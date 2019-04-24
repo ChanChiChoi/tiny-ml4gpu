@@ -1,6 +1,6 @@
 #include<pybind11/pybind11.h>
 #include<pybind11/numpy.h>
-#include "knn.h"
+#include "knn_worst_perf.h"
 
 namespace py = pybind11;
 
