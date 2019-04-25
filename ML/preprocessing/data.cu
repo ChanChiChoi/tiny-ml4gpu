@@ -7,13 +7,6 @@ the file imitates sklearn.preprocessing.data
 #define MIN(x,y) ((x)>(y) ? (y): (x))
 
 
-template<class T> __device__
-T * get_minmax(T *, )
-
-// 1 - there is a [n by m] matrix
-// 2 - get two vector, one is min, one is max, their size are 1 by m
-
-
 /* get the [n by m] matrix's maxValue vector and minValue vector by col dimension,
 means maxVal vector is [1 by m], minVal vector is [1 by m]*/
 template<class T> __global__ void
