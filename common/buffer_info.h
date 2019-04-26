@@ -7,7 +7,8 @@
 
 #include <stdio.h>
 #include <vector>
-#include "common/common.h"
+#include<string>
+//#include "common/common.h"
 
 
 /// Information record describing a Python buffer object
@@ -22,5 +23,6 @@ typedef struct buffer_info {
     std::vector<ssize_t> strides; // Number of entries between adjacent entries (for each per dimension)
 
 } Buf;
+
 
 
