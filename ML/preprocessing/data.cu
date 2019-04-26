@@ -1,10 +1,15 @@
 /*
 the file imitates sklearn.preprocessing.data
 */
+#include<stdio.h>
 #include<cuda_runtime.h>
-#include<limit>
+#include<limits>
 #include<assert.h>
 #include<cmath>
+
+#include "ML/preprocessing/data.h"
+
+#include "common/helper.h"
 
 #define MAX(x,y) ((x)>(y) ? (x): (y))
 #define MIN(x,y) ((x)>(y) ? (y): (x))
@@ -13,7 +18,7 @@ the file imitates sklearn.preprocessing.data
 /* get the [n by m] matrix's maxValue vector and minValue vector by col dimension,
 means maxVal vector is [1 by m], minVal vector is [1 by m]*/
 template<class T> __global__ void
-get_minmax(T *mat, T *min, T *max, unsigned int col, unsigned int row){
+get_minmax(T *mat, T *min, T *max, unsigned int col, unsigned int row, T min_val, T max_val){
     unsigned int idy = blockIdx.y*blockDim.y + threadIdx.y;
     unsigned int idx = blockIdx.x*blockDim.x + threadIdx.x;
 
@@ -22,14 +27,14 @@ get_minmax(T *mat, T *min, T *max, unsigned int col, unsigned int row){
     // launch col numbers cuda threads to handle the matrix.
     // each cuda thread handle one col dimension
     if (thread_idx < col){
-        T min_l = std::numeric_limits<T>::max();
-        T max_l = std::numeric_limits<T>::min();
+        T min_l = max_val;
+        T max_l = min_val;
     
         T tmp = (T)0;
         for (unsigned int i = 0; i < row; i++){
-            tmp = *(mat + row*i + thread_idx)
-            min_l = MIN(tmp, min_l)
-            max_l = MAX(tmp, max_l)
+            tmp = *(mat + col*i + thread_idx);
+            min_l = MIN(tmp, min_l);
+            max_l = MAX(tmp, max_l);
         } 
         min[thread_idx] = min_l;
         max[thread_idx] = max_l;
@@ -46,8 +51,8 @@ minmax_scale_cuda(T *mat, T *min, T *max, unsigned int col, unsigned int row, T 
     unsigned int thread_idx = (gridDim.x * blockDim.x)*idy +idx;
 
     if (thread_idx < col){
-       T min_l = min[thread_idx]
-       T max_l = max[thread_idx]
+       T min_l = min[thread_idx];
+       T max_l = max[thread_idx];
 
        T range = max_l - min_l;
        
@@ -58,10 +63,10 @@ minmax_scale_cuda(T *mat, T *min, T *max, unsigned int col, unsigned int row, T 
        
        T tmp = (T)0;
        for(unsigned int i = 0; i<row; i++){
-           tmp = *(mat + row*i + thread_idx)
+           tmp = *(mat + col*i + thread_idx);
            tmp *= scale;
            tmp += min_;
-           *(mat + row*i + thread_idx) = (T)tmp;
+           *(mat + col*i + thread_idx) = (T)tmp;
 
        }
 
@@ -74,30 +79,55 @@ minmax_scale_cpu(T *mat, unsigned int col, unsigned int row, T feature_min, T fe
 
     T *mat_d = NULL;
     size_t size_mat = sizeof(T)*col*row;
-    cudaMalloc((void **)&mat_d, size_mat);
-    cudaMemcpy(mat_d, mat, size_mat, cudaMemcpyHostToDevice);
+    CHECK_CALL(cudaMalloc((void **)&mat_d, size_mat));
+    CHECK_CALL(cudaMemcpy(mat_d, mat, size_mat, cudaMemcpyHostToDevice));
  
-    T *min_d = NULL:
+    T *min_d = NULL;
     size_t size_min = sizeof(T)*col;
-    cudaMalloc((void **)&min_d, size_min);
+    CHECK_CALL(cudaMalloc((void **)&min_d, size_min));
 //    cudaMemcpy(min_d, min, size_min, cudaMemcpyHostToDevice);
 
     T *max_d = NULL;
     size_t size_max = sizeof(T)*col;
-    cudaMalloc((void **)&max_d, size_max);
+    CHECK_CALL(cudaMalloc((void **)&max_d, size_max));
 //    cudaMemcpy(max_d, max, size_max, cudaMemcpyHostToDevice);
 
 
-    // max blockdim is 65536,so max col not bigger than b5536*65536*256.
-    int threaddim = 32;
-    int blockdim = ceil(sqrt( ceil(col/threaddim) ));
+    // max blockdim is 65536,so max col not bigger than 65536*65536*256.
+    unsigned int threaddim = 32;
+    int blockdim = MAX(ceil(sqrt( ceil(col/threaddim) )),1);
     dim3 grid_size(blockdim, blockdim);
     dim3 block_size(1,threaddim); 
 
-    get_minmax<T><<<grid_size, block_size>>(mat_d, min_d, max_d);
+    T min_val = std::numeric_limits<T>::min();
+    T max_val = std::numeric_limits<T>::max();
+
+    get_minmax<T><<<grid_size, block_size>>>(mat_d, min_d, max_d, col, row, min_val, max_val);
+    cudaDeviceSynchronize();
 
     minmax_scale_cuda<T><<<grid_size, block_size>>>(mat_d, min_d, max_d, 
                                      col, row, feature_min, feature_max);
 
-    
+    CHECK_CALL(cudaMemcpy(mat, mat_d, size_mat, cudaMemcpyDeviceToHost));
+
+    cudaFree(mat_d); 
+    cudaFree(min_d);
+    cudaFree(max_d); 
+    return 0;
 }
+
+//
+//int
+//main(){
+//
+//    float mat[4][2] = {{-1,2},{-0.5,6},{0,10},{1,18}};
+//
+//    float *p = &mat[0][0];
+//    minmax_scale_cpu<float>(p, 2, 4, 3, 6);
+//
+//    for (int i=0; i<4; i++){
+//        for (int j=0; j<2; j++){
+//           printf("%d %d vale %f\n",i,j,mat[i][j]);
+//        }
+//    }
+//}
