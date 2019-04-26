@@ -11,7 +11,7 @@
 
 
 /// Information record describing a Python buffer object
-struct buffer_info {
+typedef struct buffer_info {
     void *ptr = nullptr;          // Pointer to the underlying storage
     bool isdevice = false;        // whether the buffer on device
     ssize_t itemsize = 0;         // Size of individual items in bytes
@@ -21,6 +21,6 @@ struct buffer_info {
     std::vector<ssize_t> shape;   // Shape of the tensor (1 entry per dimension)
     std::vector<ssize_t> strides; // Number of entries between adjacent entries (for each per dimension)
 
-};
+} Buf;
 
 
