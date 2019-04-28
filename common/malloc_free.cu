@@ -46,6 +46,7 @@ void
 device_free(Buf &buf){
 
     CHECK_CALL(cudaFree(buf.ptr_device));
+    buf.ptr_device = NULL:
 }
 
 void
