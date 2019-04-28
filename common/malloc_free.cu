@@ -22,12 +22,10 @@ host_to_device(Buf &buf){
     // call device_malloc for malloc buffer on device;
     switch (buf.type){
         case "int":
-            size = sizeof(int)*size;
             buf.ptr_device = device_malloc<int>(size);
             break;
 
         case "float":
-            size = sizeof(float)*size;
             buf.ptr_device = device_malloc<float>(size): 
             break;
 
@@ -53,18 +51,6 @@ device_free(Buf &buf){
 void
 device_to_host(Buf &buf){
     size_t = buf.itemsize * buf.size;
-
-    switch (buf.type){
-        case "int":
-            size = sizeof(int)*size;
-            break;
-        case "float":
-            size = sizeof(float)*size;
-            break;
-        default:
-            assert("current version not support other types, except int and float!" == 0);
-            break;
-    }
 
     CHECK_CALL(cudaMemcpy(buf.ptr_host, buf.ptr_device, size, cudaMemcpyDeviceToHost));
 
