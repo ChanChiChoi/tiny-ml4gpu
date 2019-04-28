@@ -13,10 +13,11 @@
 
 /// Information record describing a Python buffer object
 typedef struct buffer_info {
-    void *ptr = nullptr;          // Pointer to the underlying storage
-    bool isdevice = false;        // whether the buffer on device
+    void *ptr_host = nullptr;          // Pointer to the underlying storage on host
+    void *ptr_device = nullptr;        // Pointer to the underlying storage on device
     ssize_t itemsize = 0;         // Size of individual items in bytes
     ssize_t size = 0;             // Total number of entries
+    std::string itemtype;         // record the type of item in buffer;
     std::string format;           // For compatible with pybind11 buffer_info, 
     ssize_t ndim = 0;             // Number of dimensions
     std::vector<ssize_t> shape;   // Shape of the tensor (1 entry per dimension)
