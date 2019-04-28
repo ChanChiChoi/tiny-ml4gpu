@@ -77,6 +77,9 @@ minmax_scale_cuda(T *mat, T *min, T *max, unsigned int cols, unsigned int rows, 
 
 }
 
+//TODO: need extra min_d  and max_d.
+//TODO: create minmax_scale class
+
 template<class T> void
 _minmax_scale_cpu(Buf &buf, unsigned int rows, unsigned int cols, T feature_min, T feature_max){
 
@@ -89,7 +92,6 @@ _minmax_scale_cpu(Buf &buf, unsigned int rows, unsigned int cols, T feature_min,
     dim3 grid_size(blockdim, blockdim);
     dim3 block_size(1,threaddim);
 
-    host_to_device(buf);
 
     T *min_d = device_malloc<T>(size_min);
     T *max_d = device_malloc<T>(size_max);
@@ -102,7 +104,6 @@ _minmax_scale_cpu(Buf &buf, unsigned int rows, unsigned int cols, T feature_min,
     minmax_scale_cuda<T><<<grid_size, block_size>>>((T *)buf.ptr_device, min_d, max_d,
                                                      cols, rows, feature_min, feature_max);
 
-    device_to_host(buf);
     device_free(min_d);
     device_free(max_d);
 }
@@ -129,6 +130,7 @@ minmax_scale_cpu(Buf &buf, float feature_min, float feature_max){
     }
 
 
+//    host_to_device(buf);
     switch (buf.dtype){
         case Dtype::INT:
             _minmax_scale_cpu<int>(buf, rows, cols, (int)feature_min, (int)feature_max);
@@ -138,7 +140,7 @@ minmax_scale_cpu(Buf &buf, float feature_min, float feature_max){
             break;
 
     }
-
+//    device_to_host(buf);
     return 0;
 }
 
@@ -156,6 +158,18 @@ main(){
     buf.ndim = 2;
     buf.shape = {4,2};
     
+    // 1 - copy to device
+    host_to_device(buf);
+    // 2 - get two min max vector
+
+    // 3 - get minmax_scale for train
+
+
+    // 4 - copy test to device
+    // 5 - use two min max vector 
+    // 6 - get minmax_scale for test
+
+    // 7 - get result of knn
     minmax_scale_cpu(buf, 3, 6);
 
     for (int i=0; i<4; i++){
@@ -163,4 +177,5 @@ main(){
            printf("%d %d vale %f\n",i,j,mat[i][j]);
         }
     }
+    device_to_host(buf);
 }
