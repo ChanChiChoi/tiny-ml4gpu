@@ -80,8 +80,8 @@ minmax_scale_cuda(T *mat, T *min, T *max, unsigned int cols, unsigned int rows, 
 template<class T> void
 _minmax_scale_cpu(Buf &buf, unsigned int rows, unsigned int cols, T feature_min, T feature_max){
 
-    size_t size_min = buf.itermsize * cols;
-    size_t size_max = buf.itermsize * cols;
+    size_t size_min = buf.itemsize * cols;
+    size_t size_max = buf.itemsize * cols;
 
     // max blockdim is 65536,so max col not bigger than 65536*65536*256.
     unsigned int threaddim = 32;
@@ -97,9 +97,9 @@ _minmax_scale_cpu(Buf &buf, unsigned int rows, unsigned int cols, T feature_min,
     T min_val = std::numeric_limits<T>::min();
     T max_val = std::numeric_limits<T>::max();
 
-    get_minmax<T><<<grid_size, block_size>>>(buf.ptr_device, min_d, max_d, cols, rows, min_val, max_val);
+    get_minmax<T><<<grid_size, block_size>>>((T *)buf.ptr_device, min_d, max_d, cols, rows, min_val, max_val);
     cudaDeviceSynchronize();
-    minmax_scale_cuda<T><<<grid_size, block_size>>>(buf.ptr_device, min_d, max_d,
+    minmax_scale_cuda<T><<<grid_size, block_size>>>((T *)buf.ptr_device, min_d, max_d,
                                                      cols, rows, feature_min, feature_max);
 
     device_to_host(buf);
@@ -143,17 +143,24 @@ minmax_scale_cpu(Buf &buf, float feature_min, float feature_max){
 }
 
 //
-//int
-//main(){
-//
-//    float mat[4][2] = {{-1,2},{-0.5,6},{0,10},{1,18}};
-//
-//    float *p = &mat[0][0];
-//    minmax_scale_cpu<float>(p, 2, 4, 3, 6);
-//
-//    for (int i=0; i<4; i++){
-//        for (int j=0; j<2; j++){
-//           printf("%d %d vale %f\n",i,j,mat[i][j]);
-//        }
-//    }
-//}
+int
+main(){
+
+    float mat[4][2] = {{-1,2},{-0.5,6},{0,10},{1,18}};
+
+    Buf buf = Buf();
+    buf.ptr_host = (void *) &mat[0][0];
+    buf.itemsize = sizeof(float);
+    buf.size = 8;
+    buf.dtype = Dtype::FLOAT;
+    buf.ndim = 2;
+    buf.shape = {4,2};
+    
+    minmax_scale_cpu(buf, 3, 6);
+
+    for (int i=0; i<4; i++){
+        for (int j=0; j<2; j++){
+           printf("%d %d vale %f\n",i,j,mat[i][j]);
+        }
+    }
+}
