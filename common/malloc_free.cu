@@ -42,11 +42,10 @@ host_to_device(Buf &buf){
  
 /* */
 
-void
-device_free(Buf &buf){
+template <class T> void
+device_free(T *pdevice){
 
-    CHECK_CALL(cudaFree(buf.ptr_device));
-    buf.ptr_device = NULL:
+    CHECK_CALL(cudaFree(pdevice));
 }
 
 void
@@ -56,5 +55,5 @@ device_to_host(Buf &buf){
     CHECK_CALL(cudaMemcpy(buf.ptr_host, buf.ptr_device, size, cudaMemcpyDeviceToHost));
 
     device_free(buf);
-
+    buf.ptr_device = NULL;
 }
