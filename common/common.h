@@ -9,3 +9,6 @@
 #if !defined(NAMESPACE_END)
 #    define NAMESPACE_END(name) }
 # endif
+
+
+enum class Dtype{int,float};

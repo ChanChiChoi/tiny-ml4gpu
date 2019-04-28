@@ -17,7 +17,7 @@ typedef struct buffer_info {
     void *ptr_device = nullptr;        // Pointer to the underlying storage on device
     ssize_t itemsize = 0;         // Size of individual items in bytes
     ssize_t size = 0;             // Total number of entries
-    std::string itemtype;         // record the type of item in buffer;
+    Dtype dtype;         // record the type of item in buffer;
     std::string format;           // For compatible with pybind11 buffer_info, 
 
     /*

@@ -43,6 +43,7 @@ get_minmax(T *mat, T *min, T *max, unsigned int cols, unsigned int rows, T min_v
     }
 }
 
+
 /*normaliza the [n by m] matrix, use col cuda threads*/
 template<class T> __global__ void
 minmax_scale_cuda(T *mat, T *min, T *max, unsigned int cols, unsigned int rows, T feature_min, T feature_max){
@@ -106,10 +107,9 @@ _minmax_scale_cpu(Buf &buf, unsigned int rows, unsigned int cols, T feature_min,
     device_free(max_d);
 }
 
+
 int
 minmax_scale_cpu(Buf &buf, float feature_min, float feature_max){
-
- 
 
     ssize_t ndim = buf.ndim;
     ssize_t rows, cols;
@@ -129,11 +129,11 @@ minmax_scale_cpu(Buf &buf, float feature_min, float feature_max){
     }
 
 
-    switch (buf.type){
-        case "int":
+    switch (buf.dtype){
+        case Dtype::int:
             _minmax_scale_cpu<int>(buf, rows, cols, (int)feature_min, (int)feature_max);
             break;
-        case "float":
+        case Dtype::float:
             _minmax_scale_cpu<float>(buf, rows, cols, (float)feature_min, (float)feature_max);
             break;
 
