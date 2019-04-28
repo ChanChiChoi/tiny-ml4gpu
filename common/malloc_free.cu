@@ -15,7 +15,7 @@ device_malloc(size_t size){
 
 
 void 
-host_to_device(Buf buf){
+host_to_device(Buf &buf){
     
     size_t size = buf.itemsize * buf.size; 
 
@@ -45,13 +45,13 @@ host_to_device(Buf buf){
 /* */
 
 void
-device_free(Buf buf){
+device_free(Buf &buf){
 
     CHECK_CALL(cudaFree(buf.ptr_device));
 }
 
 void
-device_to_host(Buf buf){
+device_to_host(Buf &buf){
     size_t = buf.itemsize * buf.size;
 
     switch (buf.type){
