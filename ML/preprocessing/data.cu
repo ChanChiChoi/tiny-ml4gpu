@@ -130,10 +130,10 @@ minmax_scale_cpu(Buf &buf, float feature_min, float feature_max){
 
 
     switch (buf.dtype){
-        case Dtype::int:
+        case Dtype::INT:
             _minmax_scale_cpu<int>(buf, rows, cols, (int)feature_min, (int)feature_max);
             break;
-        case Dtype::float:
+        case Dtype::FLOAT:
             _minmax_scale_cpu<float>(buf, rows, cols, (float)feature_min, (float)feature_max);
             break;
 

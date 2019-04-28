@@ -11,4 +11,4 @@
 # endif
 
 
-enum class Dtype{int,float};
+enum class Dtype{INT,FLOAT};

@@ -1,4 +1,5 @@
 #include <typeinfo>
+#include <assert.h>
 #include "common/malloc_free.h"
 #include "common/helper.h"
 #include "common/common.h"
@@ -22,11 +23,11 @@ host_to_device(Buf &buf){
 
     // call device_malloc for malloc buffer on device;
     switch (buf.dtype){
-        case Dtype::int:
+        case Dtype::INT:
             buf.ptr_device = device_malloc<int>(size);
             break;
 
-        case Dtype::float:
+        case Dtype::FLOAT:
             buf.ptr_device = device_malloc<float>(size);
             break;
 
@@ -55,6 +56,17 @@ device_to_host(Buf &buf){
 
     CHECK_CALL(cudaMemcpy(buf.ptr_host, buf.ptr_device, size, cudaMemcpyDeviceToHost));
 
-    device_free(buf);
+    switch (buf.dtype){
+        case Dtype::INT:
+            device_free<int>((int *)buf.ptr_device);
+            break;
+        case Dtype::FLOAT:
+            device_free<float>((float *)buf.ptr_device);
+            break;
+        default:
+            assert("current version not support other types, except int and float!" == 0);
+            break;
+    }
+
     buf.ptr_device = NULL;
 }
