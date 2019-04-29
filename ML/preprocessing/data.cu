@@ -20,7 +20,8 @@ the file imitates sklearn.preprocessing.data
 /* get the [n by m] matrix's maxValue vector and minValue vector by col dimension,
 means maxVal vector is [1 by m], minVal vector is [1 by m]*/
 template<class T> __global__ void
-get_minmax(T *mat, T *min, T *max, unsigned int cols, unsigned int rows, T min_val, T max_val){
+_get_minmax(T *mat, T *min, T *max, unsigned int cols, unsigned int rows, T min_val, T max_val){
+
     unsigned int idy = blockIdx.y*blockDim.y + threadIdx.y;
     unsigned int idx = blockIdx.x*blockDim.x + threadIdx.x;
 
@@ -44,10 +45,34 @@ get_minmax(T *mat, T *min, T *max, unsigned int cols, unsigned int rows, T min_v
 }
 
 
+template<typename T> vector<T *>
+get_minmax(Buf &buf){
+    
+    assert(buf.ptr_device != NULL);
+
+    auto cols = buf.rows_cols()[1];
+    size_t size_min = cols * buf.itemsize;
+    size_t size_max = size_min;
+    
+    float *min_d = device_malloc<float>(size_min);
+    float *max_d = device_malloc<float>(size_max);
+
+    float min_val = std::numeric_limits<float>::min();
+    float max_val = std::numeric_limits<float>::max();
+
+    _get_minmax<T><<<grid_size, block_size>>>((float *)buf.ptr_device, min_d, max_d, cols, rows, min_val, max_val);
+
+    
+
+
+}
+
+
 /*normaliza the [n by m] matrix, use col cuda threads*/
 template<class T> __global__ void
 minmax_scale_cuda(T *mat, T *min, T *max, unsigned int cols, unsigned int rows, T feature_min, T feature_max){
 /* feature_range should bigger than 0*/
+
     unsigned int idy = blockIdx.y*blockDim.y + threadIdx.y;
     unsigned int idx = blockIdx.x*blockDim.x + threadIdx.x;
 
@@ -76,6 +101,7 @@ minmax_scale_cuda(T *mat, T *min, T *max, unsigned int cols, unsigned int rows, 
     }
 
 }
+
 
 //TODO: need extra min_d  and max_d.
 //TODO: create minmax_scale class
@@ -115,22 +141,10 @@ minmax_scale_cpu(Buf &buf, float feature_min, float feature_max){
     ssize_t ndim = buf.ndim;
     ssize_t rows, cols;
     auto shape = buf.shape;
-    switch (ndim){
-        case 0:
-            assert("current version donot support scalar value!" == 0);
-            break;
-        case 1:
-            rows = shape.size() == 2 ? shape[0] : 0;
-            cols = shape.size() == 2 ? shape[1] : shape[0];
-            break;
-        default:
-            rows = shape[0];
-            cols = shape[1];
-            break;
-    }
+    auto tmp = buf.rows_cols();
+    auto rows = tmp[0];
+    auto cols  = tmp[1];
 
-
-//    host_to_device(buf);
     switch (buf.dtype){
         case Dtype::INT:
             _minmax_scale_cpu<int>(buf, rows, cols, (int)feature_min, (int)feature_max);
@@ -140,7 +154,6 @@ minmax_scale_cpu(Buf &buf, float feature_min, float feature_max){
             break;
 
     }
-//    device_to_host(buf);
     return 0;
 }
 
@@ -150,18 +163,18 @@ main(){
 
     float mat[4][2] = {{-1,2},{-0.5,6},{0,10},{1,18}};
 
-    Buf buf = Buf();
-    buf.ptr_host = (void *) &mat[0][0];
-    buf.itemsize = sizeof(float);
-    buf.size = 8;
-    buf.dtype = Dtype::FLOAT;
-    buf.ndim = 2;
-    buf.shape = {4,2};
-    
-    // 1 - copy to device
-    host_to_device(buf);
-    // 2 - get two min max vector
+    Buf data_buf = Buf( &mat[0][0], 
+                   sizeof(float), 
+                   Dtype::FLOAT, 
+                   2, 
+                   {4,2},
+                   {2,1}
+                   );
 
+    // 1 - copy to device
+    host_to_device(data_buf);
+    // 2 - get two min max vector
+    min_max_vec = get_minmax(buf);
     // 3 - get minmax_scale for train
 
 
@@ -170,12 +183,19 @@ main(){
     // 6 - get minmax_scale for test
 
     // 7 - get result of knn
-    minmax_scale_cpu(buf, 3, 6);
+    minmax_scale_cpu(data_buf, 3, 6);
+    device_to_host(data_buf);
 
+
+    //=================
+    from ml4gpu import knn
+    knn = KNN()
+    knn.fit(train,labels)
+    knn.predict(test)
+    
     for (int i=0; i<4; i++){
         for (int j=0; j<2; j++){
            printf("%d %d vale %f\n",i,j,mat[i][j]);
         }
     }
-    device_to_host(buf);
 }
