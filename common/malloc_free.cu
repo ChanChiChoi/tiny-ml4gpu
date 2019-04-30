@@ -49,17 +49,14 @@ void
 device_to_host(Buf &buf){
     size_t size = buf.itemsize * buf.size;
 
-    CHECK_CALL(cudaMemcpy(buf.ptr_host, buf.ptr_device, size, cudaMemcpyDeviceToHost));
+    CHECK_CALL(cudaMemcpy(buf.ptr, buf.ptr_device, size, cudaMemcpyDeviceToHost));
 
-    switch (buf.dtype){
-        case Dtype::INT:
-            device_free<int>((int *)buf.ptr_device);
-            break;
-        case Dtype::FLOAT:
+    switch (buf.format){
+        case std::string(1,'f'):
             device_free<float>((float *)buf.ptr_device);
             break;
         default:
-            assert("current version not support other types, except int and float!" == 0);
+            throw std::runtime_error("current version only support float32!");
             break;
     }
 
