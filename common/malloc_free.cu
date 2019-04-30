@@ -1,9 +1,10 @@
 #include <typeinfo>
 #include <assert.h>
+#include <string>
 #include "common/malloc_free.h"
 #include "common/helper.h"
 #include "common/common.h"
-#include "common/buffer_info.h"
+#include "common/buffer_info_ex.h"
 
 
 
@@ -16,30 +17,24 @@ device_malloc(size_t size){
 }
 
 
-void 
+void
 host_to_device(Buf &buf){
-    
-    size_t size = buf.itemsize * buf.size; 
+
+    size_t size = buf.itemsize * buf.size;
 
     // call device_malloc for malloc buffer on device;
-    switch (buf.dtype){
-        case Dtype::INT:
-            buf.ptr_device = device_malloc<int>(size);
-            break;
-
-        case Dtype::FLOAT:
+    switch (buf.format){
+        case std::string(1,'f'):
             buf.ptr_device = device_malloc<float>(size);
             break;
-
         default:
-            assert("current version not support other types, except int and float!" == 0);
+            throw std::runtime_error("current version only support float32!");
             break;
     }
 
     // copy host data to device;
 
-    CHECK_CALL(cudaMemcpy(buf.ptr_device, buf.ptr_host, size, cudaMemcpyHostToDevice));
-   
+    CHECK_CALL(cudaMemcpy(buf.ptr_device, buf.ptr, size, cudaMemcpyHostToDevice));
 }
  
 /* */
