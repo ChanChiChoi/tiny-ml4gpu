@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include <vector>
 #include <string>
-#include "pybind11/buffer_info.h"
-#include "pybind11/detail/common.h"
+#include "pybind11/pybind11.h"
+#include "pybind11/numpy.h"
 
 namespace py = pybind11;
 typedef struct buffer_info_ex: public py::buffer_info{
