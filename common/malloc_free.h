@@ -3,7 +3,7 @@
 
 #ifndef __MALLOC_FREE__
 #define __MALLOC_FREE__
-#include "common/buffer_info.h"
+#include "common/buffer_info_ex.h"
 
 template<class T> T * device_malloc(size_t size);
 
