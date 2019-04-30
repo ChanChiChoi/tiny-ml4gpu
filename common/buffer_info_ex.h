@@ -37,7 +37,7 @@ typedef struct buffer_info_ex: public py::buffer_info{
 class Array{
 
     Buf *ptr_buf;
-
+public:
     Array() {}
 
     Array(py::array_t<float> &array){
