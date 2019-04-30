@@ -46,11 +46,14 @@ KNN & KNN::fit(py::array_t<float> &mat){
 /*
  * from ml4gpu import KNN
  * knn = KNN()
- * gpu.train = host_to_device(np.train) // pytorch也是主动.cuda来表示将当前数据放到gpu上
- * knn.fit(gpu.train)
- * gpu.test = host_to_device(np.test)
- * ans = knn.pred(gpu.test)
- * knn.release() // release the memory
+ * train = buf(np.train)
+ * train.cuda()
+ * knn.fit(train)
+ * test = buf(np.test)
+ * test.cuda()
+ * ans = knn.pred(test)
+ * train.cpu() // release the memory
+ * test.cpu()
  * -------------------------------
  * from ml4gpu import KNN,dataPre
  * norData = dataPre()
