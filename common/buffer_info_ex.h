@@ -26,6 +26,10 @@ typedef struct buffer_info_ex: public py::buffer_info{
         strides = std::move(rhs.strides);
 
     }
-
+    
+    /*
+ *   just call cuda function, it will copy ptr data onto gpu
+ * */
+    buffer_info_ex & cuda();
 
 } Buf;
