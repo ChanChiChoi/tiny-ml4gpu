@@ -44,12 +44,12 @@ KNN & KNN::fit(py::array_t<float> &mat){
 
 
 /*
- * from ml4gpu import KNN
+ * from ml4gpu import KNN,Array
  * knn = KNN()
- * train = buf(np.train)
+ * train = Array(np.train)
  * train.cuda()
  * knn.fit(train)
- * test = buf(np.test)
+ * test = Array(np.test)
  * test.cuda()
  * ans = knn.pred(test)
  * train.cpu() // release the memory
