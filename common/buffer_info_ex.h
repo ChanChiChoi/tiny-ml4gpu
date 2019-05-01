@@ -42,7 +42,7 @@ public:
     Array() {}
 
     Array(py::array_t<float> &array){
-        auto array_info = array.requests();
+        auto array_info = array.request();
 
         if (array_info.format != py::format_descriptor<float>::format())
             throw std::runtime_error("Incompatible format: excepted a float32 array!");
