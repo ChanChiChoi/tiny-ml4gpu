@@ -1,64 +1,40 @@
-#include <typeinfo>
-#include <assert.h>
 #include <string>
 #include "common/malloc_free.h"
-#include "common/helper.h"
-#include "common/common.h"
-#include "common/buffer_info_ex.h"
-
+#include "common/helper.cuh"
 
 
 template<class T> T *
 device_malloc(size_t size){
-    
-    T *pdevice = NULL;
-    CHECK_CALL(cudaMalloc((void **)&pdevice, size));
+
+    T *ptr_device = NULL;
+    CHECK_CALL(cudaMalloc((void **)&ptr_device, size));
     return pdevice;
 }
 
 
-void
-host_to_device(Buf &buf){
+template<typename T> T *
+host_to_device(T * ptr_host, size_t size){
 
-    size_t size = buf.itemsize * buf.size;
-
-    // call device_malloc for malloc buffer on device;
-    switch (buf.format[0]){
-        case 'f':
-            buf.ptr_device = device_malloc<float>(size);
-            break;
-        default:
-            throw std::runtime_error("current version only support float32!");
-            break;
-    }
-
+    T *ptr_device = device_malloc<T>(size);
     // copy host data to device;
-
-    CHECK_CALL(cudaMemcpy(buf.ptr_device, buf.ptr, size, cudaMemcpyHostToDevice));
-}
- 
-/* */
-
-template <class T> void
-device_free(T *pdevice){
-
-    CHECK_CALL(cudaFree(pdevice));
+    CHECK_CALL(cudaMemcpy(ptr_device, ptr_host, size, cudaMemcpyHostToDevice));
+    return ptr_device;
 }
 
-void
-device_to_host(Buf &buf){
-    size_t size = buf.itemsize * buf.size;
 
-    CHECK_CALL(cudaMemcpy(buf.ptr, buf.ptr_device, size, cudaMemcpyDeviceToHost));
+template<typename T> T *
+device_free(T *ptr_device){
 
-    switch (buf.format[0]){
-        case 'f':
-            device_free<float>((float *)buf.ptr_device);
-            break;
-        default:
-            throw std::runtime_error("current version only support float32!");
-            break;
-    }
+    CHECK_CALL(cudaFree(ptr_device));
+    return NULL;
+}
 
-    buf.ptr_device = NULL;
+
+template<typename T> T *
+device_to_host(T * ptr_device, T *ptr_host, size_t size){
+
+    CHECK_CALL(cudaMemcpy(ptr_host, ptr_device, size, cudaMemcpyDeviceToHost));
+    device_free<T>(ptr_device);
+    ptr_device = NULL;
+    return ptr_device;
 }
