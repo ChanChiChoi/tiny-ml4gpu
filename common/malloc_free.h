@@ -1,7 +1,5 @@
 #pragma once
 
-#include<cuda_runtime.h>
-
 template<class T> T *
 device_malloc(size_t size);
 
