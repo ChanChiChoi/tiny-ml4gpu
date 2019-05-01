@@ -8,7 +8,7 @@ device_malloc(size_t size){
 
     T *ptr_device = NULL;
     CHECK_CALL(cudaMalloc((void **)&ptr_device, size));
-    return pdevice;
+    return ptr_device;
 }
 
 
