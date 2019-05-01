@@ -51,6 +51,12 @@ public:
         this->ptr_buf = new Buf(array_info);
     }
 
+    
+    ~Array(){
+        if (this->ptr_buf != NULL)
+             delete this->ptr_buf;
+    }
+    
     Array & cuda();
 
 };
