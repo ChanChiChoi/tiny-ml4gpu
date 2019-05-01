@@ -7,6 +7,7 @@
 #include "pybind11/numpy.h"
 
 namespace py = pybind11;
+
 typedef struct buffer_info_ex: public py::buffer_info{
 
     void *ptr_device = nullptr; // pointer of ptr data on GPU
