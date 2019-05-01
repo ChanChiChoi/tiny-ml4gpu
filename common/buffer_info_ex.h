@@ -37,7 +37,7 @@ typedef struct buffer_info_ex: public py::buffer_info{
 
 class Array{
 
-    Buf *ptr_buf;
+    Buf *ptr_buf = NULL;
 public:
     Array() {}
 
@@ -49,13 +49,14 @@ public:
         if (array_info.ndim != 2)
             throw std::runtime_error("Incompatible buffer dimension!");
 
-        this->ptr_buf = new Buf(array_info);
+        ptr_buf = new Buf(array_info);
     }
 
     
     ~Array(){
-        if (this->ptr_buf != NULL)
-             delete this->ptr_buf;
+        if (ptr_buf != NULL)
+             delete ptr_buf;
+             ptr_buf = NULL;
     }
     
     Array & cuda();
