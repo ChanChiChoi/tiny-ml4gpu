@@ -1,15 +1,15 @@
+#pragma once
 
 #include<cuda_runtime.h>
 
-#ifndef __MALLOC_FREE__
-#define __MALLOC_FREE__
-#include "common/buffer_info_ex.h"
+template<class T> T *
+device_malloc(size_t size);
 
-template<class T> T * device_malloc(size_t size);
+template<typename T> T *
+host_to_device(T * ptr_host, size_t size);
 
-void host_to_device(Buf &buf);
+template<typename T> T *
+device_free(T *ptr_device);
 
-template <class T> void device_free(T *pdevice);
-void device_to_host(Buf &buf);
-
-#endif
+template<typename T> T *
+device_to_host(T * ptr_device, T *ptr_host, size_t size);
