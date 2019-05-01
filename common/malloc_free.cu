@@ -23,8 +23,8 @@ host_to_device(Buf &buf){
     size_t size = buf.itemsize * buf.size;
 
     // call device_malloc for malloc buffer on device;
-    switch (buf.format){
-        case std::string(1,'f'):
+    switch (buf.format[0]){
+        case 'f':
             buf.ptr_device = device_malloc<float>(size);
             break;
         default:
@@ -51,8 +51,8 @@ device_to_host(Buf &buf){
 
     CHECK_CALL(cudaMemcpy(buf.ptr, buf.ptr_device, size, cudaMemcpyDeviceToHost));
 
-    switch (buf.format){
-        case std::string(1,'f'):
+    switch (buf.format[0]){
+        case 'f':
             device_free<float>((float *)buf.ptr_device);
             break;
         default:
