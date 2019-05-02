@@ -47,7 +47,7 @@ public:
         if (array_info.format != py::format_descriptor<float>::format())
             throw std::runtime_error("Incompatible format: excepted a float32 array!");
         if (array_info.ndim != 2)
-            throw std::runtime_error("Incompatible buffer dimension!");
+            throw std::runtime_error("Incompatible buffer dimension! it should be 2 dim");
 
         ptr_buf = new Buf(array_info);
     }
