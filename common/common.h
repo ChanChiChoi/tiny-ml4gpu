@@ -12,7 +12,12 @@
 #    define NAMESPACE_END(name) }
 # endif
 
+#define MAX(x,y) ((x)>(y)?(x):(y))
+#define MIN(x,y) ((x)<(y)?(x):(y))
+
+
 #include <vector>
+
 
 enum class Dtype{INT,FLOAT};
 
