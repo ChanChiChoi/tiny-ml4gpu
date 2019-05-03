@@ -12,7 +12,7 @@ radix_sort2(unsigned int * const sort_tmp,
             unsigned int *sort_ind_1){
 
     // init the ind vector
-    for(unsigned int i = 0; i< num_elements; i+= num_lists){
+    for(unsigned int i = 0; i+tid < num_elements; i+= num_lists){
         sort_ind[i+tid] = i+tid;
     }
     __syncthreads();
