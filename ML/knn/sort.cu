@@ -24,7 +24,7 @@ radix_sort2(unsigned int * const sort_tmp,
         unsigned int base_cnt_0 = 0;
         unsigned int base_cnt_1 = 0;
 
-        for(unsigned int i = 0; i< num_elements; i+= num_lists){
+        for(unsigned int i = 0; i+tid < num_elements; i+= num_lists){
           //const unsigned int elem = (unsigned int)(sort_tmp[i+tid]*100);
           const unsigned int elem = sort_tmp[i+tid];
 
@@ -47,7 +47,7 @@ radix_sort2(unsigned int * const sort_tmp,
             sort_ind[base_cnt_0+i+tid] = sort_ind_1[i+tid];
         }
     }
-    __syncthreads();
+   // __syncthreads();
 
 }
 
