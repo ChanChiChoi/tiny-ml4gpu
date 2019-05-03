@@ -15,7 +15,7 @@ radix_sort2(unsigned int * const sort_tmp,
     for(unsigned int i = 0; i+tid < num_elements; i+= num_lists){
         sort_ind[i+tid] = i+tid;
     }
-    __syncthreads();
+    //__syncthreads();
     
 
     for (unsigned int bit = 0; bit < 32; bit++){
