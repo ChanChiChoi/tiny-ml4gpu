@@ -56,23 +56,6 @@ radix_sort2(unsigned int * const sort_tmp,
 }
 
 
-__global__ void
-sort_by_rows(unsigned int *mat, unsigned int *ind_mat, size_t rows, size_t cols, 
-             unsigned int * tmp_1, unsigned int *ind_1, unsigned int num_lists){
-
-    //num_lists should be 256;
-    unsigned int bx = blockIdx.x;
-    unsigned int tx = threadIdx.x;
-
-    radix_sort2(mat+bx*cols, ind_mat+bx*cols,
-              num_lists,cols,tx,
-              tmp_1+bx*cols, ind_1+bx*cols );
-        
-    __syncthreads();
-
-}
-
-
 __device__ void
 merge_array(const u32 * const src_array,
             const u32 * const src_ind_array,
@@ -166,6 +149,28 @@ merge_array(const u32 * const src_array,
 
 }
 
+
+__global__ void
+sort_by_rows(unsigned int *mat, unsigned int *ind_mat, size_t rows, size_t cols, 
+             unsigned int * tmp_1, unsigned int *ind_1, unsigned int num_lists){
+
+    //num_lists should be 256;
+    unsigned int bx = blockIdx.x;
+    unsigned int tx = threadIdx.x;
+
+    radix_sort2(mat+bx*cols, ind_mat+bx*cols,
+              num_lists,cols,tx,
+              tmp_1+bx*cols, ind_1+bx*cols );
+        
+    __syncthreads();
+
+
+    merge_array(mat+bx*cols,ind_mat+bx*cols,
+                tmp_1+bx*cols, ind_1+bx*cols,
+                num_lists,cols,tx);
+}
+
+
 void
 sort_by_rows_cpu(unsigned int *mat,unsigned int *ind_mat, size_t rows, size_t cols){
     
@@ -186,6 +191,7 @@ sort_by_rows_cpu(unsigned int *mat,unsigned int *ind_mat, size_t rows, size_t co
     dim3 block(num_lists);
     sort_by_rows<<<grid,block>>>(mat_d, ind_mat_d, rows, cols,tmp_1,ind_1,num_lists);
 
+    //result in tmp_1 and ind_1
     device_free<unsigned int>(tmp_1);
     device_free<unsigned int>(ind_1);    
 
