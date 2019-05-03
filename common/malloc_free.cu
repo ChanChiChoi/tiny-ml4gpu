@@ -24,6 +24,14 @@ host_to_device(float * ptr_host, size_t size){
     return ptr_device;
 }
 
+unsigned int *
+host_to_device(unsigned int * ptr_host, size_t size){
+
+    unsigned int *ptr_device = device_malloc<unsigned int>(size);
+    // copy host data to device;
+    CHECK_CALL(cudaMemcpy(ptr_device, ptr_host, size, cudaMemcpyHostToDevice));
+    return ptr_device;
+}
 
 template<typename T> T *
 device_free(T *ptr_device){
@@ -41,3 +49,13 @@ device_to_host(float * ptr_device, float *ptr_host, size_t size){
     ptr_device = NULL;
     return ptr_device;
 }
+
+unsigned int *
+device_to_host(unsigned int * ptr_device, unsigned int *ptr_host, size_t size){
+
+    CHECK_CALL(cudaMemcpy(ptr_host, ptr_device, size, cudaMemcpyDeviceToHost));
+    device_free<unsigned int>(ptr_device);
+    ptr_device = NULL;
+    return ptr_device;
+}
+
