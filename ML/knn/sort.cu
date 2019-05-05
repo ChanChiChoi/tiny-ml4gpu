@@ -251,8 +251,8 @@ sort_by_rows_gpu(T  *mat_d, u32  *ind_mat_d, size_t rows, size_t cols, u32 preci
     sort_by_rows<T><<<grid,block>>>(mat_d, ind_mat_d, rows, cols,tmp_1,ind_1,num_lists, precision, max_val);
 
 
-    device_to_device(mat_d, tmp_1);
-    device_to_device(ind_mat_d, ind_1);
+    device_to_device(mat_d, tmp_1, size);
+    device_to_device(ind_mat_d, ind_1, size1);
 
     device_free<T>(tmp_1);
     device_free<u32>(ind_1);
