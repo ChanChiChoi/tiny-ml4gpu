@@ -202,7 +202,7 @@ sort_by_rows(T  *mat, u32  *ind_mat, size_t rows, size_t cols,
 
 
 template<typename T> void
-sort_by_rows_cpu(T  *mat,u32  *ind_mat, size_t rows, size_t cols, u32 precision, T max_val){
+sort_by_rows_cpu(T  *mat, u32  *ind_mat, size_t rows, size_t cols, u32 precision, T max_val){
     
     size_t size = sizeof(T)*rows*cols;
     size_t size1 = sizeof(u32)*rows*cols;
@@ -234,6 +234,31 @@ sort_by_rows_cpu(T  *mat,u32  *ind_mat, size_t rows, size_t cols, u32 precision,
 //    }
 } 
 
+template<typename T> void
+sort_by_rows_gpu(T  *mat_d, u32  *ind_mat_d, size_t rows, size_t cols, u32 precision, T max_val){
+
+    size_t size = sizeof(T)*rows*cols;
+    size_t size1 = sizeof(u32)*rows*cols;
+
+
+    // result of two buffer
+    T *tmp_1 = device_malloc<T>(size);
+    u32 *ind_1 = device_malloc<u32>(size1);
+
+    u32 num_lists = MAX_NUM_LISTS;
+    dim3 grid(rows);
+    dim3 block(num_lists);
+    sort_by_rows<T><<<grid,block>>>(mat_d, ind_mat_d, rows, cols,tmp_1,ind_1,num_lists, precision, max_val);
+
+
+    device_to_device(mat_d, tmp_1);
+    device_to_device(ind_mat_d, ind_1);
+
+    device_free<T>(tmp_1);
+    device_free<u32>(ind_1);
+
+}
+
 void
 sort_by_rows(float *mat, u32 *ind_mat, size_t rows, size_t cols, u32 precision){
 
@@ -248,8 +273,8 @@ sort_by_rows(u32 *mat, u32 *ind_mat, size_t rows, size_t cols, u32 precision){
     sort_by_rows_cpu<u32>(mat, ind_mat, rows, cols, precision, max_val);
     
 }
-//
-//
+
+
 //int
 //main(){
 //
@@ -264,11 +289,20 @@ sort_by_rows(u32 *mat, u32 *ind_mat, size_t rows, size_t cols, u32 precision){
 //        mat[i] = cols-i;
 //       // mat[i+cols] = cols-i;
 //    }
+//    float *mat_d = host_to_device_malloc(mat,size);
+//    u32 *ind_mat_d = host_to_device_malloc(ind_mat,size);
+//
 //    u32 precision = 1;
 //    float max_val = std::numeric_limits<float>::max();
 //    
-//    sort_by_rows_cpu<float>(mat, ind_mat, rows, cols, precision,max_val);
+//    sort_by_rows_gpu<float>(mat_d, ind_mat_d, rows, cols, precision,max_val);
 //
+//
+//    device_to_host_free(mat,mat_d,size);
+//    device_to_host_free(ind_mat,ind_mat_d,size);
+//    for(int i=0; i<cols; i++){
+//        printf("mat %f\n",mat[i]);
+//    }
 //    free(mat);
 //    free(ind_mat);
 //
