@@ -44,12 +44,12 @@ radix_sort2(T  * const sort_tmp,
 
           i_tid = i+tid;
           // get the val, then if float, we should preserve precision,e.g, 1 10 100 1000
-          const T elem_tmp = sort_tmp[i_tid]*precision;
+          const T elem_tmp = sort_tmp[i_tid];
           // radix sort only support unsigned int
-          const u32 elem = (u32)elem_tmp;
+          const u32 elem = (u32)(elem_tmp*precision);
 //          const u32  elem = sort_tmp[i_tid];
 
-//          if(tid == 0 && bit == 2)
+//          if(tid == 0 && bit == 1)
 //              printf(" [%f %d] ",elem_tmp, elem );
           const u32  ind = sort_ind[i_tid];
 
@@ -80,10 +80,11 @@ radix_sort2(T  * const sort_tmp,
 
 }
 
-__device__ void
-merge_array(const u32 * const src_array,
+
+template<typename T> __device__ void
+merge_array(const T * const src_array,
             const u32 * const src_ind_array,
-            u32 * const dest_array,
+            T * const dest_array,
             u32 * const dest_ind_array,
             const u32 num_lists,
             const u32 num_elements,
@@ -94,7 +95,7 @@ merge_array(const u32 * const src_array,
     //const u32 num_elements_per_list = num_elements / num_lists;
   
     __shared__ u32 list_indexes[MAX_NUM_LISTS];
-    __shared__ u32 reduction_val[MAX_NUM_LISTS];
+    __shared__ T reduction_val[MAX_NUM_LISTS];
     __shared__ u32 reduction_idx[MAX_NUM_LISTS];
 
     // 1 - clear the working set
@@ -106,7 +107,7 @@ merge_array(const u32 * const src_array,
     for(u32 i = 0; i < num_elements; i++){
 
        u32 tid_max = num_lists >> 1;   
-       u32 data;
+       T data;
 
        // 2 - for current thread, get data
        // whether current tid has handle the num of elems
@@ -116,7 +117,7 @@ merge_array(const u32 * const src_array,
            const u32 src_idx = tid + (list_indexes[tid] * num_lists);
            data = src_array[src_idx];
        }else{
-           data = 0xFFFFFFFF;
+           data = 0xFFFFFFFF; //????????
        }
 
        //store the current data value and index
@@ -136,7 +137,7 @@ merge_array(const u32 * const src_array,
                // the id of other thread
                const u32 val2_idx = tid + tid_max;
                // read in the other half
-               const u32 val2 = reduction_val[val2_idx];
+               const T val2 = reduction_val[val2_idx];
 
                //if this half is bigger
                if (reduction_val[tid] > val2){
@@ -176,7 +177,7 @@ merge_array(const u32 * const src_array,
 
 template<typename T> __global__ void
 sort_by_rows(T  *mat, u32  *ind_mat, size_t rows, size_t cols, 
-             T  * tmp_1, u32  *ind_1, u32 num_lists){
+             T  * tmp_1, u32  *ind_1, u32 num_lists, u32 precision){
 
     //num_lists should be 256;
     u32 bx = blockIdx.x;
@@ -185,48 +186,49 @@ sort_by_rows(T  *mat, u32  *ind_mat, size_t rows, size_t cols,
     radix_sort2<T>(mat+bx*cols, ind_mat+bx*cols,
               num_lists,cols,tx,
               tmp_1+bx*cols, 
-              ind_1+bx*cols );
+              ind_1+bx*cols ,
+              precision);
         
     __syncthreads();
 
 
-//    merge_array(mat+bx*cols,ind_mat+bx*cols,
-//                tmp_1+bx*cols, ind_1+bx*cols,
-//                num_lists,cols,tx);
+    merge_array<T>(mat+bx*cols,ind_mat+bx*cols,
+                tmp_1+bx*cols, ind_1+bx*cols,
+                num_lists,cols,tx);
 }
 
 
 template<typename T> void
-sort_by_rows_cpu(T  *mat,u32  *ind_mat, size_t rows, size_t cols){
+sort_by_rows_cpu(T  *mat,u32  *ind_mat, size_t rows, size_t cols, u32 precision){
     
-    size_t size = sizeof(u32)*rows*cols;
+    size_t size = sizeof(T)*rows*cols;
     size_t size1 = sizeof(u32)*rows*cols;
 
     // 2function
     T *mat_d = host_to_device_malloc(mat, size);
     u32 *ind_mat_d = host_to_device_malloc(ind_mat, size1);
 
-
-
+    // result of two buffer
     T *tmp_1 = device_malloc<T>(size);
     u32 *ind_1 = device_malloc<u32>(size1);
      
     u32 num_lists = MAX_NUM_LISTS;
     dim3 grid(rows);
     dim3 block(num_lists);
-    sort_by_rows<float><<<grid,block>>>(mat_d, ind_mat_d, rows, cols,tmp_1,ind_1,num_lists);
+    sort_by_rows<T><<<grid,block>>>(mat_d, ind_mat_d, rows, cols,tmp_1,ind_1,num_lists, precision);
 
-    //result in tmp_1 and ind_1
-    device_free<T>(tmp_1);
-    device_free<u32>(ind_1);    
 
     //2 function
-    device_to_host_free(mat, mat_d, size);
-    device_to_host_free(ind_mat, ind_mat_d, size1);
+    device_free<T>(mat_d);
+    device_free<u32>(ind_mat_d);
+
+    device_to_host_free(mat, tmp_1, size);
+    device_to_host_free(ind_mat, ind_1, size1);
     printf("======================\n");
     for(int i = 0; i<cols;i++){
        printf(" [%f %d] ",mat[i],ind_mat[i]);
     }
+    //result in tmp_1 and ind_1
 //    for(int i = 0; i<cols;i++){
 //       printf("%d ",mat[i+cols]);
 //    }
@@ -247,7 +249,7 @@ main(){
         mat[i] = cols-i+0.3;
        // mat[i+cols] = cols-i;
     }
-    sort_by_rows_cpu<float>(mat, ind_mat, rows, cols);
+    sort_by_rows_cpu<float>(mat, ind_mat, rows, cols,100);
 
     free(mat);
     free(ind_mat);
