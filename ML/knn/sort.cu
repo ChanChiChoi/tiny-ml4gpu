@@ -3,6 +3,7 @@
 #include <limits>
 #include <cuda_runtime.h>
 #include "common/malloc_free.h"
+#include "ML/knn/sort.h"
 
 typedef unsigned int u32;
 #define MAX_NUM_LISTS 128
@@ -233,27 +234,42 @@ sort_by_rows_cpu(T  *mat,u32  *ind_mat, size_t rows, size_t cols, u32 precision,
 //    }
 } 
 
+void
+sort_by_rows(float *mat, u32 *ind_mat, size_t rows, size_t cols, u32 precision){
 
-int
-main(){
-
-    size_t cols = 200;
-    size_t  rows = 1;
-    size_t size = sizeof(u32 )*cols*rows;
-    float  *mat = (float  *)malloc(size);
-
-    u32  *ind_mat = (u32  *)malloc(size);
-
-    for(int i=0; i<cols; i++){
-        mat[i] = cols-i;
-       // mat[i+cols] = cols-i;
-    }
-    u32 precision = 1;
     float max_val = std::numeric_limits<float>::max();
-    
-    sort_by_rows_cpu<float>(mat, ind_mat, rows, cols,precision,max_val);
-
-    free(mat);
-    free(ind_mat);
-
+    sort_by_rows_cpu<float>(mat, ind_mat, rows, cols, precision, max_val);
 }
+
+
+void
+sort_by_rows(u32 *mat, u32 *ind_mat, size_t rows, size_t cols, u32 precision){
+    u32 max_val = std::numeric_limits<u32>::max();
+    sort_by_rows_cpu<u32>(mat, ind_mat, rows, cols, precision, max_val);
+    
+}
+//
+//
+//int
+//main(){
+//
+//    size_t cols = 200;
+//    size_t  rows = 1;
+//    size_t size = sizeof(u32 )*cols*rows;
+//    float  *mat = (float  *)malloc(size);
+//
+//    u32  *ind_mat = (u32  *)malloc(size);
+//
+//    for(int i=0; i<cols; i++){
+//        mat[i] = cols-i;
+//       // mat[i+cols] = cols-i;
+//    }
+//    u32 precision = 1;
+//    float max_val = std::numeric_limits<float>::max();
+//    
+//    sort_by_rows_cpu<float>(mat, ind_mat, rows, cols, precision,max_val);
+//
+//    free(mat);
+//    free(ind_mat);
+//
+//}
