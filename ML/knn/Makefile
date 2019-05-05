@@ -1,11 +1,31 @@
+suf := $(shell echo `python3-config --extension-suffix`)
+obj = example$(suf)
 
-all: example.cpython-36m-x86_64-linux-gnu.so
-  g++  -Wall -shared -std=c++11 -fPIC \
-        -L.  -lknn  \
-        -I/home/zzc/software/pybind11/include \
-       `cd /home/zzc/software/pybind11 && python3 -mpybind11 --includes` \
-       pybind11.cpp \
-       -o  example`python3-config --extension-suffix` 
+CC = g++
+NVCC = nvcc
+CFLAG = -shared -fPIC -std=c++11
+NVCCFLAG = -shared -Xcompiler -fPIC -std=c++11
 
-example.cpython-36m-x86_64-linux-gnu.so: libknn.so
-  nvcc --shared -Xcompiler -fPIC cuda_test.cu -o libcutest.so
+REALPATH = $(realpath .)/../../
+INCLUDE_PATH0 = $(REALPATH)pybind11/include $(REALPATH)
+
+INCLUDE_PY = $(shell echo `cd $(REALPATH)pybind11 && python3 -m pybind11 --includes`)
+
+INCLUDE_PATH = $(patsubst %,-I%,$(INCLUDE_PATH0))
+INCLUDE_PATH  += $(INCLUDE_PY)
+
+$(info $(INCLUDE_PATH))
+
+all: $(obj)
+
+
+$(obj): libsort.so
+	$(CC) tmp.cpp $(CFLAG) $(INCLUDE_PATH)  -o $@ -L../../common -lmalloc_free
+
+
+
+libsort.so:libmalloc_free.so
+	$(NVCC) sort.cu
+
+libmalloc_free.so:
+	$(NVCC) ../../common/malloc_free.cu $(NVCCFLAG) $(INCLUDE_PATH) -o $@
