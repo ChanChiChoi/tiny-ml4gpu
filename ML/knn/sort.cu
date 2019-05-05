@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <assert.h>
+#include <limits>
 #include <cuda_runtime.h>
 #include "common/malloc_free.h"
 
 typedef unsigned int u32;
-#define MAX_NUM_LISTS 2
+#define MAX_NUM_LISTS 128
 
 
 // radix sort only support unsigned int.
@@ -88,7 +89,8 @@ merge_array(const T * const src_array,
             u32 * const dest_ind_array,
             const u32 num_lists,
             const u32 num_elements,
-            const u32 tid ){
+            const u32 tid,
+            const T max_val ){
 
     // num_lists must be even
     assert(num_lists % 2 == 0);
@@ -117,7 +119,7 @@ merge_array(const T * const src_array,
            const u32 src_idx = tid + (list_indexes[tid] * num_lists);
            data = src_array[src_idx];
        }else{
-           data = 0xFFFFFFFF; //????????
+           data = max_val; // data = 0xFFFFFFFF;
        }
 
        //store the current data value and index
@@ -177,7 +179,7 @@ merge_array(const T * const src_array,
 
 template<typename T> __global__ void
 sort_by_rows(T  *mat, u32  *ind_mat, size_t rows, size_t cols, 
-             T  * tmp_1, u32  *ind_1, u32 num_lists, u32 precision){
+             T  * tmp_1, u32  *ind_1, u32 num_lists, u32 precision, T max_val){
 
     //num_lists should be 256;
     u32 bx = blockIdx.x;
@@ -194,12 +196,12 @@ sort_by_rows(T  *mat, u32  *ind_mat, size_t rows, size_t cols,
 
     merge_array<T>(mat+bx*cols,ind_mat+bx*cols,
                 tmp_1+bx*cols, ind_1+bx*cols,
-                num_lists,cols,tx);
+                num_lists,cols,tx, max_val);
 }
 
 
 template<typename T> void
-sort_by_rows_cpu(T  *mat,u32  *ind_mat, size_t rows, size_t cols, u32 precision){
+sort_by_rows_cpu(T  *mat,u32  *ind_mat, size_t rows, size_t cols, u32 precision, T max_val){
     
     size_t size = sizeof(T)*rows*cols;
     size_t size1 = sizeof(u32)*rows*cols;
@@ -215,7 +217,7 @@ sort_by_rows_cpu(T  *mat,u32  *ind_mat, size_t rows, size_t cols, u32 precision)
     u32 num_lists = MAX_NUM_LISTS;
     dim3 grid(rows);
     dim3 block(num_lists);
-    sort_by_rows<T><<<grid,block>>>(mat_d, ind_mat_d, rows, cols,tmp_1,ind_1,num_lists, precision);
+    sort_by_rows<T><<<grid,block>>>(mat_d, ind_mat_d, rows, cols,tmp_1,ind_1,num_lists, precision, max_val);
 
 
     //2 function
@@ -224,13 +226,10 @@ sort_by_rows_cpu(T  *mat,u32  *ind_mat, size_t rows, size_t cols, u32 precision)
 
     device_to_host_free(mat, tmp_1, size);
     device_to_host_free(ind_mat, ind_1, size1);
-    printf("======================\n");
-    for(int i = 0; i<cols;i++){
-       printf(" [%f %d] ",mat[i],ind_mat[i]);
-    }
-    //result in tmp_1 and ind_1
+
+//    printf("======================\n");
 //    for(int i = 0; i<cols;i++){
-//       printf("%d ",mat[i+cols]);
+//       printf(" [%f %d] ",mat[i],ind_mat[i]);
 //    }
 } 
 
@@ -246,10 +245,13 @@ main(){
     u32  *ind_mat = (u32  *)malloc(size);
 
     for(int i=0; i<cols; i++){
-        mat[i] = cols-i+0.3;
+        mat[i] = cols-i;
        // mat[i+cols] = cols-i;
     }
-    sort_by_rows_cpu<float>(mat, ind_mat, rows, cols,100);
+    u32 precision = 1;
+    float max_val = std::numeric_limits<float>::max();
+    
+    sort_by_rows_cpu<float>(mat, ind_mat, rows, cols,precision,max_val);
 
     free(mat);
     free(ind_mat);
