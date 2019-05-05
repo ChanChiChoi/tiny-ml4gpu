@@ -3,6 +3,9 @@
 #include "common/malloc_free.h"
 
 typedef unsigned int u32;
+#define MAX_NUM_LISTS 128
+
+
 __device__ void
 radix_sort2(unsigned int * const sort_tmp,
             unsigned int * sort_ind,
@@ -155,8 +158,8 @@ sort_by_rows(unsigned int *mat, unsigned int *ind_mat, size_t rows, size_t cols,
              unsigned int * tmp_1, unsigned int *ind_1, unsigned int num_lists){
 
     //num_lists should be 256;
-    unsigned int bx = blockIdx.x;
-    unsigned int tx = threadIdx.x;
+    u32 bx = blockIdx.x;
+    u32 tx = threadIdx.x;
 
     radix_sort2(mat+bx*cols, ind_mat+bx*cols,
               num_lists,cols,tx,
@@ -174,26 +177,26 @@ sort_by_rows(unsigned int *mat, unsigned int *ind_mat, size_t rows, size_t cols,
 void
 sort_by_rows_cpu(unsigned int *mat,unsigned int *ind_mat, size_t rows, size_t cols){
     
-    size_t size = sizeof(unsigned int)*rows*cols;
-    size_t size1 = sizeof(unsigned int)*rows*cols;
+    size_t size = sizeof(u32)*rows*cols;
+    size_t size1 = sizeof(u32)*rows*cols;
 
     // 2function
-    unsigned int *mat_d = host_to_device(mat, size);
-    unsigned int *ind_mat_d = host_to_device(ind_mat, size1);
+    u32 *mat_d = host_to_device(mat, size);
+    u32 *ind_mat_d = host_to_device(ind_mat, size1);
 
 
 
-    unsigned int *tmp_1 = device_malloc<unsigned int>(size);
-    unsigned int *ind_1 = device_malloc<unsigned int>(size1);
+    u32 *tmp_1 = device_malloc<u32>(size);
+    u32 *ind_1 = device_malloc<u32>(size1);
      
-    unsigned int num_lists = 128;
+    u32 num_lists = MAX_NUM_LISTS;
     dim3 grid(rows);
     dim3 block(num_lists);
     sort_by_rows<<<grid,block>>>(mat_d, ind_mat_d, rows, cols,tmp_1,ind_1,num_lists);
 
     //result in tmp_1 and ind_1
-    device_free<unsigned int>(tmp_1);
-    device_free<unsigned int>(ind_1);    
+    device_free<u32>(tmp_1);
+    device_free<u32>(ind_1);    
 
     //2 function
     device_to_host(mat_d, mat, size);
