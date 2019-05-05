@@ -1,63 +1,84 @@
 #include <stdio.h>
+#include <assert.h>
 #include <cuda_runtime.h>
 #include "common/malloc_free.h"
 
 typedef unsigned int u32;
-#define MAX_NUM_LISTS 128
+#define MAX_NUM_LISTS 2
 
 
-__device__ void
-radix_sort2(u32  * const sort_tmp,
+// radix sort only support unsigned int.
+// when handling float, we can `unsigned int after = (unsigned int)(float before*1000)`
+
+template<typename T> __device__ void
+radix_sort2(T  * const sort_tmp,
             u32  * sort_ind,
             const u32  num_lists,
             const u32  num_elements,
             const u32  tid,
-            u32  * const sort_tmp_1,
-            u32  *sort_ind_1){
+            T  * const sort_tmp_1,
+            u32  *sort_ind_1,
+            u32 precision = 1,
+            u32 bit_size = 32){
 
     // num_lists must be even
     assert(num_lists % 2 == 0);
 
     // init the ind vector
-    for(u32  i = 0; i+tid< num_elements; i+= num_lists){
-        sort_ind[i+tid] = i+tid;
+    u32 i_tid = 0+tid;
+    for(u32  i = 0;i+tid < num_elements; i+= num_lists){
+        i_tid = i+tid;
+        sort_ind[i_tid] = i_tid;
     }
     
 
-    for (u32  bit = 0; bit < 32; bit++){
+    for (u32  bit = 0; bit < bit_size; bit++){
 
         const u32  bit_mask = (1 << bit);
         u32  base_cnt_0 = 0;
         u32  base_cnt_1 = 0;
 
-        for(u32  i = 0;  i+tid < num_elements; i+= num_lists){
-          //const u32  elem = (u32 )(sort_tmp[i+tid]*100);
-          const u32  elem = sort_tmp[i+tid];
-          if(bit == 0 && tid==9)
-          printf(" [i+tid %d, i %d, tid %d] ",i+tid, i,tid);
 
-          const u32  ind = sort_ind[i+tid];
+        i_tid = 0+tid;
+        for(u32  i = 0;  i+tid < num_elements; i+= num_lists){
+
+          i_tid = i+tid;
+          // get the val, then if float, we should preserve precision,e.g, 1 10 100 1000
+          const T elem_tmp = sort_tmp[i_tid]*precision;
+          // radix sort only support unsigned int
+          const u32 elem = (u32)elem_tmp;
+//          const u32  elem = sort_tmp[i_tid];
+
+//          if(tid == 0 && bit == 2)
+//              printf(" [%f %d] ",elem_tmp, elem );
+          const u32  ind = sort_ind[i_tid];
+
           if ((elem & bit_mask) > 0){
-              sort_tmp_1[base_cnt_1+tid] = elem;
+              sort_tmp_1[base_cnt_1+tid] = elem_tmp;
               // handle the index
               sort_ind_1[base_cnt_1+tid] = ind;
               base_cnt_1 += num_lists;
           }else{
-              sort_tmp[base_cnt_0+tid] = elem;
+              sort_tmp[base_cnt_0+tid] = elem_tmp;
               // handle the index
               sort_ind[base_cnt_0+tid] = ind;
               base_cnt_0 += num_lists;
           }
         }
+
         // copy data back to source from the one's list 
+        /*cannot use sort_ind replace sort_tmp_1, because after some iter,
+        the value of the ind has not been the origin value.
+        */
+        i_tid = 0+tid;
         for(u32  i = 0; i<base_cnt_1; i += num_lists){
-            sort_tmp[base_cnt_0+i+tid] = sort_tmp_1[i+tid];
-            sort_ind[base_cnt_0+i+tid] = sort_ind_1[i+tid];
+            i_tid = i+tid;
+            sort_tmp[base_cnt_0+i_tid] = sort_tmp_1[i_tid];
+            sort_ind[base_cnt_0+i_tid] = sort_ind_1[i_tid];
         }
     }
 
 }
-
 
 __device__ void
 merge_array(const u32 * const src_array,
@@ -153,60 +174,62 @@ merge_array(const u32 * const src_array,
 }
 
 
-__global__ void
-sort_by_rows(u32  *mat, u32  *ind_mat, size_t rows, size_t cols, 
-             u32  * tmp_1, u32  *ind_1, u32  num_lists){
+template<typename T> __global__ void
+sort_by_rows(T  *mat, u32  *ind_mat, size_t rows, size_t cols, 
+             T  * tmp_1, u32  *ind_1, u32 num_lists){
 
     //num_lists should be 256;
     u32 bx = blockIdx.x;
     u32 tx = threadIdx.x;
 
-    radix_sort2(mat+bx*cols, ind_mat+bx*cols,
+    radix_sort2<T>(mat+bx*cols, ind_mat+bx*cols,
               num_lists,cols,tx,
-              tmp_1+bx*cols, ind_1+bx*cols );
+              tmp_1+bx*cols, 
+              ind_1+bx*cols );
         
     __syncthreads();
 
 
-    merge_array(mat+bx*cols,ind_mat+bx*cols,
-                tmp_1+bx*cols, ind_1+bx*cols,
-                num_lists,cols,tx);
+//    merge_array(mat+bx*cols,ind_mat+bx*cols,
+//                tmp_1+bx*cols, ind_1+bx*cols,
+//                num_lists,cols,tx);
 }
 
 
-void
-sort_by_rows_cpu(u32  *mat,u32  *ind_mat, size_t rows, size_t cols){
+template<typename T> void
+sort_by_rows_cpu(T  *mat,u32  *ind_mat, size_t rows, size_t cols){
     
     size_t size = sizeof(u32)*rows*cols;
     size_t size1 = sizeof(u32)*rows*cols;
 
     // 2function
-    u32 *mat_d = host_to_device(mat, size);
-    u32 *ind_mat_d = host_to_device(ind_mat, size1);
+    T *mat_d = host_to_device_malloc(mat, size);
+    u32 *ind_mat_d = host_to_device_malloc(ind_mat, size1);
 
 
 
-    u32 *tmp_1 = device_malloc<u32>(size);
+    T *tmp_1 = device_malloc<T>(size);
     u32 *ind_1 = device_malloc<u32>(size1);
      
     u32 num_lists = MAX_NUM_LISTS;
     dim3 grid(rows);
     dim3 block(num_lists);
-    sort_by_rows<<<grid,block>>>(mat_d, ind_mat_d, rows, cols,tmp_1,ind_1,num_lists);
+    sort_by_rows<float><<<grid,block>>>(mat_d, ind_mat_d, rows, cols,tmp_1,ind_1,num_lists);
 
     //result in tmp_1 and ind_1
-    device_free<u32>(tmp_1);
+    device_free<T>(tmp_1);
     device_free<u32>(ind_1);    
 
     //2 function
-    device_to_host(mat_d, mat, size);
+    device_to_host_free(mat, mat_d, size);
+    device_to_host_free(ind_mat, ind_mat_d, size1);
+    printf("======================\n");
     for(int i = 0; i<cols;i++){
-       printf("%d ",mat[i]);
+       printf(" [%f %d] ",mat[i],ind_mat[i]);
     }
 //    for(int i = 0; i<cols;i++){
 //       printf("%d ",mat[i+cols]);
 //    }
-    device_to_host(ind_mat_d, ind_mat, size1);
 } 
 
 
@@ -216,15 +239,15 @@ main(){
     size_t cols = 200;
     size_t  rows = 1;
     size_t size = sizeof(u32 )*cols*rows;
-    u32  *mat = (u32  *)malloc(size);
+    float  *mat = (float  *)malloc(size);
 
     u32  *ind_mat = (u32  *)malloc(size);
 
     for(int i=0; i<cols; i++){
-        mat[i] = cols-i;
+        mat[i] = cols-i+0.3;
        // mat[i+cols] = cols-i;
     }
-    sort_by_rows_cpu(mat, ind_mat, rows, cols);
+    sort_by_rows_cpu<float>(mat, ind_mat, rows, cols);
 
     free(mat);
     free(ind_mat);
