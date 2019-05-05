@@ -1,5 +1,5 @@
-#include<stdio.h>
-#include<cuda_runtime.h>
+#include <stdio.h>
+#include <cuda_runtime.h>
 #include "common/malloc_free.h"
 
 typedef unsigned int u32;
@@ -7,36 +7,36 @@ typedef unsigned int u32;
 
 
 __device__ void
-radix_sort2(unsigned int * const sort_tmp,
-            unsigned int * sort_ind,
-            const unsigned int num_lists,
-            const unsigned int num_elements,
-            const unsigned int tid,
-            unsigned int * const sort_tmp_1,
-            unsigned int *sort_ind_1){
+radix_sort2(u32 int * const sort_tmp,
+            u32 int * sort_ind,
+            const u32 int num_lists,
+            const u32 int num_elements,
+            const u32 int tid,
+            u32 int * const sort_tmp_1,
+            u32 int *sort_ind_1){
 
     // num_lists must be even
     assert(num_lists % 2 == 0);
 
     // init the ind vector
-    for(unsigned int i = 0; i+tid< num_elements; i+= num_lists){
+    for(u32 int i = 0; i+tid< num_elements; i+= num_lists){
         sort_ind[i+tid] = i+tid;
     }
     
 
-    for (unsigned int bit = 0; bit < 32; bit++){
+    for (u32 int bit = 0; bit < 32; bit++){
 
-        const unsigned int bit_mask = (1 << bit);
-        unsigned int base_cnt_0 = 0;
-        unsigned int base_cnt_1 = 0;
+        const u32 int bit_mask = (1 << bit);
+        u32 int base_cnt_0 = 0;
+        u32 int base_cnt_1 = 0;
 
-        for(unsigned int i = 0;  i+tid < num_elements; i+= num_lists){
-          //const unsigned int elem = (unsigned int)(sort_tmp[i+tid]*100);
-          const unsigned int elem = sort_tmp[i+tid];
+        for(u32 int i = 0;  i+tid < num_elements; i+= num_lists){
+          //const u32 int elem = (u32 int)(sort_tmp[i+tid]*100);
+          const u32 int elem = sort_tmp[i+tid];
           if(bit == 0 && tid==9)
           printf(" [i+tid %d, i %d, tid %d] ",i+tid, i,tid);
 
-          const unsigned int ind = sort_ind[i+tid];
+          const u32 int ind = sort_ind[i+tid];
           if ((elem & bit_mask) > 0){
               sort_tmp_1[base_cnt_1+tid] = elem;
               // handle the index
@@ -50,7 +50,7 @@ radix_sort2(unsigned int * const sort_tmp,
           }
         }
         // copy data back to source from the one's list 
-        for(unsigned int i = 0; i<base_cnt_1; i += num_lists){
+        for(u32 int i = 0; i<base_cnt_1; i += num_lists){
             sort_tmp[base_cnt_0+i+tid] = sort_tmp_1[i+tid];
             sort_ind[base_cnt_0+i+tid] = sort_ind_1[i+tid];
         }
@@ -154,8 +154,8 @@ merge_array(const u32 * const src_array,
 
 
 __global__ void
-sort_by_rows(unsigned int *mat, unsigned int *ind_mat, size_t rows, size_t cols, 
-             unsigned int * tmp_1, unsigned int *ind_1, unsigned int num_lists){
+sort_by_rows(u32 int *mat, u32 int *ind_mat, size_t rows, size_t cols, 
+             u32 int * tmp_1, u32 int *ind_1, u32 int num_lists){
 
     //num_lists should be 256;
     u32 bx = blockIdx.x;
@@ -175,7 +175,7 @@ sort_by_rows(unsigned int *mat, unsigned int *ind_mat, size_t rows, size_t cols,
 
 
 void
-sort_by_rows_cpu(unsigned int *mat,unsigned int *ind_mat, size_t rows, size_t cols){
+sort_by_rows_cpu(u32 int *mat,u32 int *ind_mat, size_t rows, size_t cols){
     
     size_t size = sizeof(u32)*rows*cols;
     size_t size1 = sizeof(u32)*rows*cols;
@@ -215,10 +215,10 @@ main(){
 
     size_t cols = 200;
     size_t  rows = 1;
-    size_t size = sizeof(unsigned int)*cols*rows;
-    unsigned int *mat = (unsigned int *)malloc(size);
+    size_t size = sizeof(u32 int)*cols*rows;
+    u32 int *mat = (u32 int *)malloc(size);
 
-    unsigned int *ind_mat = (unsigned int *)malloc(size);
+    u32 int *ind_mat = (u32 int *)malloc(size);
 
     for(int i=0; i<cols; i++){
         mat[i] = cols-i;
