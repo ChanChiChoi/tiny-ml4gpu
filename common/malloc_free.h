@@ -31,3 +31,11 @@ device_to_host(float * ptr_device, float *ptr_host, size_t size);
 
 unsigned int *
 device_to_host(unsigned int * ptr_device, unsigned int *ptr_host, size_t size);
+
+//============change
+float *
+device_to_device(float *dst_device, float *src_device, size_t size);
+
+unsigned int *
+device_to_device(unsigned int *dst_device, unsigned int *src_device, size_t size);
+
