@@ -32,7 +32,8 @@ _host_to_device(T *ptr_device, T *ptr_host, size_t size){
     return ptr_device;
 }
 
-//===========template Instantiation
+
+//===========malloc template Instantiation
 float *
 host_to_device_malloc(float *ptr_host, size_t size){
     return _host_to_device_malloc<float>(ptr_host, size);
@@ -78,7 +79,7 @@ _device_to_host(T * ptr_host, T *ptr_device, size_t size){
     return ptr_device;
 }
 
-//=============template Instantiation
+//=============free template Instantiation
 float *
 device_to_host_free(float * ptr_host, float *ptr_device, size_t size){
     return _device_to_host_free<float>(ptr_host, ptr_device, size);
@@ -98,4 +99,23 @@ unsigned int *
 device_to_host(unsigned int * ptr_host, unsigned int  *ptr_device, size_t size){
     return _device_to_host<unsigned int>(ptr_host, ptr_device, size);
 }
+
+//=====================change template
+template<typename T> void
+_device_to_device(T *dst_device, T *src_device, size_t size){
+    CHECK_CALL(cudaMemcpy(dst_device, src_device, size, cudaMemcpyDeviceToDevice));
+}
+
+//===============change template Instantiation
+float *
+device_to_device(float *dst_device, float *src_device, size_t size){
+    _device_to_device<float>(dst_device, src_device, size);
+}
+
+unsigned int *
+device_to_device(unsigned int *dst_device, unsigned int *src_device, size_t size){
+    _device_to_device<unsigned int>(dst_device, src_device, size);
+}
+
+
 
