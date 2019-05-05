@@ -41,26 +41,32 @@ py::array_t<float> KNN::predict(Array &test, size_t k){
     size_t ans_rows = test->shape[0];
     size_t ans_cols = train->shape[0];
     size_t bytes_size = sizeof(float)*ans_rows*ans_cols;
-    
+
     float *ans = (float *) malloc(bytes_size);
-    float *ans_device = host_to_device(ans, bytes_size);
+    float *ans_device = host_to_device_malloc(ans, bytes_size);
 
     // train matrix multi test matrix
     matrix_mul_cpu((float*)train->ptr_device, train->shape[0], train->shape[1],
                    (float*)test->ptr_device, test->shape[0], test->shape[1],
-                   ans_device, ans_rows,ans_cols); 
+                   ans_device, ans_rows,ans_cols);
 
-  
+
     // sort by distance ,then extract the index
-    unsigned int *ind_mat = (unsigned int *)malloc(bytes_size);
-    unsigned int *ind_mat_device =  host_to_device(ind_mat, bytes_size);
+    size_t bytes_size1 = sizeof(unsigned int)*ans_rows*ans_cols;
+    unsigned int *ind_mat = (unsigned int *)malloc(bytes_size1);
+    unsigned int *ind_mat_device =  host_to_device_malloc(ind_mat, bytes_size1);
 
-    sort_by_rows_k(ans_device, ind_mat, ans_rows, ans_cols, k);
+    sort_by_rows(ans_device, ind_mat_device, ans_rows, ans_cols, 100);
 
+    device_to_host_free(ans,ans_device,bytes_size);
+    device_to_host_free(ind_mat, ind_mat_device, bytes_size1);
+
+    // result ans, ind_mat
+//    here we will use multi-thread to handle the mat, one line one thread
 
     free(ans);
     free(ind_mat);
-    return  ; 
+    return  ;
 }
 
 /*
