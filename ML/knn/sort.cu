@@ -263,14 +263,14 @@ void
 sort_by_rows(float *mat, u32 *ind_mat, size_t rows, size_t cols, u32 precision){
 
     float max_val = std::numeric_limits<float>::max();
-    sort_by_rows_cpu<float>(mat, ind_mat, rows, cols, precision, max_val);
+    sort_by_rows_gpu<float>(mat, ind_mat, rows, cols, precision, max_val);
 }
 
 
 void
 sort_by_rows(u32 *mat, u32 *ind_mat, size_t rows, size_t cols, u32 precision){
     u32 max_val = std::numeric_limits<u32>::max();
-    sort_by_rows_cpu<u32>(mat, ind_mat, rows, cols, precision, max_val);
+    sort_by_rows_gpu<u32>(mat, ind_mat, rows, cols, precision, max_val);
     
 }
 
