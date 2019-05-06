@@ -11,7 +11,6 @@ class KNN{
 
     Array *train = NULL;
     Array *labels = NULL;
-    Array *ans = NULL;
 
 public:
 
