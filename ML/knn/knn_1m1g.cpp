@@ -9,19 +9,13 @@ namespace py = pybind11;
 
 class KNN{
 
-
     Array *train = NULL;
     Array *labels = NULL;
-    
     Array *ans = NULL;
 
 public:
 
     KNN() {}
-
-    KNN(Array &array){
-
-    }
 
     // need overload 2 case: i)numpy -> fit; ii)numpy -> pre -> fit
 //    KNN & fit(py::array_t<float> &array);
@@ -64,13 +58,13 @@ unsigned int KNN::freq_stat(unsigned int *head, unsigned int k){
 
 
 py::array_t<float> KNN::predict(Array &test, size_t k){
+
     // because the function will return result into python
     size_t ans_rows = test->shape[0];
     size_t ans_cols = train->shape[0];
     size_t bytes_size = sizeof(float)*ans_rows*ans_cols;
     
     float *ans = (float *) malloc(bytes_size);
-    
     float *ans_device = host_to_device_malloc(ans, bytes_size);
 
     // train matrix multi test matrix
@@ -100,9 +94,9 @@ py::array_t<float> KNN::predict(Array &test, size_t k){
                               k));
     }
     
-    std::vector<unsigned int> labels;
+    std::vector<unsigned int> vec_labels;
     for (int i = 0; i< ans_rows; i++){
-        labels.push_back(tasks[i].get());
+        vec_labels.push_back(tasks[i].get());
     }
     
     free(ans);
@@ -116,7 +110,7 @@ py::array_t<float> KNN::predict(Array &test, size_t k){
     auto *ptr_result = (unsigned int *)result_info.ptr;
 
     for(int i = 0; i<ans_rows;i++){
-        ptr_result[i] = labels[i];
+        ptr_result[i] = vec_labels[i];
     }
     return  result; 
 }
