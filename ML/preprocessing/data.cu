@@ -63,3 +63,36 @@ mean_by_rows_cpu(float *mat_device, float *mean_device, u32 rows, u32 cols){
 
     zero_mean_by_rows<float><<<grid1,block1>>>(mat_device, mean_device, rows, cols);
 }
+
+
+/*
+int
+main(){
+
+    size_t size = 200*sizeof(float);
+    float *mat = (float *)malloc(size);
+    for(u32 i=0;i<200;i++)
+        mat[i] = i;
+
+
+    float *mat_device = host_to_device_malloc(mat,size);
+
+    size_t size1 = 50*sizeof(float);
+    float *mean = (float *)malloc(size1);
+    float *mean_device = host_to_device_malloc(mean,size1);
+
+    auto t0 = high_resolution_clock::now();
+    mean_by_rows_cpu(mat_device,mean_device, 4,50);
+    cudaDeviceSynchronize();
+    auto t1 = high_resolution_clock::now();
+    device_to_host_free(mat,mat_device,size);
+    device_to_host_free(mean,mean_device,size1);
+    printf("take time %d\n",duration_cast<milliseconds>(t1-t0).count());
+
+//
+    for(u32 i=0; i<20;i++){
+        printf("val %d %f\n",i,mat[i]);
+    }
+
+}
+*/
