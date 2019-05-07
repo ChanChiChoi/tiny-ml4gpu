@@ -36,6 +36,8 @@ matrix_mul(T * Md, u32 Row_Md, u32 Col_Md,
     // for cur tx,ty only care cur WIDTH of Pd
     for(u32 m = 0; m < ceil(Col_Pd/TILE_WIDTH); ++m){
         // get the data again and again
+        // if cur tx,ty is exceend of Md,Nd, then it should be exit early,
+        // so it will not run here
         Mds[ty][tx] = Md[Row*Width + (m*TILE_WIDTH + tx)]
         Nds[ty][tx] = Nd[(m*TILE_HEIGHT + ty)*Width + Col]
         __syncthreads();
