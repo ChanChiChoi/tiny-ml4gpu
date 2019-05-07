@@ -64,6 +64,19 @@ mean_by_rows_cpu(float *mat_device, float *mean_device, u32 rows, u32 cols){
     zero_mean_by_rows<float><<<grid1,block1>>>(mat_device, mean_device, rows, cols);
 }
 
+void
+cov_cpu(float *mat_device, u32 rows, u32 cols){
+
+//   mean = np.mean(mat,0) //[rows x cols] ,means [samples x features]
+//   res = inp-mean
+//   res = res.T
+
+//   res.dot(res.T)/(res.shape[1]-1)
+
+     const u32 n_1 = MAX(rows -1,1);
+
+
+}
 
 /*
 int
