@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <math_functions.hpp>
 #include "common/type.h"
 
 # define TILE_HEIGHT 32
