@@ -119,6 +119,29 @@ matrix_transpose_launch(T *mat_src, u32 Row_src, u32 Col_src,
     matrix_transpose<T><<<grid, block>>>(mat_src, Row_src, Col_src,
                                    mat_dst, Row_dst, Col_dst);
 }
+
+template<typename T>__global__ void
+matrix_divide_scalar(T *mat, u32 Row, u32 Col, u32 scalar){
+
+    u32 idy = blockIdx.y*gridDim.y + threadIdx.y;
+    u32 idx = blockIdx.x*gridDim.x + threadIdx.x;
+
+    if (idy >= Row || idx >= Col)
+        return ;
+
+    mat[idy*Col+idx] /= scalar;
+}
+
+template<typename T> void
+matrix_divide_scalar_launch(T *mat, u32 Row, u32 Col, u32 scalar){
+
+    dim3 grid(MAX(1, (size_t)ceil((double)Col_src/TILE_HEIGHT)),
+              MAX(1, (size_t)ceil((double)Row_src/TILE_WIDTH)) );
+    dim3 block(TILE_WIDTH, TILE_HEIGHT);
+  
+    matrix_divide_scalar<T><<<grid, block>>>(mat, Row, Col, scalar);
+
+}
 // ==========cov
 
 
@@ -142,6 +165,11 @@ matrix_transpose_cpu(float *mat_src, u32 Row_src, u32 Col_src,
 }
 
 void
+matrix_divide_scalar_cpu(float *mat, u32 Row, u32 Col, u32 scalar){
+
+    matrix_divide_scalar_launch<float>(mat, Row, Col, scalar);
+}
+void
 cov_cpu(float *mat, u32 Row_mat, u32 Col_mat,
         float *mat_cov, u32 Row_mat_cov, u32 Col_mat_cov){
     
@@ -162,6 +190,10 @@ cov_cpu(float *mat, u32 Row_mat, u32 Col_mat,
                    mat_cov, Row_mat_cov, Col_mat_cov);
 
     device_free<float>(mat_T_device);
+
+    //4 - divide (n-1) samples;
+    size_t n_1 = MAX(1,Row_mat-1);
+    matrix_divide_scalar_cpu(mat_cov, Row_mat_cov, Col_mat_cov, n_1);
 
 }
 //int
