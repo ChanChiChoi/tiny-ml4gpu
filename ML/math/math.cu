@@ -9,7 +9,8 @@
 # define TILE_HEIGHT 32
 # define TILE_WIDTH 32
 
-//matrix_multiplication ===
+//template ===
+//matrix_mul
 template<typename T> __global__ void
 matrix_mul(T * Md, u32 Row_Md, u32 Col_Md,
            T * Nd, u32 Row_Nd, u32 Col_Nd,
@@ -169,6 +170,7 @@ matrix_divide_scalar_cpu(float *mat, u32 Row, u32 Col, u32 scalar){
 
     matrix_divide_scalar_launch<float>(mat, Row, Col, scalar);
 }
+
 void
 cov_cpu(float *mat, u32 Row_mat, u32 Col_mat,
         float *mat_cov, u32 Row_mat_cov, u32 Col_mat_cov){
