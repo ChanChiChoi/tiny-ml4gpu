@@ -5,8 +5,8 @@
 #include "common/common.h"
 #include "common/malloc_free.h"
 
-# define TILE_HEIGHT 32
-# define TILE_WIDTH 32
+# define TILE_HEIGHT 16
+# define TILE_WIDTH 16
 
 template<typename T> __global__ void
 matrix_mul(T * Md, u32 Row_Md, u32 Col_Md,
@@ -30,6 +30,7 @@ matrix_mul(T * Md, u32 Row_Md, u32 Col_Md,
     u32 Row = by*TILE_HEIGHT + ty;
     u32 Col = bx*TILE_WIDTH + tx;
     
+    //printf("[bx by tx ty row col][%d %d %d %d %d %d]\n",bx,by,tx,ty,Row,Col);
     // if current thread is exceed the Pd matrix, then return void
     if(Row >= Row_Pd ||Col >= Col_Pd)
         return ;
@@ -79,8 +80,8 @@ matrix_mul_launch(T * Md, u32 Row_Md, u32 Col_Md,
            T * Nd, u32 Row_Nd, u32 Col_Nd,
            T * Pd, u32 Row_Pd, u32 Col_Pd){
 
-    dim3 grid(MAX(1, ceil(Row_Pd/TILE_HEIGHT)),
-              MAX(1, ceil(Col_Pd/TILE_WIDTH)) );
+    dim3 grid(MAX(1, (size_t)ceil((double)Col_Pd/TILE_HEIGHT)),
+              MAX(1, (size_t)ceil((double)Row_Pd/TILE_WIDTH)) );
     dim3 block(TILE_WIDTH, TILE_HEIGHT);
 
     matrix_mul<T><<<grid, block>>>(Md, Row_Md, Col_Md,
@@ -101,25 +102,36 @@ matrix_mul_cpu(float *Md, u32 Row_Md, u32 Col_Md,
 int
 main(){
 
-   size_t size = sizeof(float)*32*32;
+   size_t rowm = 29,colm = 17;
+   size_t rown = colm, coln = 17;
+   size_t rowp = rowm, colp = coln;
+   
+   size_t size = sizeof(float)*rowm*colm;
    float *md = (float *)malloc(size);
+   for(int i=0;i<rowm*colm;i++)
+     md[i] = i;
    float *md_d = host_to_device_malloc(md, size);
 
-   float *nd = (float *)malloc(size);
-   float *nd_d = host_to_device_malloc(nd, size);
+   size_t size1 = sizeof(float)*rown*coln;
+   float *nd = (float *)malloc(size1);
+   for(int i=0;i<rown*coln;i++)
+      nd[i]=2;
+   float *nd_d = host_to_device_malloc(nd, size1);
    
-   float *pd = (float *)malloc(size);
-   float *pd_d = host_to_device_malloc(pd, size);
+   size_t size2 = sizeof(float)*rowp*colp;
+   float *pd = (float *)malloc(size2);
+   float *pd_d = host_to_device_malloc(pd, size2);
 
 
-   matrix_mul_cpu(md_d,32,32,
-                       nd_d,32,32,
-                       pd_d,32,32);
+   matrix_mul_cpu(md_d,rowm,colm,
+                       nd_d,rown,coln,
+                       pd_d,rowp,colp);
 
-   device_to_host_free(pd,pd_d,size);
-   for(int i = 0; i<32; i++){
-      for(int j=0;j<32;j++)
-          printf("%f ",pd[i*32+j]);
+   device_to_host_free(pd,pd_d,size2);
+   for(int i = 0; i<rowp; i++){
+      printf("[%d] ",i+1);
+      for(int j=0;j<colp;j++)
+          printf("%d ",(int)pd[i*colp+j]);
       printf("\n");
    }
   return 0;
