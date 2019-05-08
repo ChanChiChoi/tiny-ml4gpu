@@ -4,10 +4,12 @@
 #include "common/type.h"
 #include "common/common.h"
 #include "common/malloc_free.h"
+#include <chrono>
 
 # define TILE_HEIGHT 32
 # define TILE_WIDTH 32
 
+//matrix_multiplication ===
 template<typename T> __global__ void
 matrix_mul(T * Md, u32 Row_Md, u32 Col_Md,
            T * Nd, u32 Row_Nd, u32 Col_Nd,
@@ -89,6 +91,38 @@ matrix_mul_launch(T * Md, u32 Row_Md, u32 Col_Md,
            Pd, Row_Pd, Col_Pd);
 }
 
+
+template<typename T> __global__ void
+matrix_transpose(T * mat_src, u32 Row_src, u32 Col_src,
+                 T * mat_dst, u32 Row_dst, u32 Col_dst){
+
+    assert(Row_src*Col_src == Row_dst*Col_dst);
+    u32 idy = blockIdx.y*gridDim.y + threadIdx.y;
+    u32 idx = blockIdx.x*gridDim.x + threadIdx.x;
+
+    if (idy >= Row_src || idx >= Col_src)
+        return ;
+
+    mat_dst[idx*Col_dst + idy] = mat_src[idy*Col_src + idx];
+
+}
+
+
+template<typename T> void
+matrix_transpose_launch(T *mat_src, u32 Row_src, u32 Col_src,
+                 T * mat_dst, u32 Row_dst, u32 Col_dst){
+
+    dim3 grid(MAX(1, (size_t)ceil((double)Col_src/TILE_HEIGHT)),
+              MAX(1, (size_t)ceil((double)Row_src/TILE_WIDTH)) );
+    dim3 block(TILE_WIDTH, TILE_HEIGHT);
+
+    matrix_transpose<T><<<grid, block>>>(mat_src, Row_src, Col_src,
+                                   mat_dst, Row_dst, Col_dst);
+}
+// ==========cov
+
+
+//================ 
 void
 matrix_mul_cpu(float *Md, u32 Row_Md, u32 Col_Md,
                float *Nd, u32 Row_Nd, u32 Col_Nd,
@@ -99,40 +133,74 @@ matrix_mul_cpu(float *Md, u32 Row_Md, u32 Col_Md,
                Pd, Row_Pd, Col_Pd);
 }
 
-int
-main(){
-//2wx2w × 2wx2w，on p40，need 15s; on e5-2630（2.2ghz）×40core，need 40s
-   size_t rowm = 29,colm = 17;
-   size_t rown = colm, coln = 17;
-   size_t rowp = rowm, colp = coln;
-   
-   size_t size = sizeof(float)*rowm*colm;
-   float *md = (float *)malloc(size);
-   for(int i=0;i<rowm*colm;i++)
-     md[i] = i;
-   float *md_d = host_to_device_malloc(md, size);
+void
+matrix_transpose_cpu(float *mat_src, u32 Row_src, u32 Col_src,
+                     float * mat_dst, u32 Row_dst, u32 Col_dst){
 
-   size_t size1 = sizeof(float)*rown*coln;
-   float *nd = (float *)malloc(size1);
-   for(int i=0;i<rown*coln;i++)
-      nd[i]=2;
-   float *nd_d = host_to_device_malloc(nd, size1);
-   
-   size_t size2 = sizeof(float)*rowp*colp;
-   float *pd = (float *)malloc(size2);
-   float *pd_d = host_to_device_malloc(pd, size2);
-
-
-   matrix_mul_cpu(md_d,rowm,colm,
-                       nd_d,rown,coln,
-                       pd_d,rowp,colp);
-
-   device_to_host_free(pd,pd_d,size2);
-   for(int i = 0; i<rowp; i++){
-      printf("[%d] ",i+1);
-      for(int j=0;j<colp;j++)
-          printf("%d ",(int)pd[i*colp+j]);
-      printf("\n");
-   }
-  return 0;
+    matrix_transpose_launch<float>(mat_src, Row_src, Col_src,
+                      mat_dst, Row_dst, Col_dst);
 }
+
+void
+cov_cpu(float *mat, u32 Row_mat, u32 Col_mat,
+        float *mat_cov, u32 Row_mat_cov, u32 Col_mat_cov){
+    
+    //1 - malloc one matrix
+    size_t size = sizeof(float)*Row_mat*Col_mat;
+    float *mat_T_device = device_malloc<float>(size);
+
+    //2 - transpose
+    u32 Row_mat_T = Col_mat;
+    u32 Col_mat_T = Row_mat;
+    matrix_transpose_cpu(mat,Row_mat, Col_mat,
+                  mat_T_device, Row_mat_T, Col_mat_T);
+
+    //3 - matrix_mul
+
+    matrix_mul_cpu(mat_T_device,Row_mat_T, Col_mat_T,
+                   mat, Row_mat, Col_mat,
+                   mat_cov, Row_mat_cov, Col_mat_cov);
+
+    device_free<float>(mat_T_device);
+
+}
+//int
+//main(){
+//
+//   size_t rowm = 1024,colm = 1024;
+//   size_t rown = colm, coln = 1024;
+//   size_t rowp = rowm, colp = coln;
+//   
+//   size_t size = sizeof(float)*rowm*colm;
+//   float *md = (float *)malloc(size);
+//   for(int i=0;i<rowm*colm;i++)
+//     md[i] = i%1000;
+//   float *md_d = host_to_device_malloc(md, size);
+//
+//   size_t size1 = sizeof(float)*rown*coln;
+//   float *nd = (float *)malloc(size1);
+//   for(int i=0;i<rown*coln;i++)
+//      nd[i]=2;
+//   float *nd_d = host_to_device_malloc(nd, size1);
+//   
+//   size_t size2 = sizeof(float)*rowp*colp;
+//   float *pd = (float *)malloc(size2);
+//   float *pd_d = host_to_device_malloc(pd, size2);
+//
+//   auto t1 = high_resolution_clock::now();
+//   matrix_mul_cpu(md_d,rowm,colm,
+//                       nd_d,rown,coln,
+//                       pd_d,rowp,colp);
+//  cudaDeviceSynchronize(); 
+//  auto t2 = high_resolution_clock::now();
+//  printf("take time %d\n",duration_cast<milliseconds>(t2-t1).count());
+//
+//   device_to_host_free(pd,pd_d,size2);
+////   for(int i = 0; i<rowp; i++){
+////      printf("[%d] ",i+1);
+////      for(int j=0;j<colp;j++)
+////          printf("%d ",(int)pd[i*colp+j]);
+////      printf("\n");
+////   }
+//  return 0;
+//}
