@@ -135,8 +135,8 @@ matrix_divide_scalar(T *mat, u32 Row, u32 Col, u32 scalar){
 template<typename T> void
 matrix_divide_scalar_launch(T *mat, u32 Row, u32 Col, u32 scalar){
 
-    dim3 grid(MAX(1, (size_t)ceil((double)Col_src/TILE_HEIGHT)),
-              MAX(1, (size_t)ceil((double)Row_src/TILE_WIDTH)) );
+    dim3 grid(MAX(1, (size_t)ceil((double)Col/TILE_HEIGHT)),
+              MAX(1, (size_t)ceil((double)Row/TILE_WIDTH)) );
     dim3 block(TILE_WIDTH, TILE_HEIGHT);
   
     matrix_divide_scalar<T><<<grid, block>>>(mat, Row, Col, scalar);
