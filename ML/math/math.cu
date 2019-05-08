@@ -5,8 +5,8 @@
 #include "common/common.h"
 #include "common/malloc_free.h"
 
-# define TILE_HEIGHT 16
-# define TILE_WIDTH 16
+# define TILE_HEIGHT 32
+# define TILE_WIDTH 32
 
 template<typename T> __global__ void
 matrix_mul(T * Md, u32 Row_Md, u32 Col_Md,
@@ -101,7 +101,7 @@ matrix_mul_cpu(float *Md, u32 Row_Md, u32 Col_Md,
 
 int
 main(){
-
+//2wx2w × 2wx2w，on p40，need 15s; on e5-2630（2.2ghz）×40core，need 40s
    size_t rowm = 29,colm = 17;
    size_t rown = colm, coln = 17;
    size_t rowp = rowm, colp = coln;
