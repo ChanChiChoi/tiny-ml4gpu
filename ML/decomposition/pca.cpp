@@ -23,7 +23,7 @@ public:
 PCA&
 PCA::fit(Array &matrix){
 
-    auto ptr_device = matrix.ptr_device;
+    float * ptr_device = (float *)matrix.ptr_device;
     //1 - substract the mean by sample
     size_t rows = matrix.shape[0];
     size_t cols = matrix.shape[1];
