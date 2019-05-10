@@ -45,7 +45,7 @@ device_malloc(size_t size, const char *file, const int line){
 
 double *
 device_malloc(size_t size, const char *file, const int line){
-    return _device_malloc(size, file, line);
+    return _device_malloc<double>(size, file, line);
 }
 
 float *
