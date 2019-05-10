@@ -34,7 +34,7 @@ _svd(T *A_device, const int Row_A, const int Col_A, const int lda,
 //  T *VT_device = DEVICE_MALLOC(sizeof(T)*lda*Col_A)；
   
   int *devInfo_device;
-  DEVICE_MALLOC(devInfo_device,sizeof(T));
+  DEVICE_MALLOC(devInfo_device,sizeof(int));
 
   //step3
   CHECK_CALL_DEFAULT(cusolverDnDgesvd_bufferSize(cusolverH,Row_A,Col_A,&lwork));
