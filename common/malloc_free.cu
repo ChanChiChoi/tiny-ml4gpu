@@ -106,14 +106,14 @@ _device_to_device(T *dst_device, T *src_device, size_t size, const char *file, c
 }
 
 //===============change template Instantiation
-float *
+void
 device_to_device(float *dst_device, float *src_device, size_t size, const char *file, const int line){
-   return  _device_to_device<float>(dst_device, src_device, size, file, line);
+   _device_to_device<float>(dst_device, src_device, size, file, line);
 }
 
-unsigned int *
+void
 device_to_device(unsigned int *dst_device, unsigned int *src_device, size_t size, const char *file, const int line){
-    return _device_to_device<unsigned int>(dst_device, src_device, size, file, line);
+    _device_to_device<unsigned int>(dst_device, src_device, size, file, line);
 }
 
 
