@@ -2,13 +2,13 @@
 
 //=========malloc
 float *
-device_malloc(size_t size, const char *file, const int line);
+device_malloc(float *ptr_device, size_t size, const char *file, const int line);
 
 unsigned int *
-device_malloc(size_t size, const char *file, const int line);
+device_malloc(unsigned int *ptr_device, size_t size, const char *file, const int line);
 
 double *
-device_malloc(size_t size, const char *file, const int line);
+device_malloc(double *ptr_device, size_t size, const char *file, const int line)
 
 float *
 host_to_device_malloc(float * ptr_host, size_t size, const char *file, const int line);
@@ -29,8 +29,8 @@ double *
 host_to_device(double *ptr_device, double * ptr_host, size_t size, const char *file, const int line);
 
 //============marco define
-#define DEVICE_MALLOC(size) device_malloc(size, __FILE__, __LINE__)
-#define HOST_TO_DEVICE_MALLOC(ptr_host, size) host_to_device_malloc(ptr_host, size, __FILE__, __LINE__);
+#define DEVICE_MALLOC(ptr_device, size) device_malloc(ptr_device, size, __FILE__, __LINE__)
+#define HOST_TO_DEVICE_MALLOC(ptr_host, size) host_to_device_malloc(ptr_host, size, __FILE__, __LINE__)
 #define HOST_TO_DEVICE(ptr_device, ptr_host, size) host_to_device(ptr_device, ptr_host, size, __FILE__, __LINE__)
 
 //===========free
