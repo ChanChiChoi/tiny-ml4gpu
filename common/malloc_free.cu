@@ -17,7 +17,8 @@ _device_malloc(T *ptr_device, size_t size, const char *file, const int line){
 template<typename T> T *
 _host_to_device_malloc(T *ptr_host, size_t size, const char *file, const int line){
 
-    T *ptr_device = _device_malloc<T>(size, file, line);
+    T *ptr_device = NULL;
+    ptr_device = _device_malloc<T>( ptr_device, size, file, line);
     // copy host data to device;
     CHECK_CALL(cudaMemcpy(ptr_device, ptr_host, size, cudaMemcpyHostToDevice), file, line);
     return ptr_device;
