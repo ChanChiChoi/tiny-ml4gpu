@@ -8,114 +8,112 @@ so, other host shared object file by g++  can not find function symbols in share
 
 //==============malloc template
 template<class T> T *
-device_malloc(size_t size){
+device_malloc(size_t size, const char *file, const int line){
 
     T *ptr_device = NULL;
-    CHECK_CALL(cudaMalloc((void **)&ptr_device, size));
+    CHECK_CALL(cudaMalloc((void **)&ptr_device, size), file, line);
     return ptr_device;
 }
 
 template<typename T> T *
-_host_to_device_malloc(T *ptr_host, size_t size){
+_host_to_device_malloc(T *ptr_host, size_t size, const char *file, const int line){
 
-    T *ptr_device = device_malloc<T>(size);
+    T *ptr_device = device_malloc<T>(size, file, line);
     // copy host data to device;
-    CHECK_CALL(cudaMemcpy(ptr_device, ptr_host, size, cudaMemcpyHostToDevice));
+    CHECK_CALL(cudaMemcpy(ptr_device, ptr_host, size, cudaMemcpyHostToDevice), file, line);
     return ptr_device;
 }
 
 template<typename T> T *
-_host_to_device(T *ptr_device, T *ptr_host, size_t size){
+_host_to_device(T *ptr_device, T *ptr_host, size_t size, const char *file, const int line){
 
     // copy host data to device;
-    CHECK_CALL(cudaMemcpy(ptr_device, ptr_host, size, cudaMemcpyHostToDevice));
+    CHECK_CALL(cudaMemcpy(ptr_device, ptr_host, size, cudaMemcpyHostToDevice), file ,line);
     return ptr_device;
 }
 
-
-//===========malloc template Instantiation
+//===========template Instantiation
 float *
-host_to_device_malloc(float *ptr_host, size_t size){
-    return _host_to_device_malloc<float>(ptr_host, size);
+host_to_device_malloc(float *ptr_host, size_t size, const char *file, const int line){
+    return _host_to_device_malloc<float>(ptr_host, size, file, line);
 }
 
 unsigned int *
-host_to_device_malloc(unsigned int * ptr_host, size_t size){
-    return _host_to_device_malloc<unsigned int>(ptr_host, size);
+host_to_device_malloc(unsigned int * ptr_host, size_t size, const char *file, const int line){
+    return _host_to_device_malloc<unsigned int>(ptr_host, size, file, line);
 }
 
 float *
-host_to_device(float *ptr_device, float *ptr_host, size_t size){
-    return _host_to_device<float>(ptr_device, ptr_host, size);
+host_to_device(float *ptr_device, float *ptr_host, size_t size, const char *file, const int line){
+    return _host_to_device<float>(ptr_device, ptr_host, size, file, line);
 }
 
 unsigned int *
-host_to_device(unsigned int *ptr_device, unsigned int *ptr_host, size_t size){
-    return _host_to_device<unsigned int>(ptr_device, ptr_host, size);
+host_to_device(unsigned int *ptr_device, unsigned int *ptr_host, size_t size, const char *file, const int line){
+    return _host_to_device<unsigned int>(ptr_device, ptr_host, size, file, line);
 }
 
 //==================free template
 template<typename T> T *
-device_free(T *ptr_device){
+device_free(T *ptr_device, const char *file, const int line){
 
-    CHECK_CALL(cudaFree(ptr_device));
+    CHECK_CALL(cudaFree(ptr_device), file, line);
     return NULL;
 }
 
 
 template <typename T> T*
-_device_to_host_free(T * ptr_host, T *ptr_device, size_t size){
+_device_to_host_free(T * ptr_host, T *ptr_device, size_t size, const char *file, const int line){
 
-    CHECK_CALL(cudaMemcpy(ptr_host, ptr_device, size, cudaMemcpyDeviceToHost));
-    device_free<T>(ptr_device);
+    CHECK_CALL(cudaMemcpy(ptr_host, ptr_device, size, cudaMemcpyDeviceToHost), file, line);
+    device_free<T>(ptr_device, file, line);
     ptr_device = NULL;
     return ptr_device;
 }
 
 template <typename T> T*
-_device_to_host(T * ptr_host, T *ptr_device, size_t size){
+_device_to_host(T * ptr_host, T *ptr_device, size_t size, const char *file, const int line){
 
-    CHECK_CALL(cudaMemcpy(ptr_host, ptr_device, size, cudaMemcpyDeviceToHost));
+    CHECK_CALL(cudaMemcpy(ptr_host, ptr_device, size, cudaMemcpyDeviceToHost), file, line);
     return ptr_device;
 }
 
-//=============free template Instantiation
+//=============template Instantiation
 float *
-device_to_host_free(float * ptr_host, float *ptr_device, size_t size){
-    return _device_to_host_free<float>(ptr_host, ptr_device, size);
+device_to_host_free(float * ptr_host, float *ptr_device, size_t size, const char *file, const int line){
+    return _device_to_host_free<float>(ptr_host, ptr_device, size, file, line);
 }
 
 unsigned int *
-device_to_host_free(unsigned int * ptr_host, unsigned int  *ptr_device, size_t size){
-    return _device_to_host_free<unsigned int>(ptr_host, ptr_device, size);
+device_to_host_free(unsigned int * ptr_host, unsigned int  *ptr_device, size_t size, const char *file, const int line){
+    return _device_to_host_free<unsigned int>(ptr_host, ptr_device, size, file, line);
 }
 
 float *
-device_to_host(float * ptr_host, float *ptr_device, size_t size){
-    return _device_to_host<float>(ptr_host, ptr_device, size);
+device_to_host(float * ptr_host, float *ptr_device, size_t size, const char *file, const int line){
+    return _device_to_host<float>(ptr_host, ptr_device, size, file, line);
 }
 
 unsigned int *
-device_to_host(unsigned int * ptr_host, unsigned int  *ptr_device, size_t size){
-    return _device_to_host<unsigned int>(ptr_host, ptr_device, size);
+device_to_host(unsigned int * ptr_host, unsigned int  *ptr_device, size_t size, const char *file, const int line){
+    return _device_to_host<unsigned int>(ptr_host, ptr_device, size, file, line);
 }
 
 //=====================change template
 template<typename T> void
-_device_to_device(T *dst_device, T *src_device, size_t size){
-    CHECK_CALL(cudaMemcpy(dst_device, src_device, size, cudaMemcpyDeviceToDevice));
+_device_to_device(T *dst_device, T *src_device, size_t size, const char *file, const int line){
+    CHECK_CALL(cudaMemcpy(dst_device, src_device, size, cudaMemcpyDeviceToDevice), file, line);
 }
 
 //===============change template Instantiation
 float *
-device_to_device(float *dst_device, float *src_device, size_t size){
-    _device_to_device<float>(dst_device, src_device, size);
+device_to_device(float *dst_device, float *src_device, size_t size, const char *file, const int line){
+   return  _device_to_device<float>(dst_device, src_device, size, file, line);
 }
 
 unsigned int *
-device_to_device(unsigned int *dst_device, unsigned int *src_device, size_t size){
-    _device_to_device<unsigned int>(dst_device, src_device, size);
+device_to_device(unsigned int *dst_device, unsigned int *src_device, size_t size, const char *file, const int line){
+    return _device_to_device<unsigned int>(dst_device, src_device, size, file, line);
 }
-
 
 
