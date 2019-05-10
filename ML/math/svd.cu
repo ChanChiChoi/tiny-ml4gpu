@@ -15,7 +15,6 @@ _svd(T *A_device, const int Row_A, const int Col_A, const int lda,
     T *S_device, const int Length,
     T *VT_device, const int Row_VT, const int Col_VT){
 
-  printf("=====");
   cusolverDnHandle_t cusolverH = NULL;
   cublasHandle_t cublasH = NULL;
 
@@ -86,7 +85,6 @@ svd(double *A, const int Row_A, const int Col_A, const int lda,
     double *S, const int Length,
     double *VT, const int Row_VT, const int Col_VT){
 
-    printf("in svd double\n");
     _svd<double>(A, Row_A, Col_A, lda,
         U, Row_U, Col_U,
         S, Length,
