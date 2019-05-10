@@ -43,6 +43,11 @@ device_malloc(unsigned int *ptr_device, size_t size, const char *file, const int
     return _device_malloc<unsigned int>(ptr_device, size, file, line);
 }
 
+int *
+device_malloc(int *ptr_device, size_t size, const char *file, const int line){
+    return _device_malloc<int>(ptr_device, size, file, line);
+}
+
 double *
 device_malloc(double *ptr_device, size_t size, const char *file, const int line){
     return _device_malloc<double>(ptr_device, size, file, line);
@@ -58,6 +63,11 @@ host_to_device_malloc(unsigned int * ptr_host, size_t size, const char *file, co
     return _host_to_device_malloc<unsigned int>(ptr_host, size, file, line);
 }
 
+int *
+host_to_device_malloc(int * ptr_host, size_t size, const char *file, const int line){
+    return _host_to_device_malloc<int>(ptr_host, size, file, line);
+}
+
 double *
 host_to_device_malloc(double * ptr_host, size_t size, const char *file, const int line){
     return _host_to_device_malloc<double>(ptr_host, size, file, line);
@@ -71,6 +81,11 @@ host_to_device(float *ptr_device, float *ptr_host, size_t size, const char *file
 unsigned int *
 host_to_device(unsigned int *ptr_device, unsigned int *ptr_host, size_t size, const char *file, const int line){
     return _host_to_device<unsigned int>(ptr_device, ptr_host, size, file, line);
+}
+
+int *
+host_to_device(int *ptr_device, int *ptr_host, size_t size, const char *file, const int line){
+    return _host_to_device<int>(ptr_device, ptr_host, size, file, line);
 }
 
 double *
@@ -114,6 +129,11 @@ device_free(unsigned int *ptr_device, const char *file, const int line){
     return _device_free<unsigned int>(ptr_device, file, line);
 }
 
+int *
+device_free(int *ptr_device, const char *file, const int line){
+    return _device_free<int>(ptr_device, file, line);
+}
+
 double *
 device_free(double *ptr_device, const char *file, const int line){
     return _device_free<double>(ptr_device, file, line);
@@ -129,6 +149,11 @@ device_to_host_free(unsigned int * ptr_host, unsigned int  *ptr_device, size_t s
     return _device_to_host_free<unsigned int>(ptr_host, ptr_device, size, file, line);
 }
 
+int *
+device_to_host_free(int * ptr_host, int  *ptr_device, size_t size, const char *file, const int line){
+    return _device_to_host_free<int>(ptr_host, ptr_device, size, file, line);
+}
+
 double *
 device_to_host_free(double * ptr_host, double  *ptr_device, size_t size, const char *file, const int line){
     return _device_to_host_free<double>(ptr_host, ptr_device, size, file, line);
@@ -142,6 +167,11 @@ device_to_host(float * ptr_host, float *ptr_device, size_t size, const char *fil
 unsigned int *
 device_to_host(unsigned int * ptr_host, unsigned int  *ptr_device, size_t size, const char *file, const int line){
     return _device_to_host<unsigned int>(ptr_host, ptr_device, size, file, line);
+}
+
+int *
+device_to_host(int * ptr_host, int  *ptr_device, size_t size, const char *file, const int line){
+    return _device_to_host<int>(ptr_host, ptr_device, size, file, line);
 }
 
 double *
@@ -164,6 +194,11 @@ device_to_device(float *dst_device, float *src_device, size_t size, const char *
 void 
 device_to_device(unsigned int *dst_device, unsigned int *src_device, size_t size, const char *file, const int line){
      _device_to_device<unsigned int>(dst_device, src_device, size, file, line);
+}
+
+void 
+device_to_device(int *dst_device, int *src_device, size_t size, const char *file, const int line){
+     _device_to_device<int>(dst_device, src_device, size, file, line);
 }
 
 void 
