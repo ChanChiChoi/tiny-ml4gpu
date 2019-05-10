@@ -8,9 +8,8 @@ so, other host shared object file by g++  can not find function symbols in share
 
 //==============malloc template
 template<class T> T *
-_device_malloc(size_t size, const char *file, const int line){
+_device_malloc(T *ptr_device, size_t size, const char *file, const int line){
 
-    T *ptr_device = NULL;
     CHECK_CALL(cudaMalloc((void **)&ptr_device, size), file, line);
     return ptr_device;
 }
@@ -34,18 +33,18 @@ _host_to_device(T *ptr_device, T *ptr_host, size_t size, const char *file, const
 
 //===========template Instantiation
 float *
-device_malloc(size_t size, const char *file, const int line){
-    return _device_malloc<float>(size, file, line);
+device_malloc(float *ptr_device, size_t size, const char *file, const int line){
+    return _device_malloc<float>(ptr_device, size, file, line);
 }
 
 unsigned int *
-device_malloc(size_t size, const char *file, const int line){
-    return _device_malloc<unsigned int>(size, file, line);
+device_malloc(unsigned int *ptr_device, size_t size, const char *file, const int line){
+    return _device_malloc<unsigned int>(ptr_device, size, file, line);
 }
 
 double *
-device_malloc(size_t size, const char *file, const int line){
-    return _device_malloc<double>(size, file, line);
+device_malloc(double *ptr_device, size_t size, const char *file, const int line){
+    return _device_malloc<double>(ptr_device, size, file, line);
 }
 
 float *
