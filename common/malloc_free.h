@@ -51,7 +51,7 @@ device_to_host(double * ptr_host, double *ptr_device, size_t size, const char *f
 
 //============macro define
 #define DEVICE_FREE(ptr_device) device_free(ptr_device, __FILE__, __LINE__)
-#define DEVICE_TO_HOST_FREE(ptr_device, ptr_host, size) device_to_host_free(ptr_host, size, __FILE__, __LINE__);
+#define DEVICE_TO_HOST_FREE(ptr_host, ptr_device, size) device_to_host_free(ptr_host, ptr_device, size, __FILE__, __LINE__);
 #define DEVICE_TO_HOST(ptr_host, ptr_device, size) device_to_host(ptr_host, ptr_device, size, __FILE__, __LINE__)
 
 //============change
