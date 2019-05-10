@@ -1,7 +1,13 @@
 #pragma once
 
 //=========malloc
-template<class T> T *
+float *
+device_malloc(size_t size, const char *file, const int line);
+
+unsigned int *
+device_malloc(size_t size, const char *file, const int line);
+
+double *
 device_malloc(size_t size, const char *file, const int line);
 
 float *
@@ -28,8 +34,14 @@ host_to_device(double *ptr_device, double * ptr_host, size_t size, const char *f
 #define HOST_TO_DEVICE(ptr_device, ptr_host, size) host_to_device(ptr_device, ptr_host, size, __FILE__, __LINE__)
 
 //===========free
-template<typename T> T *
-device_free(T *ptr_device, const char *file, const int line);
+float *
+device_free(float *ptr_device, const char *file, const int line);
+
+unsigned int *
+device_free(unsigned int *ptr_device, const char *file, const int line);
+
+double *
+device_free(double *ptr_device, const char *file, const int line);
 
 float *
 device_to_host_free(float * ptr_host, float *ptr_device, size_t size, const char *file, const int line);
