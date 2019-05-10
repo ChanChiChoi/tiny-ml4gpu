@@ -2,16 +2,16 @@
 
 //=========malloc
 float *
-device_malloc(float *ptr_device, size_t size, const char *file, const int line);
+device_malloc(float *&ptr_device, size_t size, const char *file, const int line);
 
 unsigned int *
-device_malloc(unsigned int *ptr_device, size_t size, const char *file, const int line);
+device_malloc(unsigned int *&ptr_device, size_t size, const char *file, const int line);
 
 int *
-device_malloc(int *ptr_device, size_t size, const char *file, const int line);
+device_malloc(int *&ptr_device, size_t size, const char *file, const int line);
 
 double *
-device_malloc(double *ptr_device, size_t size, const char *file, const int line);
+device_malloc(double *&ptr_device, size_t size, const char *file, const int line);
 
 float *
 host_to_device_malloc(float * ptr_host, size_t size, const char *file, const int line);
