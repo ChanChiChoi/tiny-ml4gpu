@@ -7,13 +7,15 @@
 #include <cusolverDn.h>
 
 #include "common/malloc_free.h"
+#include "common/helper.cuh"
 
 template<typename T> void
-svd(T *A_device, const int Row_A, const int Col_A, const int lda,
+_svd(T *A_device, const int Row_A, const int Col_A, const int lda,
     T *U_device, const int Row_U, const int Col_U,
     T *S_device, const int Length,
     T *VT_device, const int Row_VT, const int Col_VT){
 
+  printf("=====");
   cusolverDnHandle_t cusolverH = NULL;
   cublasHandle_t cublasH = NULL;
 
@@ -31,12 +33,15 @@ svd(T *A_device, const int Row_A, const int Col_A, const int lda,
 //  T *S_device = DEVICE_MALLOC(sizeof(T)*Col_A)；
 //  T *U_device = DEVICE_MALLOC(sizeof(T)*lda*Row_A)；
 //  T *VT_device = DEVICE_MALLOC(sizeof(T)*lda*Col_A)；
-  T *devInfo_device = DEVICE_MALLOC(sizeof(int))；
+  
+  T *devInfo_device;
+  DEVICE_MALLOC(devInfo_device,sizeof(T));
 
   //step3
   CHECK_CALL_DEFAULT(cusolverDnDgesvd_bufferSize(cusolverH,Row_A,Col_A,&lwork));
 
-  T *work_device = DEVICE_MALLOC(sizeof(T)*lwork);
+  T *work_device;
+  work_device = DEVICE_MALLOC(work_device,sizeof(T)*lwork);
 
   //step 4:compute svd
   signed char jobu = 'A';
@@ -61,18 +66,18 @@ svd(T *A_device, const int Row_A, const int Col_A, const int lda,
   return ;
 }
 
-
-void
-svd(float *A, const int Row_A, const int Col_A, const int lda,
-    float *U, const int Row_U, const int Col_U,
-    float *S, const int Length,
-    float *VT, const int Row_VT, const int Col_VT){
-
-    svd(A, Row_A, Col_A, lda,
-        U, Row_U, Col_U,
-        S, Length,
-        VT, Row_VT, Col_VT);
-}
+//
+//void
+//svd(float *A, const int Row_A, const int Col_A, const int lda,
+//    float *U, const int Row_U, const int Col_U,
+//    float *S, const int Length,
+//    float *VT, const int Row_VT, const int Col_VT){
+//
+//    _svd<float>(A, Row_A, Col_A, lda,
+//        U, Row_U, Col_U,
+//        S, Length,
+//        VT, Row_VT, Col_VT);
+//}
 
 
 void
@@ -81,7 +86,8 @@ svd(double *A, const int Row_A, const int Col_A, const int lda,
     double *S, const int Length,
     double *VT, const int Row_VT, const int Col_VT){
 
-    svd(A, Row_A, Col_A, lda,
+    printf("in svd double\n");
+    _svd<double>(A, Row_A, Col_A, lda,
         U, Row_U, Col_U,
         S, Length,
         VT, Row_VT, Col_VT);
