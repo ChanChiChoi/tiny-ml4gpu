@@ -8,7 +8,7 @@ unsigned int *
 device_malloc(unsigned int *ptr_device, size_t size, const char *file, const int line);
 
 double *
-device_malloc(double *ptr_device, size_t size, const char *file, const int line)
+device_malloc(double *ptr_device, size_t size, const char *file, const int line);
 
 float *
 host_to_device_malloc(float * ptr_host, size_t size, const char *file, const int line);
