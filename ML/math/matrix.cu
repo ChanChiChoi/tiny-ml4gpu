@@ -177,7 +177,7 @@ cov_cpu(float *mat, u32 Row_mat, u32 Col_mat,
     
     //1 - malloc one matrix
     size_t size = sizeof(float)*Row_mat*Col_mat;
-    float *mat_T_device = device_malloc<float>(size);
+    float *mat_T_device = DEVICE_MALLOC<float>(size);
 
     //2 - transpose
     u32 Row_mat_T = Col_mat;
@@ -191,7 +191,7 @@ cov_cpu(float *mat, u32 Row_mat, u32 Col_mat,
                    mat, Row_mat, Col_mat,
                    mat_cov, Row_mat_cov, Col_mat_cov);
 
-    device_free<float>(mat_T_device);
+    DEVICE_FREE<float>(mat_T_device);
 
     //4 - divide (n-1) samples;
     size_t n_1 = MAX(1,Row_mat-1);
