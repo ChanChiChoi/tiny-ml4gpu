@@ -34,7 +34,7 @@ _svd(T *A_device, const int Row_A, const int Col_A, const int lda,
 //  T *U_device = DEVICE_MALLOC(sizeof(T)*lda*Row_A)；
 //  T *VT_device = DEVICE_MALLOC(sizeof(T)*lda*Col_A)；
   
-  T *devInfo_device;
+  int *devInfo_device;
   DEVICE_MALLOC(devInfo_device,sizeof(T));
 
   //step3
@@ -66,18 +66,18 @@ _svd(T *A_device, const int Row_A, const int Col_A, const int lda,
   return ;
 }
 
-//
-//void
-//svd(float *A, const int Row_A, const int Col_A, const int lda,
-//    float *U, const int Row_U, const int Col_U,
-//    float *S, const int Length,
-//    float *VT, const int Row_VT, const int Col_VT){
-//
-//    _svd<float>(A, Row_A, Col_A, lda,
-//        U, Row_U, Col_U,
-//        S, Length,
-//        VT, Row_VT, Col_VT);
-//}
+
+void
+svd(float *A, const int Row_A, const int Col_A, const int lda,
+    float *U, const int Row_U, const int Col_U,
+    float *S, const int Length,
+    float *VT, const int Row_VT, const int Col_VT){
+
+    _svd<float>(A, Row_A, Col_A, lda,
+        U, Row_U, Col_U,
+        S, Length,
+        VT, Row_VT, Col_VT);
+}
 
 
 void
