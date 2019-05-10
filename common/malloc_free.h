@@ -43,10 +43,10 @@ device_to_host(unsigned int * ptr_host, unsigned int *ptr_device, size_t size, c
 #define DEVICE_TO_HOST(ptr_host, ptr_device, size) device_to_host(ptr_host, ptr_device, size, __FILE__, __LINE__)
 
 //============change
-float *
+void
 device_to_device(float *dst_device, float *src_device, size_t size, const char *file, const int line);
 
-unsigned int *
+void
 device_to_device(unsigned int *dst_device, unsigned int *src_device, size_t size, const char *file, const int line);
 
 //============macro define
