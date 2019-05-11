@@ -60,8 +60,7 @@ _svd(T *A_device, const int Row_A, const int Col_A, const int lda,
 
   cublasDestroy(cublasH);
   cusolverDnDestroy(cusolverH);
-
-  cudaDeviceReset();
+    
   return ;
 }
 
