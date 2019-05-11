@@ -9,6 +9,8 @@
 #include "common/malloc_free.h"
 #include "common/helper.cuh"
 
+/* cusolverDnDgesvd only support double* pointer. so _svd() has to been double parameter
+*/
 template<typename T> void
 _svd(T *A_device, const int Row_A, const int Col_A, const int lda,
     T *U_device, const int Row_U, const int Col_U,
@@ -64,7 +66,7 @@ _svd(T *A_device, const int Row_A, const int Col_A, const int lda,
   return ;
 }
 
-
+/*
 void
 svd(float *A, const int Row_A, const int Col_A, const int lda,
     float *U, const int Row_U, const int Col_U,
@@ -76,7 +78,7 @@ svd(float *A, const int Row_A, const int Col_A, const int lda,
         S, Length,
         VT, Row_VT, Col_VT);
 }
-
+*/
 
 void
 svd(double *A, const int Row_A, const int Col_A, const int lda,
