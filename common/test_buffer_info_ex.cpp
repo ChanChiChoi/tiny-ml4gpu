@@ -3,6 +3,7 @@ g++ test_buffer_info_ex.cpp -I../pybind11/include -I../ `cd ../pybind11 &&  pyth
 */
 #include "buffer_info_ex.h"
 #include <string>
+#include <stdio.h>
 
 int
 main(){
@@ -13,6 +14,7 @@ main(){
    std::string(1,'f')
    };
 
+   printf("shape rows:%d\n",ptr->ptr_buf->shape[0]);
 
 
   return 0;
