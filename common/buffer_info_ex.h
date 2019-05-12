@@ -11,14 +11,17 @@ namespace py = pybind11;
 typedef struct buffer_info_ex: public py::buffer_info{
 
     void *ptr_device = nullptr; // pointer of ptr data on GPU
-
+    void *ptr_host = nullptr; // just for inside the project,ptr for receive from numpy
+    
     buffer_info_ex():buffer_info{}{
         ptr_device = nullptr;
+        ptr_host = nullptr;
     }
 
     buffer_info_ex(buffer_info &rhs){
         ptr = rhs.ptr;
         ptr_device = nullptr;
+        ptr_host = nullptr;
         itemsize = rhs.itemsize;
         size = rhs.size;
         format = std::move(rhs.format);
