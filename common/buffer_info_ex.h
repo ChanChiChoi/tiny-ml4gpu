@@ -33,6 +33,8 @@ typedef struct buffer_info_ex: public py::buffer_info{
  * */
     buffer_info_ex & cuda();
 
+    ~buffer_info_ex();
+    
 } Buf;
 
 class Array{
