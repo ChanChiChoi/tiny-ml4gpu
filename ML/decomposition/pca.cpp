@@ -15,8 +15,6 @@ public:
     // only init the n_components;
     PCA ( size_t n_components):n_components{n_components}{
         trans_mat = new Array();
-        trans_mat->ptr_device = NULL;
-        trans_mat->ptr = NULL;
     }
 
     // will stat the matrix, then put the transfer matrix into trans_mat
