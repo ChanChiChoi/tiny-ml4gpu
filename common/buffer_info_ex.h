@@ -51,6 +51,12 @@ public:
         ptr_buf = new Buf();
     }
     
+    Array(ssize_t rows, ssize_t cols, const std::string &format){
+        ptr_buf = new Buf();
+        ptr_buf->shape = std::move(std::vector<ssize_t> {rows, cols});
+        ptr_buf->format = std::move(format);
+    }
+
     Array(py::array_t<float> &array){
         auto array_info = array.request();
 
