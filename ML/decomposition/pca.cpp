@@ -90,7 +90,6 @@ PCA::fit(Array &matrix){
     free(U);
     free(S);
 
-    trans_mat -> ptr_device = VT
     //6 - hold the VT matrix, then that is all
 
     DEVICE_TO_HOST_FREE(mean, mean_device, size_mean);
