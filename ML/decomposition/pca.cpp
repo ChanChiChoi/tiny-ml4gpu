@@ -6,8 +6,8 @@
 
 class PCA{
 
-    Array &trans_mat;
-    size_t n_components;
+    Array &trans_mat = NULL;
+    size_t n_components = 0;
 
 public:
     PCA (){}
