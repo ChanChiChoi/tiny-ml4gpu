@@ -6,7 +6,8 @@
 
 class PCA{
 
-    Array &trans_mat = NULL;
+    Array *trans_mat = NULL;
+    Array *mean_vec = NULL;
     size_t n_components = 0;
 
 public:
@@ -15,6 +16,7 @@ public:
     // only init the n_components;
     PCA ( size_t n_components):n_components{n_components}{
         trans_mat = new Array();
+        mean_vec = new Array();
     }
 
     // will stat the matrix, then put the transfer matrix into trans_mat
@@ -26,6 +28,10 @@ public:
         if (trans_mat){
             delete trans_mat;
             trans_mat = NULL;
+        }
+        if (mean_vec){
+            delete mean_vec;
+            mean_vec = NULL;
         }
     }
 
@@ -46,6 +52,11 @@ PCA::fit(Array &matrix){
     float *mean = (float *)malloc(size_mean);
     float *mean_device = HOST_TO_DEVICE_MALLOC(mean, size_mean);
 
+    delete mean_vec;
+    mean_vec = new Array();
+    mean_vec->ptr_host = mean;
+    mean_vec->ptr_device = mean_device;
+    
     //TODO: we need keep mean_device
     mean_by_rows_cpu(ptr_device, mean_device, rows, cols);
 
