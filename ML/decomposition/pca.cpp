@@ -23,8 +23,9 @@ public:
     PCA & transform(Array &matrix);
 
     ~PCA(){
-        if (trans_mat->ptr_device){
-            DEVICE_FREE(trans_mat->ptr_device);
+        if (trans_mat){
+            delete trans_mat;
+            trans_mat = NULL;
         }
     }
 
