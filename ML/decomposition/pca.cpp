@@ -78,6 +78,7 @@ PCA::fit(Array &matrix){
     float *U_device = HOST_TO_DEVICE_MALLOC(U, size_U);
     float *S_device = HOST_TO_DEVICE_MALLOC(S, size_S);
     float *VT_device = HOST_TO_DEVICE_MALLOC(VT, size_VT);
+    
     svd(mat_cov_device, Row_A, Col_A, lda,
         U_device, Row_U, Col_U,
         S_device, Length,
