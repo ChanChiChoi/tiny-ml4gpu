@@ -59,6 +59,7 @@ PCA::fit(Array &matrix){
     
     //TODO: we need keep mean_device
     mean_by_rows_cpu(ptr_device, mean_device, rows, cols);
+    DEVICE_TO_HOST(mean, mean_device, size_mean);
 
     //2 - calc the cov matrix
     size_t rows_cov = cols;
@@ -78,6 +79,7 @@ PCA::fit(Array &matrix){
     ci32 Row_U = lda, Col_U = lda; //    
     ci32 Length = Col_A; //
     ci32 Row_VT = Col_A, Col_VT = Col_A;
+    
     size_t size_U = sizeof(float)*Row_U*Col_U;
     size_t size_S = sizeof(float)*Length;
     size_t size_VT = sizeof(float)*Row_VT*Col_VT;
@@ -103,9 +105,7 @@ PCA::fit(Array &matrix){
 
     //6 - hold the VT matrix, then that is all
 
-    DEVICE_TO_HOST_FREE(mean, mean_device, size_mean);
     DEVICE_TO_HOST_FREE(mat_cov, mat_cov_device, size_cov);
-    free(mean);
     free(mat_cov);
 
     delete trans_mat;
