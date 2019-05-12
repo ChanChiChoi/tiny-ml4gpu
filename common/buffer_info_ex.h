@@ -45,6 +45,7 @@ typedef struct buffer_info_ex: public py::buffer_info{
 
 class Array{
 
+public:
     Buf *ptr_buf = NULL;
 public:
     Array() {
