@@ -39,8 +39,10 @@ class Array{
 
     Buf *ptr_buf = NULL;
 public:
-    Array() {}
-
+    Array() {
+        ptr_buf = new Buf();
+    }
+    
     Array(py::array_t<float> &array){
         auto array_info = array.request();
 
