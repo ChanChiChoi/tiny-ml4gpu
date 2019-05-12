@@ -20,7 +20,9 @@ buffer_info_ex::~buffer_info_ex(){
 
     switch (format[0]){
         case 'f':
-            DEVICE_FREE((float *)ptr_device);
+            if(ptr_device){
+                DEVICE_FREE((float *)ptr_device);
+            }
             ptr_device = NULL;
             break;
         default:
