@@ -53,8 +53,10 @@ PCA::fit(Array &matrix){
     size_t rows_cov = cols;
     size_t cols_cov = cols;
     size_t size_cov = sizeof(float)*rows_cov*cols_cov;
+    
     float *mat_cov = (float *)malloc(size_cov);
     float *mat_cov_device = HOST_TO_DEVICE_MALLOC(mat_cov, size_cov);
+    
     cov_cpu(ptr_device, rows, cols,
             mat_cov_device, rows_cov, cols_cov );
 
