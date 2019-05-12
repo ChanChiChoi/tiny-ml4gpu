@@ -38,7 +38,7 @@ typedef struct buffer_info_ex: public py::buffer_info{
  *   just call cuda function, it will copy ptr data onto gpu
  * */
     buffer_info_ex & cuda();
-
+    buffer_info_ex & cpu();
     ~buffer_info_ex();
     
 } Buf;
