@@ -58,8 +58,8 @@ PCA::fit(Array &matrix){
                cols,
                std::string(1,'f')
                }; //need parameter
-    mean_vec->ptr_host = mean;
-    mean_vec->ptr_device = mean_device;
+    mean_vec->ptr_buf->ptr_host = mean;
+    mean_vec->ptr_buf->ptr_device = mean_device;
     
     //TODO: we need keep mean_device
     mean_by_rows_cpu(ptr_device, mean_device, rows, cols);
@@ -118,8 +118,8 @@ PCA::fit(Array &matrix){
                 Col_VT,
                 std::string(1,'f')
                 }; // need parameter
-    trans_mat->ptr_host = (void *)VT;
-    trans_mat->ptr_device = (void *)VT_device;
+    trans_mat->ptr_buf->ptr_host = (void *)VT;
+    trans_mat->ptr_buf->ptr_device = (void *)VT_device;
     
 
 }
