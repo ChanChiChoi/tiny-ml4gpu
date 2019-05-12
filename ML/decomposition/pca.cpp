@@ -53,7 +53,11 @@ PCA::fit(Array &matrix){
     float *mean_device = HOST_TO_DEVICE_MALLOC(mean, size_mean);
 
     delete mean_vec;
-    mean_vec = new Array(); //need parameter
+    mean_vec = new Array{
+               size_t(1),
+               cols,
+               std::string(1,'f')
+               }; //need parameter
     mean_vec->ptr_host = mean;
     mean_vec->ptr_device = mean_device;
     
@@ -109,7 +113,11 @@ PCA::fit(Array &matrix){
     free(mat_cov);
 
     delete trans_mat;
-    trans_mat = new Array(); // need parameter
+    trans_mat = new Array{
+                Row_VT,
+                Col_VT,
+                std::string(1,'f')
+                }; // need parameter
     trans_mat->ptr_host = (void *)VT;
     trans_mat->ptr_device = (void *)VT_device;
     
