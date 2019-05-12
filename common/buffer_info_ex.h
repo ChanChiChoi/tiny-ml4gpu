@@ -70,5 +70,5 @@ public:
     }
     
     Array & cuda();
-
+    Array & cpu();
 };
