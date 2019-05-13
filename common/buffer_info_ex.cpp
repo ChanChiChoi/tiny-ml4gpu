@@ -42,3 +42,12 @@ Array & Array::cuda(){
     return *this;
 
 }
+
+template<typename T> py::array_t<T> &
+Array::cpu(){
+    
+    assert(this->ptr_buf);
+    auto result = py::array_t<T>(this->ptr_buf)
+
+
+}

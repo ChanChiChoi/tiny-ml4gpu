@@ -76,6 +76,6 @@ public:
              ptr_buf = NULL;
     }
     
-    Array & cuda();
-    Array & cpu();
+    Array & cuda(); // transfer ptr->data into GPU
+    template<typename T> py::array_t<T> &cpu(); // transfer ptr->data from GPU into python numpy
 };

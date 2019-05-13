@@ -22,7 +22,7 @@ public:
     // will stat the matrix, then put the transfer matrix into trans_mat
     PCA & fit(Array &matrix);
 
-    PCA & transform(Array &matrix);
+    Array & transform(Array &matrix);
 
     ~PCA(){
         if (trans_mat){
@@ -121,6 +121,11 @@ PCA::fit(Array &matrix){
     trans_mat->ptr_buf->ptr_host = (void *)VT;
     trans_mat->ptr_buf->ptr_device = (void *)VT_device;
     
+
+}
+
+Array &
+PCA::transform(Array &matrix){
 
 }
 
