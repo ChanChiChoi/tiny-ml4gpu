@@ -145,18 +145,30 @@ PCA::transform(Array &matrix){
     // step 2: get n_components col of V
 
     float * V_device = (float *)trans_mat->prt_buf->ptr_device;
-    size_t Row_src = trans_mat->ptr_buf->shape[0];
-    size_t Col_src = trans_mat->ptr_buf->shape[1];
+    size_t Row_V = trans_mat->ptr_buf->shape[0];
+    size_t Col_V = trans_mat->ptr_buf->shape[1];
 
-    size_t size_ans = sizeof(float)*Row_mat*n_components;
+    // malloc for result
+    size_t Row_ans = Row_mat, Col_mat = n_components;
+    size_t size_ans = sizeof(float)*Row_ans*Col_ans;
     float *ans = (float *)malloc(size_ans); 
     float *ans_device = HOST_TO_DEVICE_MALLOC(ans,size_ans);
+
+    // get submatrix from V
+    float *tmp_device;
+    size_t Row_tmp = Row_V, Col_tmp = n_components;
+    size_t size_tmp = sizeof(float)*Row_tmp*Col_tmp;
+    tmp_device = DEVICE_MALLOC(tmp_device, size_tmp);
+    
+    matrix_subblock_cpu(V_device, Row_V, Col_V,
+                       tmp_device, Row_tmp, Col_tmp,
+                       0, 0, Row_V, Col_tmp);
+
     // matrix multiply the V
-
     matrix_mul_cpu(ptr_device,Row_mat, Col_mat,
-                   V_device, Row_src, n_components,
-                   ans_device, Row_mat, n_components);
-
+                   tmp_device, Row_tmp, Col_tmp,
+                   ans_device, Row_ans, Col_ans);
+    DEVICE_FREE(tmp_device);
 
     DEVICE_TO_HOST(ans, ans_device, size_ans); 
     // get first n_components columns: [d,n_components]
@@ -164,9 +176,9 @@ PCA::transform(Array &matrix){
     
     return new Array{
             nullptr, ans, ans_device,
-            2, {Row_mat, n_components}, std::string(1,'f'),
-            sizeof(float), Row_mat*n_components,
-            {sizeof(float)*n_components, sizeof(float)}
+            2, {Row_ans, Col_ans}, std::string(1,'f'),
+            sizeof(float), Row_ans*Col_ans,
+            {sizeof(float)*Col_ans, sizeof(float)}
             };
     
 }
