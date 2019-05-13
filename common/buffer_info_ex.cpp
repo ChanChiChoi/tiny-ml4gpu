@@ -43,22 +43,22 @@ Array & Array::cuda(){
 
 }
 
-template<typename T> py::array_t<T> &
-Array::cpu(){
+template<typename T> py::array_t<T> 
+Array::_cpu(){
     
     assert(this->ptr_buf);
 
     void * res = nullptr;
     if (ptr_buf -> ptr_host){
-        res = ptr_buf->ptr_host
-    }else if{
-        res = ptr_buf->ptr
+        res = ptr_buf->ptr_host;
+    }else if(ptr_buf->ptr){
+        res = ptr_buf->ptr;
     }else{
         res = nullptr;
         throw std::runtime_error("current has no data");
     }
    
-    auto res =  py::buffer_info(
+    py::buffer_info res_buf =  py::buffer_info(
                 res,
                 ptr_buf->itemsize,
                 ptr_buf->format,
@@ -67,6 +67,12 @@ Array::cpu(){
                 ptr_buf->strides
            );
 
-    return py::array_t<T>{*res};
+    return py::array_t<T>{res_buf};
 
+}
+
+py::array_t<float> 
+Array::cpu(){
+
+    return this->_cpu<float>();
 }
