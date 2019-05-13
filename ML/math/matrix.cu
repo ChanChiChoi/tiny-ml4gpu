@@ -143,6 +143,38 @@ matrix_divide_scalar_launch(T *mat, u32 Row, u32 Col, u32 scalar){
     matrix_divide_scalar<T><<<grid, block>>>(mat, Row, Col, scalar);
 
 }
+
+template<typename T> void
+matrix_subblock(T *big, u32 Row_big, u32 Col_big,
+                T *small, u32 Row_sm, u32 Col_sm,
+                u32 rmin, u32 cmin, u32 rmax, u32 cmax){
+    // rmin base on 0.
+    u32 idy = blockIdx.y*gridDim.y + threadIdx.y;
+    u32 idx = blockIdx.x*gridDim.x + threadIdx.x;
+ 
+    assert(rmax - rmin == Row_sm);
+    assert(cmax - cmin == Col_sm);
+
+    if(idy >= Row_sm || idx >= Col_sm)
+        return ;
+
+    small[idy*Col_sm+idx] = big[(rmin+idy)*Col_big+cmin+idx];
+}
+
+template<typename T> void
+matrix_subblock_launch(T *big, u32 Row_big, u32 Col_big,
+                       T *small, u32 Row_sm, u32 Col_sm,
+                       u32 rmin, u32 cmin, u32 rmax, u32 cmax){
+
+    dim3 grid(MAX(1, (size_t)ceil((double)Col_sm/TILE_HEIGHT)),
+              MAX(1, (size_t)ceil((double)Row_sm/TILE_WIDTH)) );
+    dim3 block(TILE_WIDTH, TILE_HEIGHT);
+
+    matrix_subblock<T><<<grid, block>>>(big, Row_big, Col_big,
+                                       small, Row_sm, Col_sm,
+                                      rmin, cmin, rmax, cmax);
+
+}
 // ==========cov
 
 
@@ -169,6 +201,16 @@ void
 matrix_divide_scalar_cpu(float *mat, u32 Row, u32 Col, u32 scalar){
 
     matrix_divide_scalar_launch<float>(mat, Row, Col, scalar);
+}
+
+void
+matrix_subblock(T *big, u32 Row_big, u32 Col_big,
+                T *small, u32 Row_sm, u32 Col_sm,
+                u32 rmin, u32 cmin, u32 rmax, u32 cmax){
+    matrix_subblock_launch(big, Row_big, Col_big,
+                           small, Row_sm, Col_sm,
+                           rmin, cmin, rmax, cmax);
+
 }
 
 void

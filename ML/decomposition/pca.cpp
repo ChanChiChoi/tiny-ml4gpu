@@ -82,6 +82,7 @@ PCA::fit(Array &matrix){
     ci32 Row_U = lda, Col_U = lda; //    
     ci32 Length = Col_A; //
     ci32 Row_VT = Col_A, Col_VT = Col_A;
+    ci32 Row_V = Col_VT, Col_V = Row_VT;
     
     size_t size_U = sizeof(float)*Row_U*Col_U;
     size_t size_S = sizeof(float)*Length;
@@ -89,11 +90,11 @@ PCA::fit(Array &matrix){
 
     float *U = (float *)malloc(size_U);
     float *S = (float *)malloc(size_S);
-    float *VT = (float *)malloc(size_VT);
+    float *V = (float *)malloc(size_VT); //for V not VT
 
     float *U_device = HOST_TO_DEVICE_MALLOC(U, size_U);
     float *S_device = HOST_TO_DEVICE_MALLOC(S, size_S);
-    float *VT_device = HOST_TO_DEVICE_MALLOC(VT, size_VT);
+    float *VT_device = HOST_TO_DEVICE_MALLOC(V, size_VT);
     
     svd(mat_cov_device, Row_A, Col_A, lda,
         U_device, Row_U, Col_U,
@@ -106,17 +107,24 @@ PCA::fit(Array &matrix){
     free(U);
     free(S);
 
-    //6 - hold the VT matrix, then that is all
-
+    //delete mat_cov matrix,
     DEVICE_TO_HOST_FREE(mat_cov, mat_cov_device, size_cov);
     free(mat_cov);
 
+    // get V ,not VT
+    float *V_device;
+    V_device = DEVICE_MALLOC(V_device, size_VT);
+    matrix_transpose_cpu(VT_device,Row_VT, Col_VT,
+                         V_device, Row_V, Col_V);
+    DEVICE_FREE(VT_device);
+    DEVICE_TO_HOST(V, V_device, size_VT);
+
     delete trans_mat;
     trans_mat = new Array{
-                nullptr, VT, VT_device,
-                2, {Row_VT, Col_VT}, std::string(1,'f'),
-                sizeof(float), Row_VT*Col_VT,
-                {sizeof(float)*Col_VT, sizeof(float)}
+                nullptr, V, V_device,
+                2, {Row_V, Col_V}, std::string(1,'f'),
+                sizeof(float), Row_V*Col_V,
+                {sizeof(float)*Col_V, sizeof(float)}
                 }; // need parameter
     
 
@@ -124,8 +132,42 @@ PCA::fit(Array &matrix){
 
 Array &
 PCA::transform(Array &matrix){
+    // first min(m,n) columns of U and V are left and right singular vectors of A
   
     assert(matrix->ptr_buf->ptr_device != nullptr);
+    auto ptr_device = matrix->ptr_buf->ptr_device;
+    size_t Row_mat = matrix->ptr_buf->shape[0];
+    size_t Col_mat = matrix->ptr_buf->shape[1]; 
+    assert(Col_mat == trans_mat->ptr_buf->shape[1]); 
+
+    // step 1: subtract the mean from matrix
+    mean_by_rows_cpu(ptr_device, mean->ptr_buf->ptr_device, Row_mat, Col_mat);
+    // step 2: get n_components col of V
+
+    float * V_device = (float *)trans_mat->prt_buf->ptr_device;
+    size_t Row_src = trans_mat->ptr_buf->shape[0];
+    size_t Col_src = trans_mat->ptr_buf->shape[1];
+
+    size_t size_ans = sizeof(float)*Row_mat*n_components;
+    float *ans = (float *)malloc(size_ans); 
+    float *ans_device = HOST_TO_DEVICE_MALLOC(ans,size_ans);
+    // matrix multiply the V
+
+    matrix_mul_cpu(ptr_device,Row_mat, Col_mat,
+                   V_device, Row_src, n_components,
+                   ans_device, Row_mat, n_components);
+
+
+    DEVICE_TO_HOST(ans, ans_device, size_ans); 
+    // get first n_components columns: [d,n_components]
+    // res = matrix x ans: n*d times d*n_components
+    
+    return new Array{
+            nullptr, ans, ans_device,
+            2, {Row_mat, n_components}, std::string(1,'f'),
+            sizeof(float), Row_mat*n_components,
+            {sizeof(float)*n_components, sizeof(float)}
+            };
     
 }
 
