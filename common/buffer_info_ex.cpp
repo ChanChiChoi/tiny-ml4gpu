@@ -47,7 +47,26 @@ template<typename T> py::array_t<T> &
 Array::cpu(){
     
     assert(this->ptr_buf);
-    auto result = py::array_t<T>(this->ptr_buf)
 
+    void * res = nullptr;
+    if (ptr_buf -> ptr_host){
+        res = ptr_buf->ptr_host
+    }else if{
+        res = ptr_buf->ptr
+    }else{
+        res = nullptr;
+        throw std::runtime_error("current has no data");
+    }
+   
+    auto res =  py::buffer_info(
+                res,
+                ptr_buf->itemsize,
+                ptr_buf->format,
+                ptr_buf->ndim,
+                ptr_buf->shape,
+                ptr_buf->strides
+           );
+
+    return py::array_t<T>{*res};
 
 }

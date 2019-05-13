@@ -56,7 +56,8 @@ PCA::fit(Array &matrix){
     mean_vec = new Array{
                 nullptr,  mean, mean_device,
                 2, {1, Col_VT}, std::string(1,'f'), 
-                sizeof(float), 1*cols
+                sizeof(float), 1*cols,
+                {sizeof(float)*cols,sizeof(float)}
                 }; // need parameter
     
     //TODO: we need keep mean_device
@@ -114,7 +115,8 @@ PCA::fit(Array &matrix){
     trans_mat = new Array{
                 nullptr, VT, VT_device,
                 2, {Row_VT, Col_VT}, std::string(1,'f'),
-                sizeof(float), Row_VT*Col_VT
+                sizeof(float), Row_VT*Col_VT,
+                {sizeof(float)*Col_VT, sizeof(float)}
                 }; // need parameter
     
 
