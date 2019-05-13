@@ -1,52 +1,19 @@
-#include <cuda_runtime.h>
 #include "ML/preprocessing/data.h"
 #include "common/buffer_info_ex.h"
 #include "ML/math/math.h"
 #include "common/type.h"
-
-class PCA{
-
-    Array *trans_mat = NULL;
-    Array *mean_vec = NULL;
-    size_t n_components = 0;
-
-public:
-    PCA (){}
-
-    // only init the n_components;
-    PCA ( size_t n_components):n_components{n_components}{
-        trans_mat = new Array();
-        mean_vec = new Array();
-    }
-
-    // will stat the matrix, then put the transfer matrix into trans_mat
-    PCA & fit(Array &matrix);
-
-    Array & transform(Array &matrix);
-
-    ~PCA(){
-        if (trans_mat){
-            delete trans_mat;
-            trans_mat = NULL;
-        }
-        if (mean_vec){
-            delete mean_vec;
-            mean_vec = NULL;
-        }
-    }
-
-};
-
+#include "ML/decomposition/pca.h"
+#include "common/malloc_free.h"
 
 
 PCA&
 PCA::fit(Array &matrix){
 
-    float * ptr_device = (float *)matrix.ptr_device;
+    float * ptr_device = (float *)(matrix.ptr_buf->ptr_device);
 
     //1 - substract the mean by sample
-    size_t rows = matrix.shape[0];
-    size_t cols = matrix.shape[1];
+    size_t rows = matrix.ptr_buf->shape[0];
+    size_t cols = matrix.ptr_buf->shape[1];
     size_t size_mean = sizeof(float)*cols;
 
     float *mean = (float *)malloc(size_mean);
@@ -55,7 +22,7 @@ PCA::fit(Array &matrix){
     delete mean_vec;
     mean_vec = new Array{
                 nullptr,  mean, mean_device,
-                2, {1, Col_VT}, std::string(1,'f'), 
+                2, {1, cols}, std::string(1,'f'), 
                 sizeof(float), 1*cols,
                 {sizeof(float)*cols,sizeof(float)}
                 }; // need parameter
@@ -130,26 +97,26 @@ PCA::fit(Array &matrix){
 
 }
 
-Array &
+Array 
 PCA::transform(Array &matrix){
     // first min(m,n) columns of U and V are left and right singular vectors of A
   
-    assert(matrix->ptr_buf->ptr_device != nullptr);
-    auto ptr_device = matrix->ptr_buf->ptr_device;
-    size_t Row_mat = matrix->ptr_buf->shape[0];
-    size_t Col_mat = matrix->ptr_buf->shape[1]; 
+    assert(matrix.ptr_buf->ptr_device != nullptr);
+    auto ptr_device = matrix.ptr_buf->ptr_device;
+    size_t Row_mat = matrix.ptr_buf->shape[0];
+    size_t Col_mat = matrix.ptr_buf->shape[1]; 
     assert(Col_mat == trans_mat->ptr_buf->shape[1]); 
 
     // step 1: subtract the mean from matrix
-    mean_by_rows_cpu(ptr_device, mean->ptr_buf->ptr_device, Row_mat, Col_mat);
+    mean_by_rows_cpu((float *)ptr_device, (float *)(mean_vec->ptr_buf->ptr_device), Row_mat, Col_mat);
     // step 2: get n_components col of V
 
-    float * V_device = (float *)trans_mat->prt_buf->ptr_device;
+    float * V_device = (float *)(trans_mat->ptr_buf->ptr_device);
     size_t Row_V = trans_mat->ptr_buf->shape[0];
     size_t Col_V = trans_mat->ptr_buf->shape[1];
 
     // malloc for result
-    size_t Row_ans = Row_mat, Col_mat = n_components;
+    size_t Row_ans = Row_mat, Col_ans = n_components;
     size_t size_ans = sizeof(float)*Row_ans*Col_ans;
     float *ans = (float *)malloc(size_ans); 
     float *ans_device = HOST_TO_DEVICE_MALLOC(ans,size_ans);
@@ -168,6 +135,7 @@ PCA::transform(Array &matrix){
     matrix_mul_cpu(ptr_device,Row_mat, Col_mat,
                    tmp_device, Row_tmp, Col_tmp,
                    ans_device, Row_ans, Col_ans);
+
     DEVICE_FREE(tmp_device);
 
     DEVICE_TO_HOST(ans, ans_device, size_ans); 
