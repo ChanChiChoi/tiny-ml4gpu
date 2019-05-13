@@ -54,12 +54,10 @@ PCA::fit(Array &matrix){
 
     delete mean_vec;
     mean_vec = new Array{
-               size_t(1),
-               cols,
-               std::string(1,'f')
-               }; //need parameter
-    mean_vec->ptr_buf->ptr_host = mean;
-    mean_vec->ptr_buf->ptr_device = mean_device;
+                nullptr,  mean, mean_device,
+                2, {1, Col_VT}, std::string(1,'f'), 
+                sizeof(float), 1*cols
+                }; // need parameter
     
     //TODO: we need keep mean_device
     mean_by_rows_cpu(ptr_device, mean_device, rows, cols);
@@ -114,19 +112,19 @@ PCA::fit(Array &matrix){
 
     delete trans_mat;
     trans_mat = new Array{
-                Row_VT,
-                Col_VT,
-                std::string(1,'f')
+                nullptr, VT, VT_device,
+                2, {Row_VT, Col_VT}, std::string(1,'f'),
+                sizeof(float), Row_VT*Col_VT
                 }; // need parameter
-    trans_mat->ptr_buf->ptr_host = (void *)VT;
-    trans_mat->ptr_buf->ptr_device = (void *)VT_device;
     
 
 }
 
 Array &
 PCA::transform(Array &matrix){
-
+  
+    assert(matrix->ptr_buf->ptr_device != nullptr);
+    
 }
 
 /* from ml4gpu import Array,PCA
