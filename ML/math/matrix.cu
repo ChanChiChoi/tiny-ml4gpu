@@ -204,11 +204,11 @@ matrix_divide_scalar_cpu(float *mat, u32 Row, u32 Col, u32 scalar){
 }
 
 void
-matrix_subblock_cpu(T *big, u32 Row_big, u32 Col_big,
-                T *small, u32 Row_sm, u32 Col_sm,
+matrix_subblock_cpu(float *big, u32 Row_big, u32 Col_big,
+                float *small, u32 Row_sm, u32 Col_sm,
                 u32 rmin, u32 cmin, u32 rmax, u32 cmax){
 
-    matrix_subblock_launch(big, Row_big, Col_big,
+    matrix_subblock_launch<float>(big, Row_big, Col_big,
                            small, Row_sm, Col_sm,
                            rmin, cmin, rmax, cmax);
 }
