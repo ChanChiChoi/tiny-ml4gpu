@@ -18,7 +18,7 @@ public:
     // will stat the matrix, then put the transfer matrix into trans_mat
     PCA & fit(Array &matrix);
 
-    Array  transform(Array &matrix);
+    Array * transform(Array &matrix);
 
     ~PCA(){
         if (trans_mat){

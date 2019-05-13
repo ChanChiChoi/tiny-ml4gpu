@@ -22,9 +22,9 @@ PCA::fit(Array &matrix){
     delete mean_vec;
     mean_vec = new Array{
                 nullptr,  mean, mean_device,
-                2, {1, cols}, std::string(1,'f'), 
-                sizeof(float), 1*cols,
-                {sizeof(float)*cols,sizeof(float)}
+                2, {1, ssize_t(cols)}, std::string(1,'f'), 
+                ssize_t(sizeof(float)), ssize_t(1*cols),
+                {ssize_t(sizeof(float)*cols),ssize_t(sizeof(float))}
                 }; // need parameter
     
     //TODO: we need keep mean_device
@@ -89,20 +89,20 @@ PCA::fit(Array &matrix){
     delete trans_mat;
     trans_mat = new Array{
                 nullptr, V, V_device,
-                2, {Row_V, Col_V}, std::string(1,'f'),
-                sizeof(float), Row_V*Col_V,
-                {sizeof(float)*Col_V, sizeof(float)}
+                2, {ssize_t(Row_V), ssize_t(Col_V)}, std::string(1,'f'),
+                ssize_t(sizeof(float)), ssize_t(Row_V*Col_V),
+                {ssize_t(sizeof(float)*Col_V), ssize_t(sizeof(float))}
                 }; // need parameter
     
 
 }
 
-Array 
+Array *
 PCA::transform(Array &matrix){
     // first min(m,n) columns of U and V are left and right singular vectors of A
   
     assert(matrix.ptr_buf->ptr_device != nullptr);
-    auto ptr_device = matrix.ptr_buf->ptr_device;
+    float * ptr_device = (float *)matrix.ptr_buf->ptr_device;
     size_t Row_mat = matrix.ptr_buf->shape[0];
     size_t Col_mat = matrix.ptr_buf->shape[1]; 
     assert(Col_mat == trans_mat->ptr_buf->shape[1]); 
@@ -144,9 +144,9 @@ PCA::transform(Array &matrix){
     
     return new Array{
             nullptr, ans, ans_device,
-            2, {Row_ans, Col_ans}, std::string(1,'f'),
-            sizeof(float), Row_ans*Col_ans,
-            {sizeof(float)*Col_ans, sizeof(float)}
+            2, {ssize_t(Row_ans), ssize_t(Col_ans)}, std::string(1,'f'),
+            ssize_t(sizeof(float)), ssize_t(Row_ans*Col_ans),
+            {ssize_t(sizeof(float)*Col_ans), ssize_t(sizeof(float))}
             };
     
 }
