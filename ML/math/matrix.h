@@ -11,5 +11,12 @@ matrix_mul_cpu(float *Md, u32 Row_Md, u32 Col_Md,
                float *Pd, u32 Row_Pd, u32 Col_Pd);
 
 void
+matrix_divide_scalar_cpu(float *mat, u32 Row, u32 Col, u32 scalar);
+
+void
+matrix_transpose_cpu(float *mat_src, u32 Row_src, u32 Col_src,
+                     float * mat_dst, u32 Row_dst, u32 Col_dst);
+
+void
 cov_cpu(float *mat, u32 Row_mat, u32 Col_mat,
         float *mat_cov, u32 Row_mat_cov, u32 Col_mat_cov);
