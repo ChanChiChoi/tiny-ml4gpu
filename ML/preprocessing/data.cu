@@ -62,6 +62,11 @@ mean_by_rows_launch(float *mat_device, float *mean_device, u32 rows, u32 cols){
     zero_mean_by_rows<float><<<grid1,block1>>>(mat_device, mean_device, rows, cols);
 }
 
+void
+mean_by_rows_cpu(float *mat_device, float *mean_device, u32 rows, u32 cols){
+
+    mean_by_rows_launch(mat_device, mean_device, rows, cols);
+}
 
 /*
 int
