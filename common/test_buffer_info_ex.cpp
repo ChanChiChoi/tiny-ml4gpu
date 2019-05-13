@@ -16,6 +16,13 @@ main(){
 
    printf("shape rows:%d\n",ptr->ptr_buf->shape[0]);
 
+  Array *ptr1 = new Array{
+       nullptr,nullptr,nullptr,
+       2,{3,4},std::string(1,'f'),32,12
+   };
+
+   printf("shape rows:%d\n",ptr1->ptr_buf->shape[0]);
+  
 
   return 0;
 }

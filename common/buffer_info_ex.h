@@ -58,6 +58,21 @@ public:
         ptr_buf->format = std::move(format);
     }
 
+   Array(void *ptr, void *ptr_host, void *ptr_device, 
+         const ssize_t ndim, const std::vector<ssize_t> shape, const std::string &format,
+         const ssize_t itemsize, const ssize_t size){
+        ptr_buf = new Buf();
+        ptr_buf->ptr = ptr;
+        ptr_buf->ptr_host = ptr_host;
+        ptr_buf->ptr_device = ptr_device;
+        ptr_buf->ndim = ndim;
+        ptr_buf->shape = std::move(shape);
+        ptr_buf->format = std::move(format);
+        ptr_buf->itemsize = itemsize;
+        ptr_buf->size = size;
+
+    }
+
     Array(py::array_t<float> &array){
         auto array_info = array.request();
 
