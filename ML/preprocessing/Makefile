@@ -20,7 +20,7 @@ obj := libml4gpu_ml_preprocess.so
 all: $(obj)
 	
 $(obj):  data.cu
-	$(NVCC) $^ $(NVCCFLAG) $(INCLUDE)  -o ${libres}/$@ -L${libinc} -lmalloc_free -lbuffer_info_ex 
+	$(NVCC) $^ $(NVCCFLAG) $(INCLUDE)  -o ${libres}/$@ -L${libinc} -lml4gpu_com_mf -lml4gpu_com_bufex
 	 
 
 clean_sotmp := ${obj} 
