@@ -29,7 +29,12 @@ comma := ,
 empty := 
 space := $(empty) $(empty)
 clean_so := $(subst $(space),$(comma),${clean_sotmp})
-$(info ${clean_sotmp})
+
+ifneq (1,$(words ${clean_sotmp}))
+	clean_so := {$(clean_so)}
+endif
+
+$(info ${clean_so})
 
 clean:
-	-rm -f ${libres}/{${clean_so}}
+	-rm -f ${libres}/${clean_so}

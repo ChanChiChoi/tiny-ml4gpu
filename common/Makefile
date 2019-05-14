@@ -37,5 +37,9 @@ empty :=
 space := $(empty) $(empty)
 clean_so := $(subst $(space),$(comma),${clean_sotmp})
 
+ifneq (1,$(words ${clean_sotmp}))
+	clean_so := {$(clean_so)}
+endif
+
 clean:
-	rm -f ${lib}/{${clean_so}}
+	rm -f ${lib}/${clean_so}
