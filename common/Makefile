@@ -1,4 +1,4 @@
-rootpath := $(shell dirname $(shell pwd))
+ROOTPATH ?= $(shell dirname $(shell pwd))
 suf := $(shell echo `python3-config --extension-suffix`)
 obj = Array$(suf)
 
