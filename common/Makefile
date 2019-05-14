@@ -1,24 +1,34 @@
-ROOTPATH ?= $(shell dirname $(shell pwd))
-suf := $(shell echo `python3-config --extension-suffix`)
-obj = Array$(suf)
+curdir := ${CURDIR}
+rootpath := ${curdir}/..
 
-CC = g++
-NVCC = nvcc
-CFLAG = -shared -fPIC -std=c++11
-NVCCFLAG = -shared -Xcompiler -fPIC -std=c++11
-INCLUDE_PY = $(shell echo `cd ../pybind11 && python3 -m pybind11 --includes`)
+suf := $(shell echo `python3-config --extension-suffix`)
+obj := Array$(suf)
+
+CC := g++
+NVCC := nvcc
+CFLAG := -shared -fPIC -std=c++11
+NVCCFLAG := -shared -Xcompiler -fPIC -std=c++11
+INCLUDE_PY := $(shell echo `cd ${rootpath}/pybind11 && python3 -m pybind11 --includes`)
+
+INCLUDE_DIR := ${rootpath} ${rootpath}/pybind11/include  
+INCLUDE := $(patsubst %,-I%,${INCLUDE_DIR})
+INCLUDE += ${INCLUDE_PY}
+
+lib := ${curdir}/../ML/lib
 
 $(info $(INCLUDE_PY))
 
 all: $(obj)
 	
-$(obj): libbuffer_info_ex.so
-	$(CC) pybind11.cpp $(CFLAG) $(INCLUDE_PY) -I../ -I../pybind11/include -o $@ -L. -lmalloc_free -lbuffer_info_ex 
-
+$(obj): pybind11.cpp libbuffer_info_ex.so libmalloc_free.so
+	$(CC) $< $(CFLAG) $(INCLUDE)  -o ${lib}/$@ -L${lib} -lmalloc_free -lbuffer_info_ex 
 	 
+libbuffer_info_ex.so: buffer_info_ex.cpp libmalloc_free.so
+	$(CC) $< $(CFLAG) $(INCLUDE)  -o ${lib}/$@ -L${lib} -lmalloc_free
 
-libbuffer_info_ex.so: libmalloc_free.so
-	$(CC) buffer_info_ex.cpp $(CFLAG) $(INCLUDE_PY) -I../ -I../pybind11/include -o $@ -L. -lmalloc_free
+libmalloc_free.so: malloc_free.cu
+	$(NVCC) $< $(NVCCFLAG) ${INCLUDE} -o ${lib}/$@
 
-libmalloc_free.so:
-	$(NVCC) malloc_free.cu $(NVCCFLAG) -I../ -o $@
+
+clean:
+	rm -f ${lib}/{libmalloc_free.so,libbuffer_info_ex.so}
