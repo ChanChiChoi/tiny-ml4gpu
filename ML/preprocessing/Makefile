@@ -15,7 +15,7 @@ INCLUDE += ${INCLUDE_PY}
 libinc := ${rootpath}/lib
 libres := ${rootpath}/ML/lib
 
-obj := libml4gpu_preprocess.so
+obj := libml4gpu_ml_preprocess.so
 
 all: $(obj)
 	

@@ -20,17 +20,17 @@ $(info $(INCLUDE_PY))
 
 all: $(obj)
 	
-$(obj): pybind11.cpp libbuffer_info_ex.so libmalloc_free.so
-	$(CC) $< $(CFLAG) $(INCLUDE)  -o ${lib}/$@ -L${lib} -lmalloc_free -lbuffer_info_ex 
+$(obj): pybind11.cpp libml4gpu_com_bufex.so libml4gpu_com_mf.so
+	$(CC) $< $(CFLAG) $(INCLUDE)  -o ${lib}/$@ -L${lib} -lml4gpu_com_bufex -lml4gpu_com_mf 
 	 
-libbuffer_info_ex.so: buffer_info_ex.cpp libmalloc_free.so
-	$(CC) $< $(CFLAG) $(INCLUDE)  -o ${lib}/$@ -L${lib} -lmalloc_free
+libml4gpu_com_bufex.so: buffer_info_ex.cpp libml4gpu_com_mf.so
+	$(CC) $< $(CFLAG) $(INCLUDE)  -o ${lib}/$@ -L${lib} -lml4gpu_com_mf
 
-libmalloc_free.so: malloc_free.cu
+libml4gpu_com_mf.so: malloc_free.cu
 	$(NVCC) $< $(NVCCFLAG) ${INCLUDE} -o ${lib}/$@
 
 
-clean_sotmp := ${obj} libmalloc_free.so libbuffer_info_ex.so
+clean_sotmp := ${obj} libml4gpu_com_mf.so libml4gpu_com_bufex.so
 clean_sotmp := $(strip ${clean_sotmp})
 comma := ,
 empty := 
