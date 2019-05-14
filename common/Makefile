@@ -14,7 +14,7 @@ INCLUDE_DIR := ${rootpath} ${rootpath}/pybind11/include
 INCLUDE := $(patsubst %,-I%,${INCLUDE_DIR})
 INCLUDE += ${INCLUDE_PY}
 
-lib := ${curdir}/../ML/lib
+lib := ${rootpath}/lib
 
 $(info $(INCLUDE_PY))
 
@@ -30,5 +30,11 @@ libmalloc_free.so: malloc_free.cu
 	$(NVCC) $< $(NVCCFLAG) ${INCLUDE} -o ${lib}/$@
 
 
+clean_sotmp := ${obj} libmalloc_free.so libbuffer_info_ex.so
+comma := ,
+empty := 
+space := $(empty) $(empty)
+clean_so := $(subst $(space),$(comma),${clean_sotmp})
+
 clean:
-	rm -f ${lib}/{libmalloc_free.so,libbuffer_info_ex.so}
+	rm -f ${lib}/{${clean_so}}
