@@ -1,4 +1,4 @@
-
+rootpath := $(shell dirname $(shell pwd))
 suf := $(shell echo `python3-config --extension-suffix`)
 obj = Array$(suf)
 
@@ -12,13 +12,12 @@ $(info $(INCLUDE_PY))
 
 all: $(obj)
 	
-
 $(obj): libbuffer_info_ex.so
 	$(CC) pybind11.cpp $(CFLAG) $(INCLUDE_PY) -I../ -I../pybind11/include -o $@ -L. -lmalloc_free -lbuffer_info_ex 
 
 	 
 
-libbuffer_info_ex.so:libmalloc_free.so
+libbuffer_info_ex.so: libmalloc_free.so
 	$(CC) buffer_info_ex.cpp $(CFLAG) $(INCLUDE_PY) -I../ -I../pybind11/include -o $@ -L. -lmalloc_free
 
 libmalloc_free.so:
