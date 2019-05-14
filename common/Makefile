@@ -31,6 +31,7 @@ libmalloc_free.so: malloc_free.cu
 
 
 clean_sotmp := ${obj} libmalloc_free.so libbuffer_info_ex.so
+clean_sotmp := $(strip ${clean_sotmp})
 comma := ,
 empty := 
 space := $(empty) $(empty)
