@@ -1,5 +1,5 @@
 /*
-g++ test_buffer_info_ex.cpp -I../pybind11/include -I../ `cd ../pybind11 &&  python3 -m pybind11 --includes` -std=c++11
+g++ test_buffer_info_ex.cpp -I../../pybind11/include -I../../ `cd ../../pybind11 &&  python3 -m pybind11 --includes` -std=c++11
 */
 #include <string>
 #include <stdio.h>
@@ -22,7 +22,7 @@ main(){
    };
 
    printf("shape rows:%d\n",ptr1->ptr_buf->shape[0]);
-   ptr1->cpu();
+//   ptr1->cpu();
   
 
   return 0;
