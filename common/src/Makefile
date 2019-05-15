@@ -2,6 +2,7 @@ curdir := ${CURDIR}
 rootpath := ${curdir}/../..
 commonpath := ${curdir}/..
 
+
 suf := $(shell echo `python3-config --extension-suffix`)
 obj := Array$(suf)
 
