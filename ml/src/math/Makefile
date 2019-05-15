@@ -22,7 +22,7 @@ obj := libm4g_ml_math.so
 all: $(obj)
 	
 $(obj):  matrix.cu svd.cu
-	$(NVCC) $^ $(NVCCFLAG) $(INCLUDE_SELF)  -o ${libres}/$@ 
+	$(NVCC) $^ $(NVCCFLAG) $(INCLUDE_SELF)  -o $@ 
 	 
 
 clean_sotmp := ${obj} 
@@ -39,7 +39,7 @@ endif
 $(info ${clean_so})
 
 install:
-	mv 
+	mv *.so ${libres}
 
 clean:
 	rm -f *.o
