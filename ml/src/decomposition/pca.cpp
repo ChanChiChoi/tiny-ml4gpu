@@ -1,9 +1,9 @@
-#include "common/type.h"
-#include "common/malloc_free.h"
-#include "common/buffer_info_ex.h"
-#include "ML/math/math.h"
-#include "ML/decomposition/pca.h"
-#include "ML/preprocessing/data.h"
+#include "common/include/type.h"
+#include "common/include/malloc_free.h"
+#include "common/include/buffer_info_ex.h"
+#include "ml/include/math/math.h"
+#include "ml/include/decomposition/pca.h"
+#include "ml/include/preprocessing/data.h"
 
 
 PCA&
