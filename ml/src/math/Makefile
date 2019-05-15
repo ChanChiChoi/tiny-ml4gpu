@@ -1,26 +1,28 @@
 curdir := ${CURDIR}
-rootpath := ${curdir}/../..
-
+rootpath := ${curdir}/../../..
+mlpath := ${rootpath}/ml
 
 CC := g++
 NVCC := nvcc
-CFLAG := -shared -fPIC -std=c++11
+CXXFLAG := -c -fPIC -std=c++11
+CLDLAG := -shared -fPIC -std=c++11
 NVCCFLAG := -shared -Xcompiler -fPIC -std=c++11
 INCLUDE_PY := $(shell echo `cd ${rootpath}/pybind11 && python3 -m pybind11 --includes`)
 
 INCLUDE_DIR := ${rootpath} ${rootpath}/pybind11/include  
+INCLUDE_SELF := -I${rootpath}
 INCLUDE := $(patsubst %,-I%,${INCLUDE_DIR})
 INCLUDE += ${INCLUDE_PY}
 
-libinc := ${rootpath}/lib
-libres := ${rootpath}/ML/lib
+libinc := ${rootpath}/common/lib
+libres := ${rootpath}/ml/lib
 
-obj := libml4gpu_ml_math.so
+obj := libm4g_ml_math.so
 
 all: $(obj)
 	
 $(obj):  matrix.cu svd.cu
-	$(NVCC) $^ $(NVCCFLAG) $(INCLUDE)  -o ${libres}/$@ -L${libinc} -lml4gpu_com_mf -lml4gpu_com_bufex 
+	$(NVCC) $^ $(NVCCFLAG) $(INCLUDE_SELF)  -o ${libres}/$@ 
 	 
 
 clean_sotmp := ${obj} 
@@ -36,5 +38,10 @@ endif
 
 $(info ${clean_so})
 
+install:
+	mv 
+
 clean:
+	rm -f *.o
+	rm -f ${clean_so}
 	-rm -f ${libres}/${clean_so}
