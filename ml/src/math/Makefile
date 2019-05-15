@@ -5,7 +5,7 @@ mlpath := ${rootpath}/ml
 CC := g++
 NVCC := nvcc
 CXXFLAG := -c -fPIC -std=c++11
-CLDLAG := -shared -fPIC -std=c++11
+CLDFLAG := -shared -fPIC -std=c++11
 NVCCFLAG := -shared -Xcompiler -fPIC -std=c++11
 INCLUDE_PY := $(shell echo `cd ${rootpath}/pybind11 && python3 -m pybind11 --includes`)
 
