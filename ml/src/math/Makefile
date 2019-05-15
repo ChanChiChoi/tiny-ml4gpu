@@ -14,8 +14,8 @@ INCLUDE_SELF := -I${rootpath}
 INCLUDE := $(patsubst %,-I%,${INCLUDE_DIR})
 INCLUDE += ${INCLUDE_PY}
 
-libinc := ${rootpath}/common/lib
-libres := ${rootpath}/ml/lib
+libcommon := ${rootpath}/common/lib
+libml := ${rootpath}/ml/lib
 
 obj := libm4g_ml_math.so
 
@@ -39,9 +39,9 @@ endif
 $(info ${clean_so})
 
 install:
-	mv *.so ${libres}
+	mv *.so ${libml}
 
 clean:
 	rm -f *.o
 	rm -f ${clean_so}
-	-rm -f ${libres}/${clean_so}
+	-rm -f ${libml}/${clean_so}

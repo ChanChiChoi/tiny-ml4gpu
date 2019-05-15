@@ -2,6 +2,7 @@ curdir := ${CURDIR}
 rootpath := ${curdir}/../../..
 mlpath := ${rootpath}/ml
 
+suf := $(shell echo `python3-config --extension-suffix`)
 
 CC := g++
 NVCC := nvcc
@@ -18,12 +19,22 @@ INCLUDE += ${INCLUDE_PY}
 libcommon := ${rootpath}/common/lib
 libml := ${rootpath}/ml/lib
 
-obj := libm4g_ml_preprocess.so
+LDFLAGS_DIR := ${libcommon} ${libml}
+LDFLAGS := $(patsubst %,-L%,${LDFLAGS_DIR})
 
-all: $(obj)
+LDLIBS_DIR := m4g_com_cuMF m4g_ml_math m4g_ml_preprocess
+LDLIBS := $(patsubst %,-l%,${LDLIBS_DIR})
+
+obj := PCA${suf}
+
+all:  $(obj)
 	
-$(obj):  data.cu
-	$(NVCC) $^ $(NVCCFLAG) $(INCLUDE_SELF)  -o $@ 
+
+${obj}: pybind11.cpp pca.o
+	$(CC) $^ ${libcommon}/buffer_info_ex.o ${CLDFLAG} ${INCLUDE} -o $@ ${LDFLAGS} ${LDLIBS}
+
+pca.o:  pca.cpp 
+	$(CC) $^ $(CXXFLAG) $(INCLUDE)  -o $@ 
 	 
 
 clean_sotmp := ${obj} 
