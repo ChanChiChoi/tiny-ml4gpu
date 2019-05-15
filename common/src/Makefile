@@ -2,17 +2,18 @@ curdir := ${CURDIR}
 rootpath := ${curdir}/../..
 commonpath := ${curdir}/..
 
-
 suf := $(shell echo `python3-config --extension-suffix`)
 obj := Array$(suf)
 
 CC := g++
 NVCC := nvcc
-CFLAG := -shared -fPIC -std=c++11
+CXXFLAG := -c  -fPIC -std=c++11
+CLDFLAG :=  -shared -fPIC -std=c++11
 NVCCFLAG := -shared -Xcompiler -fPIC -std=c++11
 INCLUDE_PY := $(shell echo `cd ${rootpath}/pybind11 && python3 -m pybind11 --includes`)
 
 INCLUDE_DIR := ${rootpath} ${rootpath}/pybind11/include  
+INCLUDE_SELF := -I${rootpath}
 INCLUDE := $(patsubst %,-I%,${INCLUDE_DIR})
 INCLUDE += ${INCLUDE_PY}
 
@@ -20,19 +21,19 @@ lib := ${commonpath}/lib
 
 $(info $(INCLUDE_PY))
 
-all: $(obj)
+all:  libm4g_com_cuMF.so ${obj}
 	
-$(obj): pybind11.cpp libml4gpu_com_bufex.so libml4gpu_com_mf.so
-	$(CC) $< $(CFLAG) $(INCLUDE)  -o $@ -L. -lml4gpu_com_bufex -lml4gpu_com_mf 
+$(obj): buffer_info_ex.o pybind11.cpp
+	$(CC) $^ ${CLDFLAG} $(INCLUDE)  -o $@ -L. -lm4g_com_cuMF 
 	 
-libml4gpu_com_bufex.so: buffer_info_ex.cpp libml4gpu_com_mf.so
-	$(CC) $< $(CFLAG) $(INCLUDE)  -o $@ -L. -lml4gpu_com_mf
+buffer_info_ex.o: buffer_info_ex.cpp
+	$(CC) $< $(CXXFLAG) $(INCLUDE)  -o $@ 
 
-libml4gpu_com_mf.so: malloc_free.cu
-	$(NVCC) $< $(NVCCFLAG) ${INCLUDE} -o $@
+libm4g_com_cuMF.so: malloc_free.cu
+	$(NVCC) $< $(NVCCFLAG) ${INCLUDE_SELF} -o $@
 
 
-clean_sotmp := ${obj} libml4gpu_com_mf.so libml4gpu_com_bufex.so
+clean_sotmp := ${obj} libm4g_com_cuMF.so 
 clean_sotmp := $(strip ${clean_sotmp})
 comma := ,
 empty := 
@@ -48,4 +49,6 @@ install:
 	mv *.so ${lib}
 
 clean:
+	rm -f *.o
+	rm -f ${clean_so}
 	rm -f ${lib}/${clean_so}
