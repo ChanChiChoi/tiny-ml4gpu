@@ -17,13 +17,24 @@ INCLUDE += ${INCLUDE_PY}
 libcommon := ${rootpath}/common/lib
 libml := ${rootpath}/ml/lib
 
+LDFLAGS_DIR := /usr/local/cuda/lib64
+LDFLAGS := $(patsubst %,-I%,${LDFLAGS_DIR})
+
+LDLIBS_ITEMS := cudart cublas cusolver
+LDLIBS := $(patsubst %,-l%,${LDLIBS_ITEMS})
+
 obj := libm4g_ml_math.so
 
 all: $(obj)
 	
-$(obj):  matrix.cu svd.cu
-	$(NVCC) $^ $(NVCCFLAG) $(INCLUDE_SELF)  -o $@ 
+$(obj):  matrix.o svd.o 
+	$(NVCC) $^ $(NVCCFLAG) $(INCLUDE_SELF)  -o $@ ${LDFLAGS} ${LDLIBS}
 	 
+matrix.o:matrix.cu
+	$(NVCC) $^ $(NVCCFLAG) $(INCLUDE_SELF)  -o $@
+
+svd.o:svd.cu
+	$(NVCC) $^ $(NVCCFLAG) $(INCLUDE_SELF)  -o $@
 
 clean_sotmp := ${obj} 
 clean_sotmp := $(strip $(clean_sotmp))
