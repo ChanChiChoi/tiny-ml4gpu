@@ -47,6 +47,7 @@ endif
 
 install:
 	mv *.so ${lib}
+	mv *.o ${lib}
 
 clean:
 	rm -f *.o
