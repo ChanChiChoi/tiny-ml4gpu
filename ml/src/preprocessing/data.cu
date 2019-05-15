@@ -1,8 +1,8 @@
 #include <cmath>
 #include <stdio.h>
 #include <cuda_runtime.h>
-#include "common/type.h"
-#include "common/common.h"
+#include "common/include/type.h"
+#include "common/include/common.h"
 
 
 // calc the mean by row dimension
