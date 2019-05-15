@@ -28,13 +28,13 @@ obj := libm4g_ml_math.so
 all: $(obj)
 	
 $(obj):  matrix.o svd.o 
-	$(NVCC) $^ $(NVCCFLAG) $(INCLUDE_SELF)  -o $@ ${LDFLAGS} ${LDLIBS}
+	$(NVCC)  $^ $(NVCCFLAG) $(INCLUDE_SELF)  -o $@ ${LDFLAGS} ${LDLIBS}
 	 
-matrix.o:matrix.cu
-	$(NVCC) $^ $(NVCCFLAG) $(INCLUDE_SELF)  -o $@
+matrix.o: matrix.cu
+	$(NVCC)  $^  -c $(NVCCFLAG) $(INCLUDE_SELF)  -o $@
 
 svd.o:svd.cu
-	$(NVCC) $^ $(NVCCFLAG) $(INCLUDE_SELF)  -o $@
+	$(NVCC) $^ -c $(NVCCFLAG) $(INCLUDE_SELF)  -o $@
 
 clean_sotmp := ${obj} 
 clean_sotmp := $(strip $(clean_sotmp))
