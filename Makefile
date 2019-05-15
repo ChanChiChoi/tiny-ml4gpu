@@ -1,18 +1,19 @@
 
-all: ml_math ml_pre common_so
+all: common_mk ml_mk
 
-ml_math: common_so
-	$(MAKE) -C ML/math
+ml_mk: common_mk
+	$(MAKE) -C ml
 
-ml_pre: common_so
-	$(MAKE) -C ML/preprocessing
-
-common_so:
+common_mk:
 	$(MAKE) -C common
 
+
+.PHONY: install
+install:
+	${MAKE} install -C common
+	${MAKE} clean -C ml
 
 .PHONY: clean
 clean:
 	${MAKE} clean -C common 
-	${MAKE} clean -C ML/math
-	${MAKE} clean -C ML/preprocessing
+	${MAKE} clean -C ml
