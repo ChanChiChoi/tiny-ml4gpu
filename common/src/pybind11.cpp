@@ -4,7 +4,7 @@ g++  pybind11.cpp buffer_info_ex.cpp -shared -std=c++11 -fPIC -I../pybind11/incl
  * */
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
-#include "common/buffer_info_ex.h"
+#include "common/include/buffer_info_ex.h"
 
 namespace py = pybind11;
 

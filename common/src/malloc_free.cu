@@ -1,6 +1,6 @@
 #include <string>
-#include "common/malloc_free.h"
-#include "common/helper.cuh"
+#include "common/include/malloc_free.h"
+#include "common/include/helper.cuh"
 /*
  because nvcc will not Instantiate template onto host side of shared object file,
 so, other host shared object file by g++  can not find function symbols in shared object by nvcc

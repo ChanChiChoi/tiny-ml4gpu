@@ -1,5 +1,5 @@
-#include "common/buffer_info_ex.h"
-#include "common/malloc_free.h"
+#include "common/include/buffer_info_ex.h"
+#include "common/include/malloc_free.h"
 
 Buf& buffer_info_ex::cuda(){
 
