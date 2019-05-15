@@ -7,3 +7,6 @@ src_mk:
 
 install:
 	$(MAKE) install -C src
+
+clean:
+	${MAKE} clean -C src
