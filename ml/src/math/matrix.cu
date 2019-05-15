@@ -1,10 +1,10 @@
 #include <assert.h>
 #include <stdio.h>
 #include <math_functions.hpp>
-#include "common/type.h"
-#include "common/common.h"
-#include "common/malloc_free.h"
-#include <chrono>
+#include "common/include/type.h"
+#include "common/include/common.h"
+#include "common/include/malloc_free.h"
+#include "ml/include/math/matrix.h"
 
 # define TILE_HEIGHT 32
 # define TILE_WIDTH 32

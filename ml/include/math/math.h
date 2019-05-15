@@ -1,5 +1,4 @@
 #pragma once
 
-#include "common/type.h"
-#include "common/ML/math/matrix.h"
-#include "common/ML/math/svd.h"
+#include "ml/include/math/matrix.h"
+#include "ml/include/math/svd.h"

@@ -1,4 +1,5 @@
 #pragma once
+#include "common/include/type.h"
 
 void
 matrix_subblock_cpu(float *big, u32 Row_big, u32 Col_big,

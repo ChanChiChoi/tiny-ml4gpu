@@ -6,8 +6,9 @@
 #include <cublas_v2.h>
 #include <cusolverDn.h>
 
-#include "common/malloc_free.h"
-#include "common/helper.cuh"
+#include "common/include/malloc_free.h"
+#include "common/include/helper.cuh"
+#include "ml/include/math/svd.h"
 
 
 void
