@@ -24,7 +24,7 @@ LDFLAGS := $(patsubst %,-L%,${LDFLAGS_DIR})
 LDFLAGS_EX_DIR := ${libcommon} $(libml)
 LDFLAGS_EX := $(patsubst %,-L%,${LDFLAGS_EX_DIR})
 
-LDLIBS_ITEMS := cudart cublas cusolver cusolver_static gomp
+LDLIBS_ITEMS := cudart cublas cusolver gomp
 LDLIBS := $(patsubst %,-l%,${LDLIBS_ITEMS})
 
 LDLIBS_EX_ITEMS := m4g_com_cuMF m4g_ml_math
@@ -63,7 +63,7 @@ test: test_svd
 
 test_svd:test_svd.cu
 	$(NVCC) $^  $(INCLUDE_SELF) $(LDFLAGS) $(LDFLAGS_EX) $(LDLIBS) $(LDLIBS_EX) -o $@
-	LD_LIBRARY_PATH=$(libcommon):$(libml):$(LD_LIBRARY_PATH) ./$@
+	@echo LD_LIBRARY_PATH=$(libcommon):$(libml):$(LD_LIBRARY_PATH) ./$@
 
 
 
