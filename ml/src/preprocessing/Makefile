@@ -40,7 +40,7 @@ endif
 $(info ${clean_so})
 
 install:
-	mv *.so ${libml}
+	cp *.so ${libml}
 
 clean:
 	rm -f *.o
