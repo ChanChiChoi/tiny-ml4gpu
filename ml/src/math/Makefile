@@ -71,3 +71,4 @@ clean:
 	rm -f *.o
 	rm -f ${clean_so}
 	-rm -f ${libml}/${clean_so}
+	rm -f test_svd
