@@ -9,6 +9,9 @@ Buf& buffer_info_ex::cuda(){
         case 'f':
             ptr_device = (void *)HOST_TO_DEVICE_MALLOC((float *)ptr, bytes_size);
             break;
+        case NULL:
+           printf("current Array obj has no data concent, cannot execute cuda()!\n");
+           break;
         default:
             throw std::runtime_error("current version only support float32!");
             break;
@@ -30,6 +33,9 @@ buffer_info_ex::~buffer_info_ex(){
                 ptr_host = NULL;
             }
             break;
+        case NULL:
+           printf("current Array obj has no data concent, cannot deconstructor!\n");
+           break;
         default:
             throw std::runtime_error("current version only support float32!");
             break;
