@@ -96,4 +96,5 @@ public:
     template<typename T> py::array_t<T>  _cpu(); // transfer ptr->data from GPU into python numpy
 
     py::array_t<float>  cpu();
+    void display();
 };

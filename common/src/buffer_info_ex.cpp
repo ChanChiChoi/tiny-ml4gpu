@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "common/include/buffer_info_ex.h"
 #include "common/include/malloc_free.h"
 
@@ -75,4 +76,15 @@ py::array_t<float>
 Array::cpu(){
 
     return this->_cpu<float>();
+}
+
+void
+Array::display(){
+    printf("ptr id: %ld\n",ptr_buf->ptr);
+    printf("ptr_host id: %d\n",ptr_buf->ptr_host);
+    printf("ptr_device id: %d\n",ptr_buf->ptr_device);
+    printf("ndim: %d\n",ptr_buf->ndim);
+    printf("format: %s\n",ptr_buf->format.c_str());
+    printf("itemsize: %d\n",ptr_buf->itemsize);
+    printf("size: %d\n",ptr_buf->size);
 }
