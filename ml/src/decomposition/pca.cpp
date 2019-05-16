@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "common/include/type.h"
 #include "common/include/malloc_free.h"
 #include "common/include/buffer_info_ex.h"
@@ -10,7 +11,6 @@ PCA&
 PCA::fit(Array &matrix){
 
     float * ptr_device = (float *)(matrix.ptr_buf->ptr_device);
-
     //1 - substract the mean by sample
     size_t rows = matrix.ptr_buf->shape[0];
     size_t cols = matrix.ptr_buf->shape[1];
@@ -93,6 +93,8 @@ PCA::fit(Array &matrix){
                 ssize_t(sizeof(float)), ssize_t(Row_V*Col_V),
                 {ssize_t(sizeof(float)*Col_V), ssize_t(sizeof(float))}
                 }; // need parameter
+
+    return *this;
     
 
 }
