@@ -17,6 +17,7 @@ svd(float *A_device, const int Row_A, const int Col_A, const int lda,
     float *S_device, const int Length,
     float *VT_device, const int Row_VT, const int Col_VT){
 
+  assert(Row_A >= Col_A);
   cusolverDnHandle_t cusolverH = NULL;
   cublasHandle_t cublasH = NULL;
   float *rwork_device = NULL;
@@ -65,6 +66,7 @@ svd(double *A_device, const int Row_A, const int Col_A, const int lda,
     double *S_device, const int Length,
     double *VT_device, const int Row_VT, const int Col_VT){
 
+  assert(Row_A >= Col_A);
   cusolverDnHandle_t cusolverH = NULL;
   cublasHandle_t cublasH = NULL;
   double *rwork_device = NULL;
