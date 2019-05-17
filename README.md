@@ -3,6 +3,9 @@ use cuda to coding the machine learning and deep learning models.
 
 firstly, use cuda to coding the base part, then, use pybind11 to wrapper the .cu into .cpp, so we can use python to import the model .
 
+## Example
+like this, firstly, you should transfer data from cpu host onto gpu device:  
+![](./img/array.png)
 
 TODO:  
 in the future, the ml4gpu project will have three version:  
