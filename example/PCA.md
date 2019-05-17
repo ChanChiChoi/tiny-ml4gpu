@@ -1,4 +1,7 @@
 
+you can use ipython to input this code
+
+```
 from Array import Array
 from PCA import PCA
 import numpy as np
@@ -14,3 +17,4 @@ pca.fit(data)
 res_data = pca.transform(data)
 
 npres = res.data.cpu()
+```
