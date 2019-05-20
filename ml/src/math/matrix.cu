@@ -98,8 +98,8 @@ matrix_transpose(T * mat_src, u32 Row_src, u32 Col_src,
                  T * mat_dst, u32 Row_dst, u32 Col_dst){
 
     assert(Row_src*Col_src == Row_dst*Col_dst);
-    u32 idy = blockIdx.y*gridDim.y + threadIdx.y;
-    u32 idx = blockIdx.x*gridDim.x + threadIdx.x;
+    u32 idy = blockIdx.y*blockDim.y + threadIdx.y;
+    u32 idx = blockIdx.x*blockDim.x + threadIdx.x;
 
     if (idy >= Row_src || idx >= Col_src)
         return ;
@@ -124,8 +124,8 @@ matrix_transpose_launch(T *mat_src, u32 Row_src, u32 Col_src,
 template<typename T>__global__ void
 matrix_divide_scalar(T *mat, u32 Row, u32 Col, u32 scalar){
 
-    u32 idy = blockIdx.y*gridDim.y + threadIdx.y;
-    u32 idx = blockIdx.x*gridDim.x + threadIdx.x;
+    u32 idy = blockIdx.y*blockDim.y + threadIdx.y;
+    u32 idx = blockIdx.x*blockDim.x + threadIdx.x;
 
     if (idy >= Row || idx >= Col)
         return ;
@@ -149,8 +149,8 @@ matrix_subblock(T *big, u32 Row_big, u32 Col_big,
                 T *small, u32 Row_sm, u32 Col_sm,
                 u32 rmin, u32 cmin, u32 rmax, u32 cmax){
     // rmin base on 0.
-    u32 idy = blockIdx.y*gridDim.y + threadIdx.y;
-    u32 idx = blockIdx.x*gridDim.x + threadIdx.x;
+    u32 idy = blockIdx.y*blockDim.y + threadIdx.y;
+    u32 idx = blockIdx.x*blockDim.x + threadIdx.x;
  
     assert(rmax - rmin == Row_sm);
     assert(cmax - cmin == Col_sm);

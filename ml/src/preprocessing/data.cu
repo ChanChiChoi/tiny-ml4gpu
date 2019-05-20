@@ -9,8 +9,8 @@
 template<typename T> __global__ void
 mean_by_rows(T *mat_device, T *mean_vec, u32 rows, u32 cols){
 
-    u32 idy = blockIdx.y*gridDim.y + threadIdx.y;
-    u32 idx = blockIdx.x*gridDim.x + threadIdx.x;
+    u32 idy = blockIdx.y*blockDim.y + threadIdx.y;
+    u32 idx = blockIdx.x*blockDim.x + threadIdx.x;
 
     u32 thread_idx = idy*(gridDim.x*blockIdx.x) + idx;
 
@@ -32,10 +32,13 @@ mean_by_rows(T *mat_device, T *mean_vec, u32 rows, u32 cols){
 template<typename T> __global__ void
 zero_mean_by_rows(T *mat_device, T *mean_vec, u32 rows, u32 cols){
 
-    u32 idy = blockIdx.y*gridDim.y + threadIdx.y;
-    u32 idx = blockIdx.x*gridDim.x + threadIdx.x;
+    u32 idy = blockIdx.y*blockDim.y + threadIdx.y;
+    u32 idx = blockIdx.x*blockDim.x + threadIdx.x;
 
     if(idx < cols && idy < rows){
+        printf(" [%d %d %d %d %d %d] \n",blockIdx.x, blockIdx.y,gridDim.x,gridDim.y,idx, idy);
+//        if(idy==0)
+//            printf("[%d %d %f]\n",idy,idx, mean_vec[idx]);
         u32 val_idx = idy*cols + idx;
         mat_device[val_idx] -= mean_vec[idx];
     }
@@ -46,8 +49,8 @@ zero_mean_by_rows(T *mat_device, T *mean_vec, u32 rows, u32 cols){
 template<typename T> __global__ void
 std_by_rows(T *mat_device, T *mean_vec, T *std_vec, u32 rows, u32 cols){
 
-    u32 idy = blockIdx.y*gridDim.y + threadIdx.y;
-    u32 idx = blockIdx.x*gridDim.x + threadIdx.x;
+    u32 idy = blockIdx.y*blockDim.y + threadIdx.y;
+    u32 idx = blockIdx.x*blockDim.x + threadIdx.x;
 
     u32 thread_idx = idy*(gridDim.x*blockIdx.x) + idx;
     if (thread_idx >= cols)
@@ -72,8 +75,8 @@ std_by_rows(T *mat_device, T *mean_vec, T *std_vec, u32 rows, u32 cols){
 template<typename T> __global__ void
 one_std_by_rows(T *mat_device, T *std_vec, u32 rows, u32 cols){
 
-    u32 idy = blockIdx.y*gridDim.y + threadIdx.y;
-    u32 idx = blockIdx.x*gridDim.x + threadIdx.x;
+    u32 idy = blockIdx.y*blockDim.y + threadIdx.y;
+    u32 idx = blockIdx.x*blockDim.x + threadIdx.x;
 
 
     if(idx < cols && idy < rows){
