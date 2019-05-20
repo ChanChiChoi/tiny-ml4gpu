@@ -36,9 +36,6 @@ zero_mean_by_rows(T *mat_device, T *mean_vec, u32 rows, u32 cols){
     u32 idx = blockIdx.x*blockDim.x + threadIdx.x;
 
     if(idx < cols && idy < rows){
-        printf(" [%d %d %d %d %d %d] \n",blockIdx.x, blockIdx.y,gridDim.x,gridDim.y,idx, idy);
-//        if(idy==0)
-//            printf("[%d %d %f]\n",idy,idx, mean_vec[idx]);
         u32 val_idx = idy*cols + idx;
         mat_device[val_idx] -= mean_vec[idx];
     }
