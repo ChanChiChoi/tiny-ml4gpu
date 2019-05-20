@@ -50,19 +50,18 @@ std_by_rows(T *mat_device, T *mean_vec, T *std_vec, u32 rows, u32 cols){
     u32 idx = blockIdx.x*blockDim.x + threadIdx.x;
 
     u32 thread_idx = idy*(gridDim.x*blockIdx.x) + idx;
+
     if (thread_idx >= cols)
         return ;
     
-    T cur_mean = mean_vec[thread_idx];
     T cur_val;
-    T dif;
-    T std;
+    T std = T(0);
     for (size_t i = 0; i< rows; i++){
         cur_val = mat_device[i*cols+thread_idx];
-        dif = abs(cur_val - cur_mean);
         // in case of std sum is bigger than limits
-        std = std*((float)i/(i+1)) +  dif*dif/(double)(i+1);
+        std = std*((float)i/(i+1)) +  cur_val*cur_val/(double)(i+1);
     }
+
     std_vec[thread_idx] = sqrt(std);
 
 } 

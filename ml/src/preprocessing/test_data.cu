@@ -13,12 +13,8 @@ main(){
     size_t cols = 50;
     size_t size = rows*cols*sizeof(float);
     float *mat = (float *)malloc(size);
-    for(u32 i=0;i<cols;i++)
+    for(u32 i=0;i<cols*rows;i++)
         mat[i] = i;
-
-//    for(u32 i=0; i<20;i++){
-//        printf("val %d %f\n",i,mat[i]);
-//    }
 
     float *mat_device;
     cudaMalloc((void **)&mat_device,size);
@@ -38,7 +34,9 @@ main(){
   
 
   //  auto t0 = high_resolution_clock::now();
-    mean_by_rows_cpu(mat_device,mean_device, rows,cols);
+    //mean_by_rows_cpu(mat_device,mean_device, rows,cols);
+    //cudaDeviceSynchronize();
+
     normalization_by_rows_cpu(mat_device,mean_device,std_device, rows,cols);
     cudaDeviceSynchronize();
   //  auto t1 = high_resolution_clock::now();
