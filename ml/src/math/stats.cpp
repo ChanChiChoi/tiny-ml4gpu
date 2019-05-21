@@ -34,3 +34,26 @@ cov_cpu(float *mat, u32 Row_mat, u32 Col_mat,
     matrix_divide_scalar_cpu(mat_cov, Row_mat_cov, Col_mat_cov, n_1);
 
 }
+
+void
+gram_cpu(float *mat, u32 Row_mat, u32 Col_mat,
+         float *mat_gram, u32 Row_gram, u32 Col_gram ){
+
+    size_t size = sizeof(float)*Row_mat*Col_mat;
+    float *mat_T_device = nullptr;
+    mat_T_device = DEVICE_MALLOC(mat_T_device, size);
+    
+    u32 Row_mat_T = Col_mat;
+    u32 Col_mat_T = Row_mat;
+    matrix_transpose_cpu(mat,Row_mat, Col_mat,
+                  mat_T_device, Row_mat_T, Col_mat_T);
+    
+    matrix_mul_cpu(mat,Row_mat, Col_mat,
+                   mat_T_device, Row_mat_T, Col_mat_T,
+                   mat_gram, Row_gram, Col_gram,2);
+    
+    DEVICE_FREE(mat_T_device);
+    
+    matrix_gaussian_scalar_cpu(mat_gram, Row_gram, Col_gram, 1);
+
+}
