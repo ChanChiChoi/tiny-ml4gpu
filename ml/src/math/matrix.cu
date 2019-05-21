@@ -11,11 +11,26 @@
 
 //template ===
 //matrix_mul
+
+template<typename T> __device__ T
+scalar_multiply(T x, T y){
+   return x*y;
+}
+
+
 template<typename T> __global__ void
 matrix_mul(T * Md, u32 Row_Md, u32 Col_Md,
            T * Nd, u32 Row_Nd, u32 Col_Nd,
-           T * Pd, u32 Row_Pd, u32 Col_Pd){
+           T * Pd, u32 Row_Pd, u32 Col_Pd,
+           T (*fp)(T,T)
+           ){
     
+    /*
+     each thread has two task:
+    1 - fetch data into shared mem;
+    2 - calc the data by steps , then get result of Pd
+
+*/
     // row = height = x;   
     // col = width = y
     assert(Col_Md == Row_Nd);
@@ -32,11 +47,9 @@ matrix_mul(T * Md, u32 Row_Md, u32 Col_Md,
     // current we create the Row,Col in Pd
     u32 Row = by*TILE_HEIGHT + ty;
     u32 Col = bx*TILE_WIDTH + tx;
-    
-    //printf("[bx by tx ty row col][%d %d %d %d %d %d]\n",bx,by,tx,ty,Row,Col);
-    // if current thread is exceed the Pd matrix, then return void
-    if(Row >= Row_Pd ||Col >= Col_Pd)
-        return ;
+
+    // here should not use  "(Row < Row_Pd && Col < Col_Pd)", because we need other thread
+    // to fetch data into shared mem.
 
     T Pvalue = 0;
 
@@ -46,6 +59,7 @@ matrix_mul(T * Md, u32 Row_Md, u32 Col_Md,
         // get the data again and again
         // if cur tx,ty is exceend of Md,Nd, then it should be exit early,
         // so it will not run here
+        printf(" row col:%d %d  %d \n",Row, Col,m );
         const u32 ind_bef_Md = Row*Col_Md;
         const u32 ind_x_Md = m*TILE_WIDTH + tx;
 
@@ -61,19 +75,26 @@ matrix_mul(T * Md, u32 Row_Md, u32 Col_Md,
 
         __syncthreads();
 
-       u32 ind_max_TILE;
-       if ((m+1)*TILE_WIDTH <= Col_Md)
-           ind_max_TILE = TILE_WIDTH;
-       else
-           ind_max_TILE = Col_Md - m*TILE_WIDTH;
-       // calc the point
-       for(u32 k = 0; k < ind_max_TILE; ++k)
-          Pvalue += Mds[ty][k] * Nds[k][tx];
+       // if cur thread' task contain create pd result, it need handle follow code
+       if (Row < Row_Pd && Col < Col_Pd){ 
+
+           u32 ind_max_TILE;
+           if ((m+1)*TILE_WIDTH <= Col_Md)
+               ind_max_TILE = TILE_WIDTH;
+           else
+               ind_max_TILE = Col_Md - m*TILE_WIDTH;
+           // calc the point
+           for(u32 k = 0; k < ind_max_TILE; ++k)
+              Pvalue += Mds[ty][k] * Nds[k][tx];
+              //Pvalue += (*fp)(Mds[ty][k],Nds[k][tx]);
+           }
 
        __syncthreads();
 
    } 
 
+   if(Row >= Row_Pd ||Col >= Col_Pd)
+        return ;
    // put the result into origin location of Pd
    Pd[Row*Col_Pd + Col] = Pvalue;
 }
@@ -89,7 +110,8 @@ matrix_mul_launch(T * Md, u32 Row_Md, u32 Col_Md,
 
     matrix_mul<T><<<grid, block>>>(Md, Row_Md, Col_Md,
            Nd, Row_Nd, Col_Nd,
-           Pd, Row_Pd, Col_Pd);
+           Pd, Row_Pd, Col_Pd,
+           scalar_multiply);
 }
 
 
@@ -241,43 +263,3 @@ cov_cpu(float *mat, u32 Row_mat, u32 Col_mat,
     matrix_divide_scalar_cpu(mat_cov, Row_mat_cov, Col_mat_cov, n_1);
 
 }
-//int
-//main(){
-//
-//   size_t rowm = 1024,colm = 1024;
-//   size_t rown = colm, coln = 1024;
-//   size_t rowp = rowm, colp = coln;
-//   
-//   size_t size = sizeof(float)*rowm*colm;
-//   float *md = (float *)malloc(size);
-//   for(int i=0;i<rowm*colm;i++)
-//     md[i] = i%1000;
-//   float *md_d = host_to_device_malloc(md, size);
-//
-//   size_t size1 = sizeof(float)*rown*coln;
-//   float *nd = (float *)malloc(size1);
-//   for(int i=0;i<rown*coln;i++)
-//      nd[i]=2;
-//   float *nd_d = host_to_device_malloc(nd, size1);
-//   
-//   size_t size2 = sizeof(float)*rowp*colp;
-//   float *pd = (float *)malloc(size2);
-//   float *pd_d = host_to_device_malloc(pd, size2);
-//
-//   auto t1 = high_resolution_clock::now();
-//   matrix_mul_cpu(md_d,rowm,colm,
-//                       nd_d,rown,coln,
-//                       pd_d,rowp,colp);
-//  cudaDeviceSynchronize(); 
-//  auto t2 = high_resolution_clock::now();
-//  printf("take time %d\n",duration_cast<milliseconds>(t2-t1).count());
-//
-//   device_to_host_free(pd,pd_d,size2);
-////   for(int i = 0; i<rowp; i++){
-////      printf("[%d] ",i+1);
-////      for(int j=0;j<colp;j++)
-////          printf("%d ",(int)pd[i*colp+j]);
-////      printf("\n");
-////   }
-//  return 0;
-//}
