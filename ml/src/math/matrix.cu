@@ -14,7 +14,12 @@
 
 template<typename T> __device__ T
 scalar_multiply(T x, T y){
-   return x*y;
+   printf(" [%f %f ] \n",x,y);
+   return (x)*(y);
+}
+__device__ float
+scalar_multiply1(float x, float y){
+  return x*y;
 }
 
 
@@ -67,14 +72,14 @@ matrix_mul(T * Md, u32 Row_Md, u32 Col_Md,
         // if cur x is exceed col of md, then skip
         if (ind_x_Md < Col_Md)
             Mds[ty][tx] = Md[ind_bef_Md + ind_x_Md];
-        else
-           return ;
  
         // if cur y is exceed row of nd, then skip
         if (ind_y_Nd  < Row_Nd)
             Nds[ty][tx] = Nd[ind_y_Nd*Col_Nd + Col];
-        else
-           return ;
+
+        // if cur thread can do nothing, then exit
+        if (ind_x_Md >= Col_Md && ind_y_Nd >= Row_Nd)
+            return ;
 
         __syncthreads();
 
@@ -114,7 +119,7 @@ matrix_mul_launch(T * Md, u32 Row_Md, u32 Col_Md,
     matrix_mul<T><<<grid, block>>>(Md, Row_Md, Col_Md,
            Nd, Row_Nd, Col_Nd,
            Pd, Row_Pd, Col_Pd,
-           scalar_multiply);
+           scalar_multiply1);
 }
 
 
