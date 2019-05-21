@@ -5,7 +5,8 @@
 #include "ml/include/math/math.h"
 #include "ml/include/decomposition/pca.h"
 #include "ml/include/preprocessing/data.h"
-
+#include <chrono>
+using namespace std::chrono;
 
 PCA&
 PCA::fit(Array &matrix){
@@ -38,10 +39,13 @@ PCA::fit(Array &matrix){
     
     float *mat_cov = (float *)malloc(size_cov);
     float *mat_cov_device = HOST_TO_DEVICE_MALLOC(mat_cov, size_cov);
-    
+
+//    auto t0 = high_resolution_clock::now();
     cov_cpu(ptr_device, rows, cols,
             mat_cov_device, rows_cov, cols_cov );
 
+//    auto t1 = high_resolution_clock::now();
+//    printf("con_cpu take time %d milliseconds\n",duration_cast<milliseconds>(t1-t0).count());
     //3 - use svd to calc the eigval and eigvec
     // A = U*S*VT
     ci32 Row_A = rows_cov, Col_A = cols_cov;
@@ -63,11 +67,14 @@ PCA::fit(Array &matrix){
     float *S_device = HOST_TO_DEVICE_MALLOC(S, size_S);
     float *VT_device = HOST_TO_DEVICE_MALLOC(V, size_VT);
     
+//    auto t01 = high_resolution_clock::now();
     svd(mat_cov_device, Row_A, Col_A, lda,
         U_device, Row_U, Col_U,
         S_device, Length,
         VT_device, Row_VT, Col_VT);
 
+//    auto t11 = high_resolution_clock::now();
+//    printf("svd take time %d milliseconds\n",duration_cast<milliseconds>(t11-t01).count());
     // copy U ,S to host then free
     DEVICE_TO_HOST_FREE(U,U_device, size_U);
     DEVICE_TO_HOST_FREE(S,S_device, size_S);
