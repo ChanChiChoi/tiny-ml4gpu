@@ -31,7 +31,7 @@ scalar_divide(T x, T y){
 template<typename T> __device__ T
 scalar_gaussian(T x, T sigma){
   // T should not be int data type, in case of return 0
-  return -x*x/(2*sigma*sigma);
+  return exp(-x*x/(2*sigma*sigma));
    
 }
 
