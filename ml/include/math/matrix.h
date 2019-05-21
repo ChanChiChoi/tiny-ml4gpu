@@ -9,7 +9,8 @@ matrix_subblock_cpu(float *big, u32 Row_big, u32 Col_big,
 void
 matrix_mul_cpu(float *Md, u32 Row_Md, u32 Col_Md,
                float *Nd, u32 Row_Nd, u32 Col_Nd,
-               float *Pd, u32 Row_Pd, u32 Col_Pd);
+               float *Pd, u32 Row_Pd, u32 Col_Pd,
+               const int op);
 
 void
 matrix_divide_scalar_cpu(float *mat, u32 Row, u32 Col, u32 scalar);
