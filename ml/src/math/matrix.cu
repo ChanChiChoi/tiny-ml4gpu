@@ -14,12 +14,30 @@
 
 template<typename T> __device__ T
 scalar_multiply(T x, T y){
-   printf(" [%f %f ] \n",x,y);
-   return (x)*(y);
-}
-__device__ float
-scalar_multiply1(float x, float y){
   return x*y;
+}
+
+template<typename T> __device__ T
+scalar_mse(T x, T y){
+    T tmp = abs(x-y);
+    return tmp*tmp;
+}
+
+template<typename T> __device__ T
+scalar_operation(T x, T y, const int op){
+  /*
+   this function used to be entrance of how to handle two scalar
+   1 - x * y
+   2 - |x-y|^2
+
+  */
+  T ans = T(0);
+  if (op == 1){
+      ans = scalar_multiply<T>(x,y);
+  }else if(op == 2){
+      ans = scalar_mse(x,y); 
+  }
+  return ans;
 }
 
 
@@ -27,7 +45,7 @@ template<typename T> __global__ void
 matrix_mul(T * Md, u32 Row_Md, u32 Col_Md,
            T * Nd, u32 Row_Nd, u32 Col_Nd,
            T * Pd, u32 Row_Pd, u32 Col_Pd,
-           T (*fp)(T,T)
+           const int op = 1
            ){
     
     /*
@@ -92,16 +110,17 @@ matrix_mul(T * Md, u32 Row_Md, u32 Col_Md,
            else
                ind_max_TILE = Col_Md - m*TILE_WIDTH;
            // calc the point
-           for(u32 k = 0; k < ind_max_TILE; ++k)
-              Pvalue += Mds[ty][k] * Nds[k][tx];
-              //Pvalue += (*fp)(Mds[ty][k],Nds[k][tx]);
+           for(u32 k = 0; k < ind_max_TILE; ++k){
+              //Pvalue += Mds[ty][k] * Nds[k][tx];
+              Pvalue += scalar_operation(Mds[ty][k], Nds[k][tx],op);
            }
+       }
 
        __syncthreads();
 
    } 
 
-   if(Row >= Row_Pd ||Col >= Col_Pd)
+   if(Row >= Row_Pd || Col >= Col_Pd)
         return ;
    // put the result into origin location of Pd
    Pd[Row*Col_Pd + Col] = Pvalue;
@@ -110,7 +129,8 @@ matrix_mul(T * Md, u32 Row_Md, u32 Col_Md,
 template<typename T> void
 matrix_mul_launch(T * Md, u32 Row_Md, u32 Col_Md,
            T * Nd, u32 Row_Nd, u32 Col_Nd,
-           T * Pd, u32 Row_Pd, u32 Col_Pd){
+           T * Pd, u32 Row_Pd, u32 Col_Pd,
+           const int op = 1){
 
     dim3 grid(MAX(1, (size_t)ceil((double)Col_Pd/TILE_HEIGHT)),
               MAX(1, (size_t)ceil((double)Row_Pd/TILE_WIDTH)) );
@@ -119,7 +139,7 @@ matrix_mul_launch(T * Md, u32 Row_Md, u32 Col_Md,
     matrix_mul<T><<<grid, block>>>(Md, Row_Md, Col_Md,
            Nd, Row_Nd, Col_Nd,
            Pd, Row_Pd, Col_Pd,
-           scalar_multiply1);
+           op);
 }
 
 
@@ -212,11 +232,14 @@ matrix_subblock_launch(T *big, u32 Row_big, u32 Col_big,
 void
 matrix_mul_cpu(float *Md, u32 Row_Md, u32 Col_Md,
                float *Nd, u32 Row_Nd, u32 Col_Nd,
-               float *Pd, u32 Row_Pd, u32 Col_Pd){
+               float *Pd, u32 Row_Pd, u32 Col_Pd,
+               const int op = 1){
 
     matrix_mul_launch<float>(Md, Row_Md, Col_Md,
                Nd, Row_Nd, Col_Nd,
-               Pd, Row_Pd, Col_Pd);
+               Pd, Row_Pd, Col_Pd,
+               op);
+
 }
 
 void
@@ -262,7 +285,7 @@ cov_cpu(float *mat, u32 Row_mat, u32 Col_mat,
 
     matrix_mul_cpu(mat_T_device,Row_mat_T, Col_mat_T,
                    mat, Row_mat, Col_mat,
-                   mat_cov, Row_mat_cov, Col_mat_cov);
+                   mat_cov, Row_mat_cov, Col_mat_cov,1);
 
     DEVICE_FREE(mat_T_device);
 
