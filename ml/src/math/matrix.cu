@@ -67,10 +67,14 @@ matrix_mul(T * Md, u32 Row_Md, u32 Col_Md,
         // if cur x is exceed col of md, then skip
         if (ind_x_Md < Col_Md)
             Mds[ty][tx] = Md[ind_bef_Md + ind_x_Md];
-
+        else
+           return ;
+ 
         // if cur y is exceed row of nd, then skip
         if (ind_y_Nd  < Row_Nd)
             Nds[ty][tx] = Nd[ind_y_Nd*Col_Nd + Col];
+        else
+           return ;
 
         __syncthreads();
 
