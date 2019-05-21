@@ -59,7 +59,6 @@ matrix_mul(T * Md, u32 Row_Md, u32 Col_Md,
         // get the data again and again
         // if cur tx,ty is exceend of Md,Nd, then it should be exit early,
         // so it will not run here
-        printf(" row col:%d %d  %d \n",Row, Col,m );
         const u32 ind_bef_Md = Row*Col_Md;
         const u32 ind_x_Md = m*TILE_WIDTH + tx;
 
