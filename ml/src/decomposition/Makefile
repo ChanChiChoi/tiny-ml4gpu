@@ -18,8 +18,9 @@ INCLUDE += ${INCLUDE_PY}
 
 libcommon := ${rootpath}/common/lib
 libml := ${rootpath}/ml/lib
+libtop := $(rootpath)/lib
 
-LDFLAGS_DIR := ${libcommon} ${libml} 
+LDFLAGS_DIR := ${libcommon} ${libml} $(libtop)
 LDFLAGS := $(patsubst %,-L%,${LDFLAGS_DIR})
 
 LDLIBS_DIR := m4g_com_cuMF m4g_ml_math m4g_ml_preprocess
