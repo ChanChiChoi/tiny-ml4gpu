@@ -205,7 +205,7 @@ matrix_scalar_self(T *mat, u32 Row, u32 Col, const int op){
     if (idy >= Row || idx >= Col)
         return ;
     T x = mat[idy*Col+idx];
-    mat[idy*Col+idx] = scalar_operation(x,0,op);
+    mat[idy*Col+idx] = scalar_operation(x,T(0),op);
 }
 
 
@@ -221,7 +221,7 @@ matrix_scalar(T *mat, u32 Row, u32 Col, u32 scalar, const int op){
     if (idy >= Row || idx >= Col)
         return ;
     T x = mat[idy*Col+idx];
-    mat[idy*Col+idx] = scalar_operation(x,scalar,op);
+    mat[idy*Col+idx] = scalar_operation(x,T(scalar),op);
 //    mat[idy*Col+idx] /= scalar;
 }
 
@@ -282,7 +282,7 @@ void
 matrix_mul_cpu(float *Md, u32 Row_Md, u32 Col_Md,
                float *Nd, u32 Row_Nd, u32 Col_Nd,
                float *Pd, u32 Row_Pd, u32 Col_Pd,
-               const int op = 1){
+               const int op){
 
     matrix_mul_launch<float>(Md, Row_Md, Col_Md,
                Nd, Row_Nd, Col_Nd,
