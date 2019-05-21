@@ -34,7 +34,7 @@ obj := libm4g_ml_math.so
 
 all: $(obj)
 	
-$(obj):  matrix.o svd.o 
+$(obj):  matrix.o svd.o stats.o
 	$(CC)  $^ $(CLDFLAG) $(INCLUDE_SELF)  -o $@ ${LDFLAGS} ${LDLIBS}
 	 
 matrix.o: matrix.cu
@@ -42,6 +42,9 @@ matrix.o: matrix.cu
 
 svd.o:svd.cu
 	$(NVCC) $^ -c $(NVCCFLAG) $(INCLUDE_SELF)  -o $@
+
+stats.o: stats.cpp
+	$(NVCC) $^ -c $(NVCCFLAG) $(INCLUDE_SELF) -o $@
 
 clean_sotmp := ${obj} 
 clean_sotmp := $(strip $(clean_sotmp))
@@ -63,7 +66,7 @@ test: test_svd
 
 test_svd:test_svd.cu
 	$(NVCC) $^  $(INCLUDE_SELF) $(LDFLAGS) $(LDFLAGS_EX) $(LDLIBS) $(LDLIBS_EX) -o $@
-	@echo LD_LIBRARY_PATH=$(libcommon):$(libml):$(LD_LIBRARY_PATH) ./$@
+	CUDA_VISIBLE_DEVICES='1' LD_LIBRARY_PATH=$(libcommon):$(libml):$(LD_LIBRARY_PATH) ./$@
 
 
 

@@ -24,6 +24,18 @@ scalar_mse(T x, T y){
 }
 
 template<typename T> __device__ T
+scalar_divide(T x, T y){
+  return x-y;
+}
+
+template<typename T> __device__ T
+scalar_gaussian(T x, T sigma){
+  // T should not be int data type, in case of return 0
+  return -x*x/(2*sigma*sigma);
+   
+}
+
+template<typename T> __device__ T
 scalar_operation(T x, T y, const int op){
   /*
    this function used to be entrance of how to handle two scalar
@@ -36,11 +48,15 @@ scalar_operation(T x, T y, const int op){
       ans = scalar_multiply<T>(x,y);
   }else if(op == 2){
       ans = scalar_mse(x,y); 
+  }else if(op == 3){
+      ans = scalar_divide(x,y);
+  }else if(op == 4){
+      ans = scalar_gaussian(x,y);
   }
   return ans;
 }
 
-
+//=============
 template<typename T> __global__ void
 matrix_mul(T * Md, u32 Row_Md, u32 Col_Md,
            T * Nd, u32 Row_Nd, u32 Col_Nd,
@@ -171,26 +187,42 @@ matrix_transpose_launch(T *mat_src, u32 Row_src, u32 Col_src,
                                    mat_dst, Row_dst, Col_dst);
 }
 
+//========matrix scalar
+
+template<typename T> __global__ void
+matrix_scalar_self(T *mat, u32 Row, u32 Col, const int op){
+
+    u32 idy = blockIdx.y*blockDim.y + threadIdx.y;
+    u32 idx = blockIdx.x*blockDim.x + threadIdx.x;
+
+    
+    if (idy >= Row || idx >= Col)
+        return ;
+    T x = mat[idy*Col+idx];
+    mat[idy*Col+idx] = scalar_operation(x,0,op);
+}
+
 template<typename T>__global__ void
-matrix_divide_scalar(T *mat, u32 Row, u32 Col, u32 scalar){
+matrix_scalar(T *mat, u32 Row, u32 Col, u32 scalar, const int op){
 
     u32 idy = blockIdx.y*blockDim.y + threadIdx.y;
     u32 idx = blockIdx.x*blockDim.x + threadIdx.x;
 
     if (idy >= Row || idx >= Col)
         return ;
-
-    mat[idy*Col+idx] /= scalar;
+    T x = mat[idy*Col+idx];
+    mat[idy*Col+idx] = scalar_operation(x,scalar,op);
+//    mat[idy*Col+idx] /= scalar;
 }
 
 template<typename T> void
-matrix_divide_scalar_launch(T *mat, u32 Row, u32 Col, u32 scalar){
+matrix_scalar_launch(T *mat, u32 Row, u32 Col, u32 scalar,const int op=3){
 
     dim3 grid(MAX(1, (size_t)ceil((double)Col/TILE_HEIGHT)),
               MAX(1, (size_t)ceil((double)Row/TILE_WIDTH)) );
     dim3 block(TILE_WIDTH, TILE_HEIGHT);
   
-    matrix_divide_scalar<T><<<grid, block>>>(mat, Row, Col, scalar);
+    matrix_scalar<T><<<grid, block>>>(mat, Row, Col, scalar,op);
 
 }
 
@@ -252,8 +284,12 @@ matrix_transpose_cpu(float *mat_src, u32 Row_src, u32 Col_src,
 
 void
 matrix_divide_scalar_cpu(float *mat, u32 Row, u32 Col, u32 scalar){
+    matrix_scalar_launch<float>(mat, Row, Col, scalar,3);
+}
 
-    matrix_divide_scalar_launch<float>(mat, Row, Col, scalar);
+void
+matrix_gaussian_scalar_cpu(float *mat, u32 Row, u32 Col, u32 scalar_sigma){
+    matrix_scalar_launch<float>(mat, Row, Col, scalar_sigma,4);
 }
 
 void
