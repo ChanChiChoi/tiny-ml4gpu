@@ -142,6 +142,7 @@ matrix_mul(T * Md, u32 Row_Md, u32 Col_Md,
    Pd[Row*Col_Pd + Col] = Pvalue;
 }
 
+
 template<typename T> void
 matrix_mul_launch(T * Md, u32 Row_Md, u32 Col_Md,
            T * Nd, u32 Row_Nd, u32 Col_Nd,
@@ -158,7 +159,10 @@ matrix_mul_launch(T * Md, u32 Row_Md, u32 Col_Md,
            op);
 }
 
+/*
+function: matrix_transpose
 
+*/
 template<typename T> __global__ void
 matrix_transpose(T * mat_src, u32 Row_src, u32 Col_src,
                  T * mat_dst, u32 Row_dst, u32 Col_dst){
@@ -187,8 +191,10 @@ matrix_transpose_launch(T *mat_src, u32 Row_src, u32 Col_src,
                                    mat_dst, Row_dst, Col_dst);
 }
 
-//========matrix scalar
 
+/*
+function: matrix_scalar_self
+*/
 template<typename T> __global__ void
 matrix_scalar_self(T *mat, u32 Row, u32 Col, const int op){
 
@@ -202,6 +208,10 @@ matrix_scalar_self(T *mat, u32 Row, u32 Col, const int op){
     mat[idy*Col+idx] = scalar_operation(x,0,op);
 }
 
+
+/*
+function: matrix_scalar
+*/
 template<typename T>__global__ void
 matrix_scalar(T *mat, u32 Row, u32 Col, u32 scalar, const int op){
 
@@ -226,6 +236,10 @@ matrix_scalar_launch(T *mat, u32 Row, u32 Col, u32 scalar,const int op=3){
 
 }
 
+
+/*
+function: matrix_subblock
+*/
 template<typename T> __global__ void
 matrix_subblock(T *big, u32 Row_big, u32 Col_big,
                 T *small, u32 Row_sm, u32 Col_sm,
@@ -257,10 +271,13 @@ matrix_subblock_launch(T *big, u32 Row_big, u32 Col_big,
                                       rmin, cmin, rmax, cmax);
 
 }
-// ==========cov
+
 
 
 //================ 
+/*
+function: matrix_mul_cpu
+*/
 void
 matrix_mul_cpu(float *Md, u32 Row_Md, u32 Col_Md,
                float *Nd, u32 Row_Nd, u32 Col_Nd,
@@ -274,6 +291,9 @@ matrix_mul_cpu(float *Md, u32 Row_Md, u32 Col_Md,
 
 }
 
+/*
+function: matrix_transpose_cpu
+*/
 void
 matrix_transpose_cpu(float *mat_src, u32 Row_src, u32 Col_src,
                      float * mat_dst, u32 Row_dst, u32 Col_dst){
@@ -282,16 +302,26 @@ matrix_transpose_cpu(float *mat_src, u32 Row_src, u32 Col_src,
                       mat_dst, Row_dst, Col_dst);
 }
 
+/*
+function: matrix_divide_scalar_cpu
+*/
 void
 matrix_divide_scalar_cpu(float *mat, u32 Row, u32 Col, u32 scalar){
     matrix_scalar_launch<float>(mat, Row, Col, scalar,3);
 }
 
+/*
+function: matrix_gaussian_scalar_cpu
+*/
 void
 matrix_gaussian_scalar_cpu(float *mat, u32 Row, u32 Col, u32 scalar_sigma){
     matrix_scalar_launch<float>(mat, Row, Col, scalar_sigma,4);
 }
 
+
+/*
+function: matrix_subblock_cpu
+*/
 void
 matrix_subblock_cpu(float *big, u32 Row_big, u32 Col_big,
                 float *small, u32 Row_sm, u32 Col_sm,
