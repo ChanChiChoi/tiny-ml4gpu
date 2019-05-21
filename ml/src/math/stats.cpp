@@ -3,7 +3,7 @@
 #include "common/include/type.h"
 #include "common/include/common.h"
 #include "common/include/malloc_free.h"
-#include "ml/include/math/stats.h"
+#include "ml/include/math/math.h"
 
 
 void
