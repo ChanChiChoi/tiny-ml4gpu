@@ -1,6 +1,6 @@
 #include <stdio.h>
-#include "svd.h"
-#include "common/malloc_free.h"
+#include "ml/include/math/svd.h"
+#include "common/include/malloc_free.h"
 
 
 
@@ -17,15 +17,20 @@ void printMatrix(int m, int n, const double*A, int lda, const char* name){
 int
 main(){
     
-  const int m = 3;
-  const int n = 2;
+  const int m = 1000;
+  const int n = 60;
   const int lda = m;
 
-  double A[lda*n] = { 1.0, 4.0, 2.0, 2.0, 5.0, 1.0};
+  double *A = (double *)malloc(sizeof(double)*m*n);
+  for (int i=0;i<m*n;i++){
+    A[i] = 3.0;
+
+  }
+//  double A[lda*n] = { 1.0, 4.0, 2.0, 2.0, 5.0, 1.0};
   double U[lda*m]; // m-by-m unitary matrix
-  double VT[lda*n]; // n-by-n unitary matrix
+  double VT[n*n]; // n-by-n unitary matrix
   double S[n]; // singular value
-  double S_exact[n] = {7.065283497082729, 1.040081297712078};
+//  double S_exact[n] = {7.065283497082729, 1.040081297712078};
 
   double *A_device = HOST_TO_DEVICE_MALLOC(A,sizeof(double)*lda*n);
   double *U_device = HOST_TO_DEVICE_MALLOC(U,sizeof(double)*lda*m);
@@ -37,9 +42,10 @@ main(){
   const int Row_U = lda;
   const int Col_U = n;
   const int Length = n;
-  const int Row_VT = lda;
+  const int Row_VT = n;
   const int Col_VT = n;
- svd(A_device, Row_A, Col_A, lda,
+
+  svd(A_device, Row_A, Col_A, lda,
     U_device, Row_U, Col_U,
     S_device, Length,
     VT_device, Row_VT, Col_VT);
@@ -54,14 +60,14 @@ main(){
 printf("S = (matlab base-1)\n");
 printMatrix(n, 1, S, lda, "S");
 printf("=====\n");
-
-printf("U = (matlab base-1)\n");
-printMatrix(m, m, U, lda, "U");
-printf("=====\n");
-
-printf("VT = (matlab base-1)\n");
-printMatrix(n, n, VT, lda, "VT");
-printf("=====\n");
+//
+//printf("U = (matlab base-1)\n");
+//printMatrix(m, m, U, lda, "U");
+//printf("=====\n");
+//
+//printf("VT = (matlab base-1)\n");
+//printMatrix(n, n, VT, lda, "VT");
+//printf("=====\n");
 
 
  return 0;

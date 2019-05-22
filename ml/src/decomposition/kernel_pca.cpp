@@ -38,8 +38,11 @@ KPCA::fit(Array &matrix){
     gram_cpu(ptr_device, rows, cols,
             K_device, Row_gram, Col_gram);
    // 1.2 - compute K matrix
-   size_t mean_by_rows = sizeof(float)*Row_gram*Col_gram;
-   
+   size_t size_mean_by_row = sizeof(float)*Row_gram*Col_gram;
+   float *mean = (float *)malloc(size_mean_by_row);
+   float *mean_device = HOST_TO_DEVICE_MALLOC(mean, size_mean_by_row);
+
+   mean_by_rows_cpu(K_device, mean_device, Row_gram, Col_gram);
    // 3 - calc eigenval eigenvector of this matrix
    
    // 4 - trans_mat and output transformed input
