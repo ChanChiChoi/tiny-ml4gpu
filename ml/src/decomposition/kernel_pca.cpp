@@ -3,6 +3,7 @@
  * */
 #include "ml/include/decomposition/kernel_pca.h"
 #include "ml/include/math/math.h"
+#include "ml/include/preprocessing/preprocess.h"
 
 
 // param1 = sigma
@@ -28,14 +29,17 @@ KPCA::fit(Array &matrix){
     
    // 1 - calc kernel matrix, calc distance between each samples with other samples
    // 1.1 - compute  gramm matrix
-    size_t size_gram = rows*rows*sizeof(float);
+    size_t Row_gram = rows;
+    size_t Col_gram = rows;
+    size_t size_gram = Row_gram*Col_gram*sizeof(float);
     float *K = (float *)malloc(size_gram);
     float *K_device = HOST_TO_DEVICE_MALLOC(K, size_gram);
     
     gram_cpu(ptr_device, rows, cols,
-            K_device, rows, rows);
+            K_device, Row_gram, Col_gram);
    // 1.2 - compute K matrix
-
+   size_t mean_by_rows = sizeof(float)*Row_gram*Col_gram;
+   
    // 3 - calc eigenval eigenvector of this matrix
    
    // 4 - trans_mat and output transformed input
