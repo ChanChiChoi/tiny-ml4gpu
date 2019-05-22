@@ -7,6 +7,10 @@
 # define TILE_HEIGHT 32
 # define TILE_WIDTH 32
 
+
+/*
+vector_repeat_by_rows
+*/
 template<typename T> __global__ void
 vector_repeat_by_rows(T *mat_device, u32 rows_mat, u32 cols_mat, 
               T *vector, u32 cols_vec){
@@ -43,4 +47,28 @@ vector_repeat_by_rows_cpu(float *mat_device, u32 rows_mat, u32 cols_mat,
                           float *vector_device,u32 cols_vec){
     vector_repeat_by_rows_launch(mat_device, rows_mat, cols_mat,
                               vector_device, cols_vec);
+}
+
+/*
+vector_sum
+*/
+template<typename T> __global__ void
+vector_sum(T *vec, u32 len, T *res){
+  
+
+}
+
+template<typename T> void
+vector_sum_launch(T *vec, u32 len, T *res){
+
+    dim3 grid(1);
+    dim3 block(1024);
+  
+    vector_sum<T><<<grid, block>>>(vec, len, res);
+}
+
+
+void
+vector_sum_cpu(float *vec, u32 len, float *res){
+    vector_sum_launch<float>(vec, len, res);
 }
