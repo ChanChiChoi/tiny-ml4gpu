@@ -42,9 +42,9 @@ main(){
     cudaMalloc((void **)&pd_device, size2);
     cudaMemcpy(pd_device, pd, size2, cudaMemcpyHostToDevice);
   
-    matrix_mul_cpu(md_device, md_rows, md_cols,
+    matrix_dotmul_cpu(md_device, md_rows, md_cols,
                    nd_device, nd_rows, nd_cols,
-                   pd_device, pd_rows, pd_cols,1);
+                   pd_device, pd_rows, pd_cols,2);
   //  auto t0 = high_resolution_clock::now();
     //mean_by_rows_cpu(mat_device,mean_device, rows,cols);
     //cudaDeviceSynchronize();

@@ -141,7 +141,7 @@ PCA::transform(Array &matrix){
                        0, 0, Row_V, Col_tmp);
 
     // matrix multiply the V
-    matrix_mul_cpu(ptr_device,Row_mat, Col_mat,
+    matrix_dotmul_cpu(ptr_device,Row_mat, Col_mat,
                    tmp_device, Row_tmp, Col_tmp,
                    ans_device, Row_ans, Col_ans);
 

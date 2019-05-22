@@ -83,7 +83,7 @@ scalar_operation2(T x, T y, const int op){
 
 //=============
 template<typename T> __global__ void
-matrix_mul(T * Md, u32 Row_Md, u32 Col_Md,
+matrix_dotmul(T * Md, u32 Row_Md, u32 Col_Md,
            T * Nd, u32 Row_Nd, u32 Col_Nd,
            T * Pd, u32 Row_Pd, u32 Col_Pd,
            const int op = 1
@@ -169,7 +169,7 @@ matrix_mul(T * Md, u32 Row_Md, u32 Col_Md,
 
 
 template<typename T> void
-matrix_mul_launch(T * Md, u32 Row_Md, u32 Col_Md,
+matrix_dotmul_launch(T * Md, u32 Row_Md, u32 Col_Md,
            T * Nd, u32 Row_Nd, u32 Col_Nd,
            T * Pd, u32 Row_Pd, u32 Col_Pd,
            const int op = 1){
@@ -178,7 +178,7 @@ matrix_mul_launch(T * Md, u32 Row_Md, u32 Col_Md,
               MAX(1, (size_t)ceil((double)Row_Pd/TILE_WIDTH)) );
     dim3 block(TILE_WIDTH, TILE_HEIGHT);
 
-    matrix_mul<T><<<grid, block>>>(Md, Row_Md, Col_Md,
+    matrix_dotmul<T><<<grid, block>>>(Md, Row_Md, Col_Md,
            Nd, Row_Nd, Col_Nd,
            Pd, Row_Pd, Col_Pd,
            op);
@@ -310,19 +310,21 @@ matrix_subblock_launch(T *big, u32 Row_big, u32 Col_big,
 
 }
 
-
+/*
+function: matrix_
+*/
 
 //================ 
 /*
-function: matrix_mul_cpu
+function: matrix_dotmul_cpu
 */
 void
-matrix_mul_cpu(float *Md, u32 Row_Md, u32 Col_Md,
+matrix_dotmul_cpu(float *Md, u32 Row_Md, u32 Col_Md,
                float *Nd, u32 Row_Nd, u32 Col_Nd,
                float *Pd, u32 Row_Pd, u32 Col_Pd,
                const int op){
 
-    matrix_mul_launch<float>(Md, Row_Md, Col_Md,
+    matrix_dotmul_launch<float>(Md, Row_Md, Col_Md,
                Nd, Row_Nd, Col_Nd,
                Pd, Row_Pd, Col_Pd,
                op);

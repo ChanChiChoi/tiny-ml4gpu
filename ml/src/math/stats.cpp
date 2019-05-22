@@ -23,7 +23,7 @@ cov_cpu(float *mat, u32 Row_mat, u32 Col_mat,
 
     //3 - matrix_mul
 
-    matrix_mul_cpu(mat_T_device,Row_mat_T, Col_mat_T,
+    matrix_dotmul_cpu(mat_T_device,Row_mat_T, Col_mat_T,
                    mat, Row_mat, Col_mat,
                    mat_cov, Row_mat_cov, Col_mat_cov,1);
 
@@ -48,7 +48,7 @@ gram_cpu(float *mat, u32 Row_mat, u32 Col_mat,
     matrix_transpose_cpu(mat,Row_mat, Col_mat,
                   mat_T_device, Row_mat_T, Col_mat_T);
     
-    matrix_mul_cpu(mat,Row_mat, Col_mat,
+    matrix_dotmul_cpu(mat,Row_mat, Col_mat,
                    mat_T_device, Row_mat_T, Col_mat_T,
                    mat_gram, Row_gram, Col_gram,2);
     
