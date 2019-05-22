@@ -327,13 +327,14 @@ matrix_mul(float *Md, u32 Row_Md, u32 Col_Md,
 
     u32 idy = blockIdx.y*blockDim.y + threadIdx.y;
     u32 idx = blockIdx.x*blockDim.x + threadIdx.x;
+    u32 thread_idx = idy*Col_Md + idx;
 
     if (idx >= Col_Md || idy >= Row_Md)
         return ;
   
-    T x = Md[idy*Col_Md+idx];
-    T y = Nd[idy*Col_Nd+idx];
-    Pd[idy*Col_Pd+idx] = scalar_operation2(x,y,op);
+    T x = Md[thread_idx];
+    T y = Nd[thread_idx];
+    Pd[thread_idx] = scalar_operation2(x,y,op);
 }
 
 template<typename T> void
