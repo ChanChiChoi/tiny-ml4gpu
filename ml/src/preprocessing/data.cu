@@ -5,7 +5,9 @@
 #include "common/include/common.h"
 
 //====================template
-// calc the mean by row dimension
+/*
+ calc the mean by row dimension
+*/
 template<typename T> __global__ void
 mean_by_rows(T *mat_device, T *mean_vec, u32 rows, u32 cols){
 
@@ -28,7 +30,9 @@ mean_by_rows(T *mat_device, T *mean_vec, u32 rows, u32 cols){
     
 }
 
-// each row subtract the mean vector
+/*
+ each row subtract the mean vector
+*/
 template<typename T> __global__ void
 zero_mean_by_rows(T *mat_device, T *mean_vec, u32 rows, u32 cols){
 
@@ -42,7 +46,9 @@ zero_mean_by_rows(T *mat_device, T *mean_vec, u32 rows, u32 cols){
 
 }
 
-// calc the std by rows dimension
+/*
+ calc the std by rows dimension
+*/
 template<typename T> __global__ void
 std_by_rows(T *mat_device, T *mean_vec, T *std_vec, u32 rows, u32 cols){
 
@@ -67,7 +73,9 @@ std_by_rows(T *mat_device, T *mean_vec, T *std_vec, u32 rows, u32 cols){
 } 
 
 
-// each row divide the std vector
+/*
+ each row divide the std vector
+*/
 template<typename T> __global__ void
 one_std_by_rows(T *mat_device, T *std_vec, u32 rows, u32 cols){
 
@@ -83,16 +91,24 @@ one_std_by_rows(T *mat_device, T *std_vec, u32 rows, u32 cols){
 }
 
 //===========launch
-//export the function for be called by host
+/*
+export the function for be called by host
+*/
 void
 mean_by_rows_launch(float *mat_device, float *mean_device, u32 rows, u32 cols){
-
 
     const u32 COLS = 256;
     dim3 grid0( MAX(1,ceil(double(cols)/COLS)) );
     dim3 block0(COLS);
 
     mean_by_rows<float><<<grid0, block0>>>(mat_device, mean_device, rows, cols);
+
+}
+
+void
+subtract_mean_by_rows_launch(float *mat_device, float *mean_device, u32 rows, u32 cols){
+
+    mean_by_rows_launch(float *mat_device, float *mean_device, u32 rows, u32 cols);
 
     const u32 block_size = 32;
     dim3 block1(block_size, block_size);
@@ -103,10 +119,13 @@ mean_by_rows_launch(float *mat_device, float *mean_device, u32 rows, u32 cols){
     zero_mean_by_rows<float><<<grid1,block1>>>(mat_device, mean_device, rows, cols);
 }
 
+/*
+function: normalization_by_rows_launch
+*/
 void
 normalization_by_rows_launch(float *mat_device, float *mean_device, float *std_device, u32 rows, u32 cols){
 
-    mean_by_rows_launch(mat_device, mean_device, rows, cols);
+    subtract_mean_by_rows_launch(mat_device, mean_device, rows, cols);
     
     const u32 COLS = 256;
     dim3 grid0( MAX(1, ceil(double(cols)/COLS)) );
@@ -123,11 +142,17 @@ normalization_by_rows_launch(float *mat_device, float *mean_device, float *std_d
     
 
 }
+
 //===============export to host
 void
 mean_by_rows_cpu(float *mat_device, float *mean_device, u32 rows, u32 cols){
-
     mean_by_rows_launch(mat_device, mean_device, rows, cols);
+}
+
+void
+subtract_mean_by_rows_cpu(float *mat_device, float *mean_device, u32 rows, u32 cols){
+
+    subtract_mean_by_rows_launch(mat_device, mean_device, rows, cols);
 }
 
 void
