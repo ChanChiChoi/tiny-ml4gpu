@@ -29,7 +29,7 @@ PCA::fit(Array &matrix){
                 }; // need parameter
     
     //TODO: we need keep mean_device
-    mean_by_rows_cpu(ptr_device, mean_device, rows, cols);
+    subtract_mean_by_rows_cpu(ptr_device, mean_device, rows, cols);
     DEVICE_TO_HOST(mean, mean_device, size_mean);
 
     //2 - calc the cov matrix
