@@ -9,9 +9,32 @@
 # define TILE_HEIGHT 32
 # define TILE_WIDTH 32
 
-//template ===
-//matrix_mul
+/*
+template === one scalar operation
+*/
+template<typename T> __device__ T
+scalar_sqrt(T x){
+    return sqrt(x);
+}
 
+
+template<typename T> __device__ T
+scalar_operation1(T x, const int op){
+  /*
+   this function used to be entrance of how to handle one scalar
+   1 - sqrt(x)
+
+  */
+  T ans = T(0);
+  if (op == 1){
+      ans = scalar_sqrt<T>(x);
+  }
+  return ans;
+}
+
+/*
+template === two scalar operation
+*/
 template<typename T> __device__ T
 scalar_multiply(T x, T y){
   return x*y;
@@ -35,8 +58,9 @@ scalar_gaussian(T x, T sigma){
    
 }
 
+
 template<typename T> __device__ T
-scalar_operation(T x, T y, const int op){
+scalar_operation2(T x, T y, const int op){
   /*
    this function used to be entrance of how to handle two scalar
    1 - x * y
@@ -47,14 +71,15 @@ scalar_operation(T x, T y, const int op){
   if (op == 1){
       ans = scalar_multiply<T>(x,y);
   }else if(op == 2){
-      ans = scalar_mse(x,y); 
+      ans = scalar_mse<T>(x,y); 
   }else if(op == 3){
-      ans = scalar_divide(x,y);
+      ans = scalar_divide<T>(x,y);
   }else if(op == 4){
-      ans = scalar_gaussian(x,y);
+      ans = scalar_gaussian<T>(x,y);
   }
   return ans;
 }
+
 
 //=============
 template<typename T> __global__ void
@@ -128,7 +153,7 @@ matrix_mul(T * Md, u32 Row_Md, u32 Col_Md,
            // calc the point
            for(u32 k = 0; k < ind_max_TILE; ++k){
               //Pvalue += Mds[ty][k] * Nds[k][tx];
-              Pvalue += scalar_operation(Mds[ty][k], Nds[k][tx],op);
+              Pvalue += scalar_operation2(Mds[ty][k], Nds[k][tx],op);
            }
        }
 
@@ -205,7 +230,20 @@ matrix_scalar_self(T *mat, u32 Row, u32 Col, const int op){
     if (idy >= Row || idx >= Col)
         return ;
     T x = mat[idy*Col+idx];
-    mat[idy*Col+idx] = scalar_operation(x,T(0),op);
+    mat[idy*Col+idx] = scalar_operation1(x,op);
+}
+
+
+
+template<typename T> void
+matrix_scalar_self_launch(T *mat, u32 Row, u32 Col,const int op=1){
+
+    dim3 grid(MAX(1, (size_t)ceil((double)Col/TILE_HEIGHT)),
+              MAX(1, (size_t)ceil((double)Row/TILE_WIDTH)) );
+    dim3 block(TILE_WIDTH, TILE_HEIGHT);
+  
+    matrix_scalar_self<T><<<grid, block>>>(mat, Row, Col,op);
+
 }
 
 
@@ -221,7 +259,7 @@ matrix_scalar(T *mat, u32 Row, u32 Col, u32 scalar, const int op){
     if (idy >= Row || idx >= Col)
         return ;
     T x = mat[idy*Col+idx];
-    mat[idy*Col+idx] = scalar_operation(x,T(scalar),op);
+    mat[idy*Col+idx] = scalar_operation2(x,T(scalar),op);
 //    mat[idy*Col+idx] /= scalar;
 }
 
@@ -332,31 +370,13 @@ matrix_subblock_cpu(float *big, u32 Row_big, u32 Col_big,
                            rmin, cmin, rmax, cmax);
 }
 
-//void
-//cov_cpu(float *mat, u32 Row_mat, u32 Col_mat,
-//        float *mat_cov, u32 Row_mat_cov, u32 Col_mat_cov){
-//    
-//    //1 - malloc one matrix
-//    size_t size = sizeof(float)*Row_mat*Col_mat;
-//    float *mat_T_device = NULL;
-//    mat_T_device = DEVICE_MALLOC(mat_T_device, size);
-//
-//    //2 - transpose
-//    u32 Row_mat_T = Col_mat;
-//    u32 Col_mat_T = Row_mat;
-//    matrix_transpose_cpu(mat,Row_mat, Col_mat,
-//                  mat_T_device, Row_mat_T, Col_mat_T);
-//
-//    //3 - matrix_mul
-//
-//    matrix_mul_cpu(mat_T_device,Row_mat_T, Col_mat_T,
-//                   mat, Row_mat, Col_mat,
-//                   mat_cov, Row_mat_cov, Col_mat_cov,1);
-//
-//    DEVICE_FREE(mat_T_device);
-//
-//    //4 - divide (n-1) samples;
-//    size_t n_1 = MAX(1,Row_mat-1);
-//    matrix_divide_scalar_cpu(mat_cov, Row_mat_cov, Col_mat_cov, n_1);
-//
-//}
+
+/*
+function: matrix_sqrt_cpu
+*/
+void
+matrix_scalar_sqrt_cpu(float *mat, u32 Row_mat, u32 Col_mat){
+
+    matrix_scalar_self_launch<float>(mat, Row_mat, Col_mat, 1);
+}
+

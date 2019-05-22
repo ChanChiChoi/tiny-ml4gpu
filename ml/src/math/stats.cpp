@@ -54,6 +54,7 @@ gram_cpu(float *mat, u32 Row_mat, u32 Col_mat,
     
     DEVICE_FREE(mat_T_device);
     
+    matrix_scalar_sqrt_cpu(mat_gram, Row_gram, Col_gram, 1);
     matrix_gaussian_scalar_cpu(mat_gram, Row_gram, Col_gram, 1);
 
 }
