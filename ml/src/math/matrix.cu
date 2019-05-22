@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <stdio.h>
+#include <string.h>
 #include <math_functions.hpp>
 #include "common/include/type.h"
 #include "common/include/common.h"
@@ -19,14 +20,14 @@ scalar_sqrt(T x){
 
 
 template<typename T> __device__ T
-scalar_operation1(T x, const int op){
+scalar_operation1(T x, const char *op){
   /*
    this function used to be entrance of how to handle one scalar
    1 - sqrt(x)
 
   */
   T ans = T(0);
-  if (op == 1){
+  if (strcmp(op,"sqrt") == 0){
       ans = scalar_sqrt<T>(x);
   }
   return ans;
@@ -60,7 +61,7 @@ scalar_gaussian(T x, T sigma){
 
 
 template<typename T> __device__ T
-scalar_operation2(T x, T y, const int op){
+scalar_operation2(T x, T y, const char  *op){
   /*
    this function used to be entrance of how to handle two scalar
    1 - x * y
@@ -68,13 +69,13 @@ scalar_operation2(T x, T y, const int op){
 
   */
   T ans = T(0);
-  if (op == 1){
+  if (strcmp(op,"mul") == 0){
       ans = scalar_multiply<T>(x,y);
-  }else if(op == 2){
+  }else if(strcmp(op, "mse") == 0){
       ans = scalar_mse<T>(x,y); 
-  }else if(op == 3){
+  }else if(strcmp(op,"divide") == 0){
       ans = scalar_divide<T>(x,y);
-  }else if(op == 4){
+  }else if(strcmp(op, "gaussian") == 0){
       ans = scalar_gaussian<T>(x,y);
   }
   return ans;
@@ -86,7 +87,7 @@ template<typename T> __global__ void
 matrix_dotmul(T * Md, u32 Row_Md, u32 Col_Md,
            T * Nd, u32 Row_Nd, u32 Col_Nd,
            T * Pd, u32 Row_Pd, u32 Col_Pd,
-           const int op = 1
+           const char *op
            ){
     
     /*
@@ -172,7 +173,7 @@ template<typename T> void
 matrix_dotmul_launch(T * Md, u32 Row_Md, u32 Col_Md,
            T * Nd, u32 Row_Nd, u32 Col_Nd,
            T * Pd, u32 Row_Pd, u32 Col_Pd,
-           const int op = 1){
+           const char *op){
 
     dim3 grid(MAX(1, (size_t)ceil((double)Col_Pd/TILE_HEIGHT)),
               MAX(1, (size_t)ceil((double)Row_Pd/TILE_WIDTH)) );
@@ -221,7 +222,7 @@ matrix_transpose_launch(T *mat_src, u32 Row_src, u32 Col_src,
 function: matrix_scalar_self
 */
 template<typename T> __global__ void
-matrix_scalar_self(T *mat, u32 Row, u32 Col, const int op){
+matrix_scalar_self(T *mat, u32 Row, u32 Col, const char *op){
 
     u32 idy = blockIdx.y*blockDim.y + threadIdx.y;
     u32 idx = blockIdx.x*blockDim.x + threadIdx.x;
@@ -236,7 +237,7 @@ matrix_scalar_self(T *mat, u32 Row, u32 Col, const int op){
 
 
 template<typename T> void
-matrix_scalar_self_launch(T *mat, u32 Row, u32 Col,const int op=1){
+matrix_scalar_self_launch(T *mat, u32 Row, u32 Col,const char *op){
 
     dim3 grid(MAX(1, (size_t)ceil((double)Col/TILE_HEIGHT)),
               MAX(1, (size_t)ceil((double)Row/TILE_WIDTH)) );
@@ -251,7 +252,7 @@ matrix_scalar_self_launch(T *mat, u32 Row, u32 Col,const int op=1){
 function: matrix_scalar
 */
 template<typename T>__global__ void
-matrix_scalar(T *mat, u32 Row, u32 Col, u32 scalar, const int op){
+matrix_scalar(T *mat, u32 Row, u32 Col, u32 scalar, const char *op){
 
     u32 idy = blockIdx.y*blockDim.y + threadIdx.y;
     u32 idx = blockIdx.x*blockDim.x + threadIdx.x;
@@ -264,7 +265,7 @@ matrix_scalar(T *mat, u32 Row, u32 Col, u32 scalar, const int op){
 }
 
 template<typename T> void
-matrix_scalar_launch(T *mat, u32 Row, u32 Col, u32 scalar,const int op=3){
+matrix_scalar_launch(T *mat, u32 Row, u32 Col, u32 scalar,const char *op){
 
     dim3 grid(MAX(1, (size_t)ceil((double)Col/TILE_HEIGHT)),
               MAX(1, (size_t)ceil((double)Row/TILE_WIDTH)) );
@@ -311,8 +312,45 @@ matrix_subblock_launch(T *big, u32 Row_big, u32 Col_big,
 }
 
 /*
-function: matrix_
+function: matrix_mul
 */
+template<typename T> __global__ void
+matrix_mul(float *Md, u32 Row_Md, u32 Col_Md,
+           float *Nd, u32 Row_Nd, u32 Col_Nd,
+           float *Pd, u32 Row_Pd, u32 Col_Pd,
+           const char *op){
+
+    assert(Row_Md == Row_Nd);
+    assert(Row_Md == Row_Pd);
+    assert(Col_Md == Col_Nd);
+    assert(Col_Md == Col_Pd);
+
+    u32 idy = blockIdx.y*blockDim.y + threadIdx.y;
+    u32 idx = blockIdx.x*blockDim.x + threadIdx.x;
+
+    if (idx >= Col_Md || idy >= Row_Md)
+        return ;
+  
+    T x = Md[idy*Col_Md+idx];
+    T y = Nd[idy*Col_Nd+idx];
+    Pd[idy*Col_Pd+idx] = scalar_operation2(x,y,op);
+}
+
+template<typename T> void
+matrix_mul_launch(float *Md, u32 Row_Md, u32 Col_Md,
+           float *Nd, u32 Row_Nd, u32 Col_Nd,
+           float *Pd, u32 Row_Pd, u32 Col_Pd,
+           const char *op){
+
+    dim3 grid(MAX(1, (size_t)ceil((double)Col_sm/TILE_HEIGHT)),
+              MAX(1, (size_t)ceil((double)Row_sm/TILE_WIDTH)) );
+    dim3 block(TILE_WIDTH, TILE_HEIGHT);
+
+    matrix_mul<T><<<grid, block>>>(Md, Row_Md, Col_Md,
+                               Nd, Row_Nd, Col_Nd,
+                               Pd, Row_Pd, Col_Pd,
+                               op);
+}
 
 //================ 
 /*
@@ -322,7 +360,7 @@ void
 matrix_dotmul_cpu(float *Md, u32 Row_Md, u32 Col_Md,
                float *Nd, u32 Row_Nd, u32 Col_Nd,
                float *Pd, u32 Row_Pd, u32 Col_Pd,
-               const int op){
+               const char *op){
 
     matrix_dotmul_launch<float>(Md, Row_Md, Col_Md,
                Nd, Row_Nd, Col_Nd,
@@ -382,3 +420,18 @@ matrix_scalar_sqrt_cpu(float *mat, u32 Row_mat, u32 Col_mat){
     matrix_scalar_self_launch<float>(mat, Row_mat, Col_mat, 1);
 }
 
+/*
+function: matrix_mul_cpu
+*/
+void
+matrix_mul_cpu(float *Md, u32 Row_Md, u32 Col_Md,
+               float *Nd, u32 Row_Nd, u32 Col_Nd,
+               float *Pd, u32 Row_Pd, u32 Col_Pd,
+               const char *op){
+
+    matrix_mul_launch<float>(Md, Row_Md, Col_Md,
+               Nd, Row_Nd, Col_Nd,
+               Pd, Row_Pd, Col_Pd,
+               op);
+
+}
