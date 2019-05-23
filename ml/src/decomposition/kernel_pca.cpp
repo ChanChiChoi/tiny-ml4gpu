@@ -157,6 +157,7 @@ KPCA::fit(Array &matrix){
     //mappedX =  sqrtL* subVT
     float *mappedX_device = nullptr;
     size_t Row_mappedX = Row_sqrtL, Col_mappedX = Col_subVT;
+    size_t size_mappedX = sizeof(float)*Row_mappedX*Col_mappedX;
     mappedX_device = DEVICE_MALLOC(mappedX_device, size_mappedX);
 
     matrix_dotmul_cpu(sqrtL_device, Row_sqrtL, Col_sqrtL,
