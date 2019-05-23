@@ -6,19 +6,23 @@ class KPCA{
     Array *V = nullptr;
     Array *invsqrtL = nullptr;
     Array *column_sums = nullptr; // mean by rows
-    float *total_sum = 0; //total_sum
+    float total_sum = 0; //total_sum
     std::string kernel = "gaussian"; // current only support gaussian
-    float *param1 = 1.0;// gaussian sigma
+    float param1 = 1.0;// gaussian sigma
     size_t n_components = 0;
 
 public:
     KPCA (){}
 
     // only init the n_components;
-    KPCA ( size_t n_components, const std::string kernel_in="gaussian"):n_components{n_components}{
+    KPCA ( size_t n_components, const std::string kernel_in="gaussian",
+         const float param1_in):n_components{n_components},param1{param1_in}{
         kernel = std::move(kernel_in);
-        trans_mat = new Array();
-        mean_vec = new Array();
+        
+        V = new Array();
+        invsqrtL = new Array();
+        column_sums = new Array();
+        
     }
 
     // will stat the matrix, then put the transfer matrix into trans_mat
@@ -27,13 +31,17 @@ public:
     Array * transform(Array &train, Array &test);
 
     ~KPCA(){
-        if (trans_mat){
-            delete trans_mat;
-            trans_mat = NULL;
+        if (column_sums){
+            delete column_sums;
+            column_sums = nullptr;
         }
-        if (mean_vec){
-            delete mean_vec;
-            mean_vec = NULL;
+        if (V){
+            delete V;
+            V = nullptr;
+        }
+        if (invsqrtL){
+            delete invsqrtL;
+            invsqrtL = nullptr;
         }
     }
 
