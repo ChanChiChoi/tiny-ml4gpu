@@ -3,6 +3,7 @@
 #include "common/include/type.h"
 #include "common/include/common.h"
 #include "ml/include/math/vector.h"
+#include "ml/include/math/scalar_op.cuh"
 
 # define TILE_HEIGHT 32
 # define TILE_WIDTH 32
@@ -106,3 +107,10 @@ void
 vector_invsqrt_self_cpu(float *vec, u32 len){
     vector_op_self_launch<float>(vec, len, "invsqrt");
 }
+
+
+void
+vector_sqrt_self_cpu(float *vec, u32 len){
+    vector_op_self_launch<float>(vec, len, "sqrt");
+}
+
