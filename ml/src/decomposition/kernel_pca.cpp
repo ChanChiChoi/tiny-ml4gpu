@@ -166,12 +166,25 @@ KPCA::fit(Array &matrix){
 
     DEVICE_FREE(sqrtL_device);
 
+    // get mappedX'
+    float *mappedX_T_device = nullptr;
+    size_t Row_mappedX_T = Col_mappedX,       
+           Col_mappedX_T = Row_mappedX;
+    size_t size_mappedX_T = sizeof(float)*Row_mappedX_T*Col_mappedX_T;
+    mappedX_T_device = DEVICE_MALLOC(mappedX_T_device, size_mappedX_T);
+
+    matrix_transpose_cpu(mappedX_device, Row_mappedX, Col_mappedX,
+                         mappedX_T_device, Row_mappedX_T, Col_mappedX_T);
+   
+    DEVICE_FREE(mappedX_device);
+    
     return new Array{
-          nullptr, nullptr, mappedX_device,
-          2, {ssize_t(Row_mappedX), ssize_t(Col_mappedX)}, std::string(1,'f'),
-          ssize_t(sizeof(float)), ssize_t(Row_mappedX*Col_mappedX),
-          {ssize_t(sizeof(float)*Row_mappedX), ssize_t(sizeof(float))}
-    };
+          nullptr, nullptr, mappedX_T_device,
+          2, {ssize_t(Row_mappedX_T), ssize_t(Col_mappedX_T)}, std::string(1,'f'),
+          ssize_t(sizeof(float)), ssize_t(Row_mappedX_T*Col_mappedX_T),
+          {ssize_t(sizeof(float)*Row_mappedX_T), ssize_t(sizeof(float))}
+        };
+
 
 //    float *V_device = nullptr;
 //    V_device = DEVICE_MALLOC(V_device, size_VT);
