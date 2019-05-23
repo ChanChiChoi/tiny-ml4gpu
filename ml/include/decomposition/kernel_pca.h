@@ -4,7 +4,7 @@
 class KPCA{
 
     Array *V = nullptr;
-    Array *invsqrtL = nullptr;
+    Array *L = nullptr;
     Array *column_sums = nullptr; // mean by rows
     float total_sum = 0; //total_sum
     std::string kernel = "gaussian"; // current only support gaussian
@@ -20,7 +20,7 @@ public:
         kernel = std::move(kernel_in);
         
         V = new Array();
-        invsqrtL = new Array();
+        L = new Array();
         column_sums = new Array();
         
     }
@@ -39,9 +39,9 @@ public:
             delete V;
             V = nullptr;
         }
-        if (invsqrtL){
-            delete invsqrtL;
-            invsqrtL = nullptr;
+        if (L){
+            delete L;
+            L = nullptr;
         }
     }
 
