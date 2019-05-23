@@ -3,7 +3,7 @@
 
 class KPCA{
 
-    Array *V = nullptr;
+    Array *V_T = nullptr;
     Array *L = nullptr;
     Array *column_sums = nullptr; // mean by rows
     float total_sum = 0; //total_sum
@@ -19,7 +19,7 @@ public:
          const float param1_in):n_components{n_components},param1{param1_in}{
         kernel = std::move(kernel_in);
         
-        V = new Array();
+        V_T = new Array();
         L = new Array();
         column_sums = new Array();
         
@@ -35,9 +35,9 @@ public:
             delete column_sums;
             column_sums = nullptr;
         }
-        if (V){
-            delete V;
-            V = nullptr;
+        if (V_T){
+            delete V_T;
+            V_T = nullptr;
         }
         if (L){
             delete L;
