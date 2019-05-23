@@ -125,10 +125,11 @@ KPCA::fit(Array &matrix){
           {ssize_t(sizeof(float)*Length), ssize_t(sizeof(float))}
         };
     
-    float *sqrtL = nullptr;
+    float *sqrtL_device = nullptr;
+    size_t Row_sqrtL = n_components, Col_sqrtL = n_components;
     size_t size_sqrtL = sizeof(float)*n_components*n_components;
-    sqrtL = DEVICE_MALLOC(sqrtL, size_sqrtL);
-    matrix_diag_cpu(sqrtL, n_components, n_components, 
+    sqrtL_device = DEVICE_MALLOC(sqrtL_device, size_sqrtL);
+    matrix_diag_cpu(sqrtL_device, n_components, n_components,
                     S_device, n_components);
     // get V from VT
 //    float *V_device = nullptr;
@@ -148,10 +149,28 @@ KPCA::fit(Array &matrix){
     delete this->V_T;
     this->V_T = new Array{
           nullptr, nullptr, subVT_device,
-          2, {ssize_t(Row_subVT), ssize_T(Col_subVT)}, , std::string(1,'f'),
+          2, {ssize_t(Row_subVT), ssize_t(Col_subVT)}, std::string(1,'f'),
           ssize_t(sizeof(float)), ssize_t(Row_subVT*Col_subVT),
-          {ssize_t(sizeof(float)*Row_subVT), ssize_t(sizeof(float))},
+          {ssize_t(sizeof(float)*Row_subVT), ssize_t(sizeof(float))}
         };
+    
+    //mappedX =  sqrtL* subVT
+    float *mappedX_device = nullptr;
+    size_t Row_mappedX = Row_sqrtL, Col_mappedX = Col_subVT;
+    mappedX_device = DEVICE_MALLOC(mappedX_device, size_mappedX);
+
+    matrix_dotmul_cpu(sqrtL_device, Row_sqrtL, Col_sqrtL,
+                      subVT_device, Row_subVT, Col_subVT,
+                      mappedX_device, Row_mappedX, Col_mappedX);
+
+    DEVICE_FREE(sqrtL_device);
+
+    return new Array{
+          nullptr, nullptr, mappedX_device,
+          2, {ssize_t(Row_mappedX), ssize_t(Col_mappedX)}, std::string(1,'f'),
+          ssize_t(sizeof(float)), ssize_t(Row_mappedX*Col_mappedX),
+          {ssize_t(sizeof(float)*Row_mappedX), ssize_t(sizeof(float))}
+    };
 
 //    float *V_device = nullptr;
 //    V_device = DEVICE_MALLOC(V_device, size_VT);
