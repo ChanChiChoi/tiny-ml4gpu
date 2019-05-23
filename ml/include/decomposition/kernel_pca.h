@@ -16,7 +16,7 @@ public:
 
     // only init the n_components;
     KPCA ( size_t n_components, const std::string kernel_in="gaussian",
-         const float param1_in):n_components{n_components},param1{param1_in}{
+         const float param1_in=1.0):n_components{n_components},param1{param1_in}{
         kernel = std::move(kernel_in);
         
         V_T = new Array();
