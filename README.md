@@ -7,12 +7,12 @@ firstly, use cuda to coding the base part, then, use pybind11 to wrapper the .cu
 like this, firstly, you should transfer data from cpu host onto gpu device:  
 ![](./img/array.png)
 
-## Done:
+## Done:  
 common:  Array;
 
-ML:
-decomposition:
-PCA; Kernel PCA(coding)
+ML:  
+decomposition:  
+PCA; Kernel PCA(coding)  
 
 ## TODO:  
 in the future, the ml4gpu project will have three version:  
