@@ -10,6 +10,7 @@
 # define TILE_HEIGHT 32
 # define TILE_WIDTH 32
 
+# define BLOCK_LENGTH 256
 /*
 template === one scalar operation
 */
@@ -361,6 +362,32 @@ matrix_mul_launch(float *Md, u32 Row_Md, u32 Col_Md,
                                op);
 }
 
+/*
+template:diag
+*/
+template<typename T> __global__ void
+matrix_diag(T *mat, u32 Row, u32 Col, T *vec, u32 len){
+    assert(Row == len);
+    assert(Col == len);
+
+//    u32 idy = blockIdx.y*blockDim.y + threadIdx.y;
+    u32 idx = blockIdx.x*blockDim.x + threadIdx.x;
+
+    u32 thread_idx = idx;
+    
+    if (thread_idx >= len)
+        return ;
+    mat[thread_idx*Col+thread_idx] = vec[thread_idx];
+}
+
+template<typename T> void
+matrix_diag_launch(T *mat, u32 Row, u32 Col, T *vec, u32 len){
+
+    dim3 grid(MAX(1, (size_t)ceil(double(len)/BLOCK_LENGTH)));
+    dim3 block(BLOCK_LENGTH);
+
+    matrix_diag<T><<<grid,block>>>(mat, Row, Col, vec, len);
+}
 //================ 
 /*
 function: matrix_dotmul_cpu
@@ -451,5 +478,11 @@ matrix_mul_cpu(float *Md, u32 Row_Md, u32 Col_Md,
                Nd, Row_Nd, Col_Nd,
                Pd, Row_Pd, Col_Pd,
                op);
-
+}
+/*
+function: matrix_diag_cpu
+*/
+void
+matrix_diag_cpu(float *mat, u32 Row, u32 Col, float *vec, u32 len){
+    matrix_diag_launch<float>(mat, Row, Col, vec, len);
 }
