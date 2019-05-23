@@ -7,6 +7,8 @@
 # define TILE_HEIGHT 32
 # define TILE_WIDTH 32
 
+# define BLOCK_LENGTH 256
+
 
 /*
 vector_repeat_by_rows
@@ -54,6 +56,8 @@ vector_sum
 */
 template<typename T> __global__ void
 vector_sum(T *vec, u32 len, T *res){
+  //TODO: ???????????????
+  __shared__ T block[LENGTH];
   
 
 }
@@ -61,8 +65,8 @@ vector_sum(T *vec, u32 len, T *res){
 template<typename T> void
 vector_sum_launch(T *vec, u32 len, T *res){
 
-    dim3 grid(1);
-    dim3 block(1024);
+    dim3 grid();
+    dim3 block(LENGTH);
   
     vector_sum<T><<<grid, block>>>(vec, len, res);
 }
