@@ -6,89 +6,12 @@
 #include "common/include/common.h"
 //#include "common/include/malloc_free.h"
 #include "ml/include/math/matrix.h"
+#include "ml/include/math/scalar_op.cuh"
 
 # define TILE_HEIGHT 32
 # define TILE_WIDTH 32
 
 # define BLOCK_LENGTH 256
-/*
-template === one scalar operation
-*/
-template<typename T> __device__ T
-scalar_sqrt(T x){
-    return sqrt(x);
-}
-
-
-template<typename T> __device__ T
-scalar_operation1(T x, const char *op){
-  /*
-   this function used to be entrance of how to handle one scalar
-   1 - sqrt(x)
-
-  */
-  T ans = T(0);
-  if (strcmp(op,"sqrt") == 0){
-      ans = scalar_sqrt<T>(x);
-  }
-  return ans;
-}
-
-/*
-template === two scalar operation
-*/
-template<typename T> __device__ T
-scalar_multiply(T x, T y){
-  return x*y;
-}
-
-template<typename T> __device__ T
-scalar_mse(T x, T y){
-    T tmp = abs(x-y);
-    return tmp*tmp;
-}
-
-template<typename T> __device__ T
-scalar_divide(T x, T y){
-  return x-y;
-}
-
-
-template<typename T> __device__ T
-scalar_add(T x, T y){
-  return x+y;
-}
-
-template<typename T> __device__ T
-scalar_gaussian(T x, T sigma){
-  // T should not be int data type, in case of return 0
-  return exp(-x*x/(2*sigma*sigma));
-   
-}
-
-
-template<typename T> __device__ T
-scalar_operation2(T x, T y, const char  *op){
-  /*
-   this function used to be entrance of how to handle two scalar
-   1 - x * y
-   2 - |x-y|^2
-
-  */
-  T ans = T(0);
-  if (strcmp(op,"mul") == 0){
-      ans = scalar_multiply<T>(x,y);
-  }else if(strcmp(op, "mse") == 0){
-      ans = scalar_mse<T>(x,y); 
-  }else if(strcmp(op,"divide") == 0){
-      ans = scalar_divide<T>(x,y);
-  }else if(strcmp(op, "gaussian") == 0){
-      ans = scalar_gaussian<T>(x,y);
-  }else if(strcmp(op, "add") == 0){
-      ans = scalar_add<T>(x,y);
-  }
-  return ans;
-}
 
 
 //=============
