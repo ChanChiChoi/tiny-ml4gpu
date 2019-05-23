@@ -122,7 +122,7 @@ KPCA::fit(Array &matrix){
           nullptr, S, S_device,
           2, {1, ssize_t(Length)}, std::string(1,'f'),
           ssize_t(sizeof(float)), ssize_t(1*Length),
-          {ssize_t(sizeof(float)*Length), ssize_t(ssizeof(float))}
+          {ssize_t(sizeof(float)*Length), ssize_t(sizeof(float))}
         };
     
     float *sqrtL = nullptr;
@@ -147,8 +147,12 @@ KPCA::fit(Array &matrix){
 
     delete this->V_T;
     this->V_T = new Array{
-
+          nullptr, nullptr, subVT_device,
+          2, {ssize_t(Row_subVT), ssize_T(Col_subVT)}, , std::string(1,'f'),
+          ssize_t(sizeof(float)), ssize_t(Row_subVT*Col_subVT),
+          {ssize_t(sizeof(float)*Row_subVT), ssize_t(sizeof(float))},
         };
+
 //    float *V_device = nullptr;
 //    V_device = DEVICE_MALLOC(V_device, size_VT);
 //    matrix_transpose_cpu(VT_device, Row_VT, Col_VT,
