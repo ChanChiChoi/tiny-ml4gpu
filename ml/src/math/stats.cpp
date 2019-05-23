@@ -25,7 +25,7 @@ cov_cpu(float *mat, u32 Row_mat, u32 Col_mat,
 
     matrix_dotmul_cpu(mat_T_device,Row_mat_T, Col_mat_T,
                    mat, Row_mat, Col_mat,
-                   mat_cov, Row_mat_cov, Col_mat_cov,1);
+                   mat_cov, Row_mat_cov, Col_mat_cov,"mul");
 
     DEVICE_FREE(mat_T_device);
 
@@ -37,7 +37,7 @@ cov_cpu(float *mat, u32 Row_mat, u32 Col_mat,
 
 void
 gram_cpu(float *mat, u32 Row_mat, u32 Col_mat,
-         float *mat_gram, u32 Row_gram, u32 Col_gram ){
+         float *mat_gram, u32 Row_gram, u32 Col_gram, const float param1){
 
     size_t size = sizeof(float)*Row_mat*Col_mat;
     float *mat_T_device = nullptr;
@@ -47,14 +47,26 @@ gram_cpu(float *mat, u32 Row_mat, u32 Col_mat,
     u32 Col_mat_T = Row_mat;
     matrix_transpose_cpu(mat,Row_mat, Col_mat,
                   mat_T_device, Row_mat_T, Col_mat_T);
-    
+    // computer L2_distance  
     matrix_dotmul_cpu(mat,Row_mat, Col_mat,
                    mat_T_device, Row_mat_T, Col_mat_T,
-                   mat_gram, Row_gram, Col_gram,2);
+                   mat_gram, Row_gram, Col_gram,"mse");
     
     DEVICE_FREE(mat_T_device);
-    
-    matrix_scalar_sqrt_cpu(mat_gram, Row_gram, Col_gram, 1);
-    matrix_gaussian_scalar_cpu(mat_gram, Row_gram, Col_gram, 1);
+    // computer sqrt of each elements
+    matrix_scalar_sqrt_cpu(mat_gram, Row_gram, Col_gram);
+    // computer gaussian of each elements
+    matrix_gaussian_scalar_cpu(mat_gram, Row_gram, Col_gram, param1);
+
+}
+
+
+float
+sum_vec(float *vec, size_t size){
+    float ans = 0;
+    for (int i = 0;i<size i++){
+        ans += vec[i];
+    }
+    return ans;
 
 }

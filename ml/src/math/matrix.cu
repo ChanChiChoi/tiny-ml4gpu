@@ -393,7 +393,7 @@ matrix_transpose_cpu(float *mat_src, u32 Row_src, u32 Col_src,
 function: matrix_divide_scalar_cpu
 */
 void
-matrix_divide_scalar_cpu(float *mat, u32 Row, u32 Col, u32 scalar){
+matrix_divide_scalar_cpu(float *mat, u32 Row, u32 Col, float scalar){
     matrix_scalar_launch<float>(mat, Row, Col, scalar,"divide");
 }
 
@@ -402,7 +402,7 @@ matrix_divide_scalar_cpu(float *mat, u32 Row, u32 Col, u32 scalar){
 function: matrix_add_scalar_cpu
 */
 void
-matrix_add_scalar_cpu(float *mat, u32 Row, u32 Col, u32 scalar){
+matrix_add_scalar_cpu(float *mat, u32 Row, u32 Col, float scalar){
     matrix_scalar_launch<float>(mat, Row, Col, scalar,"add");
 }
 
@@ -410,7 +410,7 @@ matrix_add_scalar_cpu(float *mat, u32 Row, u32 Col, u32 scalar){
 function: matrix_gaussian_scalar_cpu
 */
 void
-matrix_gaussian_scalar_cpu(float *mat, u32 Row, u32 Col, u32 scalar_sigma){
+matrix_gaussian_scalar_cpu(float *mat, u32 Row, u32 Col, float scalar_sigma){
     matrix_scalar_launch<float>(mat, Row, Col, scalar_sigma,"gaussian");
 }
 
