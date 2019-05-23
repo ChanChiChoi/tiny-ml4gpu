@@ -52,6 +52,12 @@ scalar_divide(T x, T y){
   return x-y;
 }
 
+
+template<typename T> __device__ T
+scalar_add(T x, T y){
+  return x+y;
+}
+
 template<typename T> __device__ T
 scalar_gaussian(T x, T sigma){
   // T should not be int data type, in case of return 0
@@ -77,6 +83,8 @@ scalar_operation2(T x, T y, const char  *op){
       ans = scalar_divide<T>(x,y);
   }else if(strcmp(op, "gaussian") == 0){
       ans = scalar_gaussian<T>(x,y);
+  }else if(strcmp(op, "add") == 0){
+      ans = scalar_add<T>(x,y);
   }
   return ans;
 }
@@ -386,7 +394,16 @@ function: matrix_divide_scalar_cpu
 */
 void
 matrix_divide_scalar_cpu(float *mat, u32 Row, u32 Col, u32 scalar){
-    matrix_scalar_launch<float>(mat, Row, Col, scalar,3);
+    matrix_scalar_launch<float>(mat, Row, Col, scalar,"divide");
+}
+
+
+/*
+function: matrix_add_scalar_cpu
+*/
+void
+matrix_add_scalar_cpu(float *mat, u32 Row, u32 Col, u32 scalar){
+    matrix_scalar_launch<float>(mat, Row, Col, scalar,"add");
 }
 
 /*
@@ -394,7 +411,7 @@ function: matrix_gaussian_scalar_cpu
 */
 void
 matrix_gaussian_scalar_cpu(float *mat, u32 Row, u32 Col, u32 scalar_sigma){
-    matrix_scalar_launch<float>(mat, Row, Col, scalar_sigma,4);
+    matrix_scalar_launch<float>(mat, Row, Col, scalar_sigma,"gaussian");
 }
 
 
@@ -418,7 +435,7 @@ function: matrix_sqrt_cpu
 void
 matrix_scalar_sqrt_cpu(float *mat, u32 Row_mat, u32 Col_mat){
 
-    matrix_scalar_self_launch<float>(mat, Row_mat, Col_mat, 1);
+    matrix_scalar_self_launch<float>(mat, Row_mat, Col_mat, "sqrt");
 }
 
 /*
