@@ -23,13 +23,23 @@ KPCA::fit(Array &matrix){
     
     /* 1 - calc kernel matrix, calc distance between each samples with other samples */
     // 1.1 - compute gramm matrix
+    float *mat_T_device = nullptr;
+    mat_T_device = DEVICE_MALLOC(mat_T_device, size_gram);
+    size_t Row_mat_T = cols, Col_mat_T = rows;
+    matrix_transpose_cpu(ptr_device, rows, cols,
+                  mat_T_device, Row_mat_T, Col_mat_T);    
+
     size_t Row_gram = rows, Col_gram = rows;
     size_t size_gram = Row_gram*Col_gram*sizeof(float);
     float *K_device = nullptr;
     float *K_device = DEVICE_MALLOC(K_device, size_gram);
-    
+
     gram_cpu(ptr_device, rows, cols,
-            K_device, Row_gram, Col_gram);
+             mat_T_device, Row_mat_T, Col_mat_T,
+             K_device, Row_gram, Col_gram,
+             this->param1);
+
+    DEVICE_FREE(mat_T_device);
 
     // 1.2 - compute K matrix
     size_t size_mean_by_row = sizeof(float)*1*Col_gram;
@@ -196,8 +206,14 @@ KPCA::fit(Array &matrix){
 
 
 Array * 
-KPCA::transform(Array &matrix){
+KPCA::transform(Array &train, Array &test){
+    //1 - gram
 
+    gram_cpu();
+    //2 - computer K
+
+
+    //3 - transform
 }
 
 
