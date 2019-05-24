@@ -37,22 +37,14 @@ cov_cpu(float *mat, u32 Row_mat, u32 Col_mat,
 
 void
 gram_cpu(float *mat, u32 Row_mat, u32 Col_mat,
+         float mat_T_device, u32 Row_mat_T, u32 Col_mat_T,
          float *mat_gram, u32 Row_gram, u32 Col_gram, const float param1){
 
-    size_t size = sizeof(float)*Row_mat*Col_mat;
-    float *mat_T_device = nullptr;
-    mat_T_device = DEVICE_MALLOC(mat_T_device, size);
-    
-    u32 Row_mat_T = Col_mat;
-    u32 Col_mat_T = Row_mat;
-    matrix_transpose_cpu(mat,Row_mat, Col_mat,
-                  mat_T_device, Row_mat_T, Col_mat_T);
     // computer L2_distance  
     matrix_dotmul_cpu(mat,Row_mat, Col_mat,
                    mat_T_device, Row_mat_T, Col_mat_T,
                    mat_gram, Row_gram, Col_gram,"mse");
     
-    DEVICE_FREE(mat_T_device);
     // computer sqrt of each elements
     matrix_scalar_sqrt_cpu(mat_gram, Row_gram, Col_gram);
     // computer gaussian of each elements
