@@ -8,5 +8,8 @@ src_mk:
 install:
 	$(MAKE) install -C src
 
+test:
+	$(MAKE) test -C src
+
 clean:
 	${MAKE} clean -C src

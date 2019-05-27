@@ -44,7 +44,7 @@ svd.o:svd.cu
 	$(NVCC) $^ -c $(NVCCFLAG) $(INCLUDE_SELF)  -o $@
 
 stats.o: stats.cpp
-	$(NVCC) $^ -c $(NVCCFLAG) $(INCLUDE_SELF) -o $@
+	$(CC) $^ -c $(CXXFLAG) $(INCLUDE_SELF) -o $@ 
 
 vector.o: vector.cu
 	$(NVCC) $^ -c $(NVCCFLAG) $(INCLUDE_SELF) -o $@
