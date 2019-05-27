@@ -34,7 +34,7 @@ obj := libm4g_ml_math.so
 
 all: $(obj)
 	
-$(obj):  matrix.o svd.o stats.o
+$(obj):  matrix.o svd.o stats.o vector.o
 	$(CC)  $^ $(CLDFLAG) $(INCLUDE_SELF)  -o $@ ${LDFLAGS} ${LDLIBS}
 	 
 matrix.o: matrix.cu
@@ -44,6 +44,9 @@ svd.o:svd.cu
 	$(NVCC) $^ -c $(NVCCFLAG) $(INCLUDE_SELF)  -o $@
 
 stats.o: stats.cpp
+	$(NVCC) $^ -c $(NVCCFLAG) $(INCLUDE_SELF) -o $@
+
+vector.o: vector.cu
 	$(NVCC) $^ -c $(NVCCFLAG) $(INCLUDE_SELF) -o $@
 
 clean_sotmp := ${obj} 
