@@ -57,3 +57,4 @@ clean:
 	rm -f *.o
 	rm -f ${clean_so}
 	rm -f ${libcom}/${clean_so}
+	rm -f ${libcom}/*.o
