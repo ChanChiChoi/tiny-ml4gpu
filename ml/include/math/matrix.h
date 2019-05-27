@@ -29,3 +29,6 @@ matrix_scalar_sqrt_cpu(float *mat, u32 Row_mat, u32 Col_mat);
 
 void
 matrix_diag_cpu(float *mat, u32 Row, u32 Col, float *vec, u32 len);
+
+void
+matrix_add_scalar_cpu(float *mat, u32 Row, u32 Col, float scalar);
