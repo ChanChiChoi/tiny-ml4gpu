@@ -45,6 +45,12 @@ KPCA::fit(Array &matrix){
     size_t size_mean_by_row = sizeof(float)*1*Col_gram;
     float *mean = (float *)malloc(size_mean_by_row);
     float *mean_device = HOST_TO_DEVICE_MALLOC(mean, size_mean_by_row);
+
+    // compute mean by row
+    mean_by_rows_cpu(K_device, mean_device, Row_gram, Col_gram);
+  
+    // calc mean of mean device on host side, then K+ mean
+    DEVICE_TO_HOST(mean, mean_device, size_mean_by_row); 
  
     delete this->column_sums;
     this->column_sums = new Array{
@@ -53,11 +59,7 @@ KPCA::fit(Array &matrix){
                ssize_t(sizeof(float)), ssize_t(1*Col_gram),
                {ssize_t(sizeof(float)*Col_gram), ssize_t(sizeof(float))}
                };
-    // compute mean by row
-    mean_by_rows_cpu(K_device, mean_device, Row_gram, Col_gram);
-  
-    // calc mean of mean device on host side, then K+ mean
-    DEVICE_TO_HOST(mean, mean_device, size_mean_by_row); 
+
     // computer total_sum
     this->total_sum = 0;
     for (int i=0;i<Col_gram; i++){
@@ -125,7 +127,12 @@ KPCA::fit(Array &matrix){
     // 4 - trans_mat and output transformed input
  
     // handle L
-    vector_sqrt_self_cpu(S_device, Length);
+    float *L_device = nullptr;
+    L_device = DEVICE_MALLOC(L_device, size_S);
+    matrix_subblock_cpu(S_device, 1, Length,
+                        L_device, 1, Length,
+                        0,0,1,Length);
+    vector_sqrt_self_cpu(L_device, Length);
 
     delete this->L;
     this->L = new Array{
@@ -140,7 +147,9 @@ KPCA::fit(Array &matrix){
     size_t size_sqrtL = sizeof(float)*n_components*n_components;
     sqrtL_device = DEVICE_MALLOC(sqrtL_device, size_sqrtL);
     matrix_diag_cpu(sqrtL_device, n_components, n_components,
-                    S_device, n_components);
+                    L_device, n_components);
+
+    DEVICE_FREE(L_device);
     // get V from VT
 //    float *V_device = nullptr;
 //    V_device = DEVICE_MALLOC(V_device, size_VT);
@@ -207,13 +216,147 @@ KPCA::fit(Array &matrix){
 
 Array * 
 KPCA::transform(Array &train, Array &test){
+/*
+ * % Compute and center kernel matrix
+ * K = gram(mapping.X, point, mapping.kernel, mapping.param1, mapping.param2);
+ * J = repmat(mapping.column_sums', [1 size(K, 2)]);
+ * K = K - repmat(sum(K, 1), [size(K, 1) 1]) - J + repmat(mapping.total_sum, [size(K, 1) size(K, 2)]);
+ *                                                 
+ * % Compute transformed points
+ * t_point = mapping.invsqrtL * mapping.V' * K;
+ * t_point = t_point';
+ *
+ * */
     //1 - gram
 
-    gram_cpu();
+    float *X_device = (float *)train->ptr_buf->ptr_deivce;
+    float *point_device = (float *)test->ptr_buf->ptr_device;
+    // get point_T_device
+
+    size_t Row_X = train->ptr_buf->shape[0];
+    size_t Col_X = train->ptr_buf->shape[1];
+
+    size_t Row_point = test->ptr_buf->shape[0];
+    size_t Col_point = test->ptr_buf->shape[1];
+
+
+    float *point_T_device = nullptr;
+    size_t Row_point_T = Col_point, Col_point_T = Row_point;
+    size_t size_point = sizeof(float)*Row_point*Col_point;
+    point_T_device = DEVICE_MALLOC(point_T_device, size_point);    
+    matrix_transpose_cpu(point_device, Row_point, Col_point,
+                         point_T_device, Row_point_T, Col_point_T);
+
+    float *K_device = nullptr;
+    size_t Row_K = Row_X, Col_K = Col_point_T;
+    size_t size_K = sizeof(float)*Row_K*Col_K;
+    K_device = DEVICE_MALLOC(K_device, size_K);
+    // get K
+    gram_cpu(X_device, Row_X, Col_X,
+             point_T_device, Row_point_T, Col_point_T,
+             K_device, Row_K, Col_K);
+
+    DEVICE_FREE(point_T_device); 
+
     //2 - computer K
+    //K - mean
+    //get mean
+    float *mean_device = nullptr;
+    size_t Row_mean = 1, Col_mean = Col_K;
+    size_t size_mean = sizeof(float)*Row_mean*Col_mean;
+    mean_device = DEVICE_MALLOC(mean_device,size_mean);
 
+    // compute mean by row
+    mean_by_rows_cpu(K_device, mean_device, Row_K, Col_K);
+    
+    float *mean_rep_device = nullptr;
+    size_t Row_mean_rep = Row_K, Col_mean_rep = Col_K;
+    mean_rep_device = DEVICE_MALLOC(mean_rep_device, Row_K, Col_K,
+                           mean_device, Col_mean);
 
+    DEVICE_FREE(mean_deivce);
+
+    matrix_mul_cpu(K_device, Row_K, Col_K,
+                   mean_rep_device, Row_mean_rep, Col_mean_rep,
+                   K_device, Row_K, Col_K,
+                   "divide");
+    DEVICE_FREE(mean_rep_device);
+
+    // K - J begin
+    float *J_T_device = nullptr;
+    size_t Row_J_T = Row_K, Col_J_T = Col_K;
+    size_t size_J_T = sizeof(float)*Row_J_T*Col_J_T;    
+    J_T_device = DEVICE_MALLOC(J_T_device, size_J_T);
+    
+    vector_repeat_by_rows_cpu(J_T_device, Row_J_T, Col_J_T,
+                         this->column_sums->ptr_device, this->column_sums->shape[1] );
+    // transpose J
+    float *J_device = nullptr;
+    size_t Row_J = Col_J_T, Col_J = Row_J_T;
+    size_t size_J = size_J_T;
+    J_device = DEVICE_MALLOC(J_device, size_J);
+    matrix_transpose_cpu(J_T_device, Row_J_T, Col_J_T,
+                         J_device, Row_J, Col_J);
+    DEVICE_FREE(J_T_device);
+    // K-J
+    matrix_mul_cpu(K_device, Row_K, Col_K,
+                   J_device, Row_J, Col_J,
+                   K_device, Row_K, Col_K,
+                   "divide");
+
+    DEVICE_FREE(J_device);
+
+    matrix_add_scalar_cpu(K_device, Row_K, Col_K, this->total_sum);
+    
     //3 - transform
+    // computer V'*K
+    float *t_point2_device = nullptr;   
+    size_t Row_t_point2 = this->n_components, Col_t_point2 = Row_K;
+    size_t size_t_point2 = sizeof(float)*Row_t_point2*Col_t_point2;
+    t_point2_device = DEVICE_MALLOC(t_point2_device, size_t_point2);
+
+    matrix_dotmul_cpu(this->V_T->ptr_deivce, this->V_T->shape[0], this->V_T->shape[1],
+                     K_device, Row_K, Col_K,
+                     t_point2_device, Row_t_point2, Col_t_point2); 
+
+    DEVICE_FREE(K_device);
+    // copy this->L to L_device
+    float *L_device = nullptr;
+    size_t Row_L = 1, Col_L = this->L->shape[1];
+    L_device = DEVICE_MALLOC(L_device, sizeof(float)*Row_L*Col_L);
+    matrix_subblock_cpu(this->L->ptr_device, Row_L, Col_L,
+                        L_device, Row_L, Col_L,
+                        0,0,Row_L, Col_L);
+    // computer invsqrt
+    vector_invsqrt_self_cpu(L_device, Col_L);
+    
+    // compute invsqrtL *ans
+    float *invsqrtL_device = nullptr;
+    size_t Row_invsqrtL = n_components, Col_invsqrtL = n_components;
+    size_t size_invsqrtL = sizeof(float)*Row_invsqrtL*Col_invsqrtL;
+    invsqrtL_device = DEVICE_MALLOC(invsqrtL_device, size_invsqrtL);
+    matrix_diag_cpu(invsqrtL_device, Row_invsqrtL, Col_invsqrtL,
+                     L_device, Col_L);
+
+    DEVICE_FREE(L_device);
+
+    float *res_device = nullptr;
+    size_t Row_res = Row_invsqrtL, Col_res = Col_t_point2;
+    res_device = DEVICE_MALLOC(res_device, sizeof(float)*Row_res*Col_res);
+
+    matrix_dotmul_cpu(invsqrtL_device, Row_invsqrtL, Col_invsqrtL,
+                      t_point2_device, Row_t_point2, Col_t_point2,
+                      res_device, Row_res, Col_res);
+    DEVICE_FREE(t_point2_device);
+    DEVICE_FREE(invsqrtL_device);
+
+    return new Array{
+           nullptr, nullptr, res_device,
+           2, {ssize_t(Row_res), ssize_t(Col_res)}, std::string(1,'f'),
+           ssize_t(sizeof(float)), ssize_t(Row_res*Col_res),
+           {ssize_t(sizeof(float)*Row_res), ssize_t(sizeof(float))}
+
+        };
 }
 
 
