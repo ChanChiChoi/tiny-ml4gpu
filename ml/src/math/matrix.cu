@@ -86,7 +86,7 @@ matrix_dotmul(T * Md, u32 Row_Md, u32 Col_Md,
            // calc the point
            for(u32 k = 0; k < ind_max_TILE; ++k){
               //Pvalue += Mds[ty][k] * Nds[k][tx];
-              Pvalue += scalar_operation2(Mds[ty][k], Nds[k][tx],op);
+              Pvalue += scalar_operation2<T>(Mds[ty][k], Nds[k][tx],op);
            }
        }
 
@@ -163,7 +163,7 @@ matrix_scalar_self(T *mat, u32 Row, u32 Col, const char *op){
     if (idy >= Row || idx >= Col)
         return ;
     T x = mat[idy*Col+idx];
-    mat[idy*Col+idx] = scalar_operation1(x,op);
+    mat[idy*Col+idx] = scalar_operation1<T>(x,op);
 }
 
 
@@ -192,7 +192,7 @@ matrix_scalar(T *mat, u32 Row, u32 Col, u32 scalar, const char *op){
     if (idy >= Row || idx >= Col)
         return ;
     T x = mat[idy*Col+idx];
-    mat[idy*Col+idx] = scalar_operation2(x,T(scalar),op);
+    mat[idy*Col+idx] = scalar_operation2<T>(x,T(scalar),op);
 //    mat[idy*Col+idx] /= scalar;
 }
 
@@ -266,7 +266,7 @@ matrix_mul(float *Md, u32 Row_Md, u32 Col_Md,
   
     T x = Md[thread_idx];
     T y = Nd[thread_idx];
-    Pd[thread_idx] = scalar_operation2(x,y,op);
+    Pd[thread_idx] = scalar_operation2<T>(x,y,op);
 }
 
 template<typename T> void
