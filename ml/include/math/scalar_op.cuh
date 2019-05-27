@@ -5,6 +5,8 @@
 #include "common/include/type.h"
 #include "common/include/common.h"
 
+# ifndef __SCALAR_OP__
+# define __SCALAR_OP__
 NAMESPACE_BEGIN(m4g)
 __device__ int 
 strcmp(const char *x, const char *y){
@@ -111,4 +113,4 @@ scalar_operation2(T x, T y, const char  *op){
   }
   return ans;
 }
-
+# endif
