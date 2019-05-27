@@ -50,16 +50,15 @@ template: vector_sum
 template<typename T> __global__ void
 vector_sum(T *vec, u32 len, T *res){
   //TODO: ???????????????
-  __shared__ T block[LENGTH];
-  
+  //__shared__ T block[BLOCK_LENGTH];
 
 }
 
 template<typename T> void
 vector_sum_launch(T *vec, u32 len, T *res){
-
-    dim3 grid();
-    dim3 block(LENGTH);
+    // TODO:??????
+    dim3 grid(MAX(1,ceil(double(len)/BLOCK_LENGTH)));
+    dim3 block(BLOCK_LENGTH);
   
     vector_sum<T><<<grid, block>>>(vec, len, res);
 }
@@ -79,7 +78,7 @@ vector_op_self(T *vec, u32 len, const char *op){
     vec[idx] = scalar_operation1(tmp, op);
 } 
 
-template<typename T> __global__ void
+template<typename T> void
 vector_op_self_launch(T *vec, u32 len, const char *op){
 
     dim3 grid(MAX(1, ceil(double(len)/BLOCK_LENGTH)));
