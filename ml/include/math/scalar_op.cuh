@@ -8,7 +8,7 @@
 # ifndef __SCALAR_OP__
 # define __SCALAR_OP__
 NAMESPACE_BEGIN(m4g)
-__device__ int 
+static __device__ int 
 strcmp(const char *x, const char *y){
   
     assert(x != nullptr && y != nullptr);
