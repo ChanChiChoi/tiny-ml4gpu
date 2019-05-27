@@ -1,3 +1,4 @@
+# first we need "cd common; make && make install"
 
 all: models
 
