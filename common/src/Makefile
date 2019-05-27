@@ -12,23 +12,27 @@ CLDFLAG :=  -shared -fPIC -std=c++11
 NVCCFLAG := -shared -Xcompiler -fPIC -std=c++11
 INCLUDE_PY := $(shell echo `cd ${rootpath}/pybind11 && python3 -m pybind11 --includes`)
 
-INCLUDE_DIR := ${rootpath} ${rootpath}/pybind11/include  
 INCLUDE_SELF := -I${rootpath}
+
+INCLUDE_DIR := ${rootpath} ${rootpath}/pybind11/include  
 INCLUDE := $(patsubst %,-I%,${INCLUDE_DIR})
 INCLUDE += ${INCLUDE_PY}
 
-lib := ${commonpath}/lib
+libcom := ${commonpath}/lib
 
 $(info $(INCLUDE_PY))
 
 all:  libm4g_com_cuMF.so ${obj}
 	
+# get the final pybind11 .so file
 $(obj): buffer_info_ex.o pybind11.cpp
 	$(CC) $^ ${CLDFLAG} $(INCLUDE)  -o $@ -L. -lm4g_com_cuMF 
 	 
+# use -fPIC to compiler the cpp file 
 buffer_info_ex.o: buffer_info_ex.cpp
 	$(CC) $< $(CXXFLAG) $(INCLUDE)  -o $@ 
 
+# make cu tobe a .so file
 libm4g_com_cuMF.so: malloc_free.cu
 	$(NVCC) $< $(NVCCFLAG) ${INCLUDE_SELF} -o $@
 
@@ -46,10 +50,10 @@ endif
 
 
 install:
-	cp *.so ${lib}
-	cp *.o ${lib}
+	cp *.so ${libcom}
+	cp *.o ${libcom}
 
 clean:
 	rm -f *.o
 	rm -f ${clean_so}
-	rm -f ${lib}/${clean_so}
+	rm -f ${libcom}/${clean_so}
