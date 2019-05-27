@@ -1,5 +1,5 @@
 
-all: common_mk ml_mk
+all:  ml_mk
 
 ml_mk: common_install
 	$(MAKE) -C ml
@@ -17,7 +17,7 @@ mv_lib: ml_install
 	mv common/lib/*.so lib
 	mv ml/lib/*.so lib
 
-ml_install:
+ml_install:ml_mk
 	${MAKE} install -C ml
 
 .PHONY: clean
