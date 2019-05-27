@@ -5,6 +5,7 @@
 #include "common/include/type.h"
 #include "common/include/common.h"
 
+NAMESPACE_BEGIN(m4g)
 __device__ int 
 strcmp(const char *x, const char *y){
   
@@ -21,7 +22,7 @@ strcmp(const char *x, const char *y){
     return 0;
 }
 
-
+NAMESPACE_END(m4g)
 
 /*
 template === one scalar operation
@@ -44,9 +45,9 @@ scalar_operation1(T x, const char *op){
 
   */
   T ans = T(0);
-  if (strcmp(op,"sqrt") == 0){
+  if (m4g::strcmp(op,"sqrt") == 0){
       ans = scalar_sqrt<T>(x);
-  }else if(strcmp(op, "invsqrt") == 0){
+  }else if(m4g::strcmp(op, "invsqrt") == 0){
       ans = scalar_invsqrt<T>(x);
   }
   return ans;
@@ -97,15 +98,15 @@ scalar_operation2(T x, T y, const char  *op){
 
   */
   T ans = T(0);
-  if (strcmp(op,"mul") == 0){
+  if (m4g::strcmp(op,"mul") == 0){
       ans = scalar_multiply<T>(x,y);
-  }else if(strcmp(op, "mse") == 0){
+  }else if(m4g::strcmp(op, "mse") == 0){
       ans = scalar_mse<T>(x,y); 
-  }else if(strcmp(op,"divide") == 0){
+  }else if(m4g::strcmp(op,"divide") == 0){
       ans = scalar_divide<T>(x,y);
-  }else if(strcmp(op, "gaussian") == 0){
+  }else if(m4g::strcmp(op, "gaussian") == 0){
       ans = scalar_gaussian<T>(x,y);
-  }else if(strcmp(op, "add") == 0){
+  }else if(m4g::strcmp(op, "add") == 0){
       ans = scalar_add<T>(x,y);
   }
   return ans;

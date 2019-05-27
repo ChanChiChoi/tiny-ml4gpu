@@ -56,7 +56,7 @@ gram_cpu(float *mat, u32 Row_mat, u32 Col_mat,
 float
 sum_vec(float *vec, size_t size){
     float ans = 0;
-    for (int i = 0;i<size i++){
+    for (int i = 0;i<size; i++){
         ans += vec[i];
     }
     return ans;
