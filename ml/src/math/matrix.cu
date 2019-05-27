@@ -275,8 +275,8 @@ matrix_mul_launch(float *Md, u32 Row_Md, u32 Col_Md,
            float *Pd, u32 Row_Pd, u32 Col_Pd,
            const char *op){
 
-    dim3 grid(MAX(1, (size_t)ceil((double)Col_sm/TILE_HEIGHT)),
-              MAX(1, (size_t)ceil((double)Row_sm/TILE_WIDTH)) );
+    dim3 grid(MAX(1, (size_t)ceil((double)Col_Pd/TILE_HEIGHT)),
+              MAX(1, (size_t)ceil((double)Row_Pd/TILE_WIDTH)) );
     dim3 block(TILE_WIDTH, TILE_HEIGHT);
 
     matrix_mul<T><<<grid, block>>>(Md, Row_Md, Col_Md,
