@@ -108,7 +108,7 @@ mean_by_rows_launch(float *mat_device, float *mean_device, u32 rows, u32 cols){
 void
 subtract_mean_by_rows_launch(float *mat_device, float *mean_device, u32 rows, u32 cols){
 
-    mean_by_rows_launch(float *mat_device, float *mean_device, u32 rows, u32 cols);
+    mean_by_rows_launch(mat_device, mean_device, rows, cols);
 
     const u32 block_size = 32;
     dim3 block1(block_size, block_size);
