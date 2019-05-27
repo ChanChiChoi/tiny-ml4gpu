@@ -8,4 +8,5 @@ cov_cpu(float *mat, u32 Row_mat, u32 Col_mat,
 
 void
 gram_cpu(float *mat, u32 Row_mat, u32 Col_mat,
-         float *mat_gram, u32 Row_gram, u32 Col_gram );
+         float mat_T_device, u32 Row_mat_T, u32 Col_mat_T,
+         float *mat_gram, u32 Row_gram, u32 Col_gram, const float param1);
