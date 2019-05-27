@@ -7,9 +7,10 @@
 
 # ifndef __SCALAR_OP__
 # define __SCALAR_OP__
-NAMESPACE_BEGIN(m4g)
-static __device__ int 
-strcmp(const char *x, const char *y){
+//NAMESPACE_BEGIN(m4g)
+//static __device__ int 
+template<typename T> __device__ int
+strcmp1(const char *x, const char *y){
   
     assert(x != nullptr && y != nullptr);
     while( *y != '\0'){
@@ -24,7 +25,7 @@ strcmp(const char *x, const char *y){
     return 0;
 }
 
-NAMESPACE_END(m4g)
+//NAMESPACE_END(m4g)
 
 /*
 template === one scalar operation
@@ -47,9 +48,9 @@ scalar_operation1(T x, const char *op){
 
   */
   T ans = T(0);
-  if (m4g::strcmp(op,"sqrt") == 0){
+  if (strcmp1<T>(op,"sqrt") == 0){
       ans = scalar_sqrt<T>(x);
-  }else if(m4g::strcmp(op, "invsqrt") == 0){
+  }else if(strcmp<T>(op, "invsqrt") == 0){
       ans = scalar_invsqrt<T>(x);
   }
   return ans;
@@ -92,7 +93,7 @@ scalar_gaussian(T x, T sigma){
 
 
 template<typename T> __device__ T
-scalar_operation2(T x, T y, const char  *op){
+scalar_operation2(T x, T y, const char *op){
   /*
    this function used to be entrance of how to handle two scalar
    1 - x * y
@@ -100,15 +101,15 @@ scalar_operation2(T x, T y, const char  *op){
 
   */
   T ans = T(0);
-  if (m4g::strcmp(op,"mul") == 0){
+  if (strcmp1<T>(op,"mul") == 0){
       ans = scalar_multiply<T>(x,y);
-  }else if(m4g::strcmp(op, "mse") == 0){
+  }else if(strcmp1<T>(op, "mse") == 0){
       ans = scalar_mse<T>(x,y); 
-  }else if(m4g::strcmp(op,"divide") == 0){
+  }else if(strcmp1<T>(op,"divide") == 0){
       ans = scalar_divide<T>(x,y);
-  }else if(m4g::strcmp(op, "gaussian") == 0){
+  }else if(strcmp1<T>(op, "gaussian") == 0){
       ans = scalar_gaussian<T>(x,y);
-  }else if(m4g::strcmp(op, "add") == 0){
+  }else if(strcmp1<T>(op, "add") == 0){
       ans = scalar_add<T>(x,y);
   }
   return ans;
