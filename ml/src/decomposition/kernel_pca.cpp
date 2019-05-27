@@ -6,6 +6,8 @@
 #include "ml/include/math/math.h"
 #include "ml/include/preprocessing/preprocess.h"
 #include "common/include/type.h"
+#include "common/include/buffer_info_ex.h"
+#include "common/include/malloc_free.h"
 
 
 // param1 = sigma
@@ -16,10 +18,10 @@ KPCA::fit(Array &matrix){
  * https://github.com/UMD-ISL/Matlab-Toolbox-for-Dimensionality-Reduction/blob/master/techniques/kernel_pca.m
  * */
 
-    float *ptr_device = (float *)matrix->ptr_buf->ptr_device;
-    assert(matrix->ptr_buf->ndim == 2);
-    size_t rows = matrix->ptr_buf->shape[0];
-    size_t cols = matrix->ptr_buf->shape[1];
+    float *ptr_device = (float *)(matrix.ptr_buf->ptr_device);
+    assert(matrix.ptr_buf->ndim == 2);
+    size_t rows = matrix.ptr_buf->shape[0];
+    size_t cols = matrix.ptr_buf->shape[1];
     
     /* 1 - calc kernel matrix, calc distance between each samples with other samples */
     // 1.1 - compute gramm matrix
@@ -32,7 +34,8 @@ KPCA::fit(Array &matrix){
 
     size_t Row_gram = rows, Col_gram = rows;
     float *K_device = nullptr;
-    float *K_device = DEVICE_MALLOC(K_device, size_gram);
+    size_t size_gram = sizeof(float)*Row_gram*Col_gram;
+    K_device = DEVICE_MALLOC(K_device, size_gram);
 
     gram_cpu(ptr_device, rows, cols,
              mat_T_device, Row_mat_T, Col_mat_T,
@@ -69,7 +72,7 @@ KPCA::fit(Array &matrix){
 
     // repeat mean vector to a whole matrix , then K - J
     float *J_device = nullptr;
-    float *J_device = DEVICE_MALLOC(J_device, size_gram);
+    J_device = DEVICE_MALLOC(J_device, size_gram);
     vector_repeat_by_rows_cpu(J_device, Row_gram, Col_gram,
                            mean_device, Col_gram); 
  
@@ -79,7 +82,7 @@ KPCA::fit(Array &matrix){
                    "divide");
     // tranpose J_device, then K - J'
     float *J_T_device = nullptr;
-    float *J_T_device = DEVICE_MALLOC(J_T_device, size_gram);
+    J_T_device = DEVICE_MALLOC(J_T_device, size_gram);
  
     matrix_transpose_cpu(J_device, Row_gram, Col_gram,
                          J_T_device, Col_gram, Row_gram);
@@ -122,7 +125,7 @@ KPCA::fit(Array &matrix){
 
     DEVICE_FREE(K_device);
     DEVICE_FREE(U_device);
-    free(U):
+    free(U);
  
     // 4 - trans_mat and output transformed input
  
@@ -157,7 +160,7 @@ KPCA::fit(Array &matrix){
 //                         V_device, Col_VT, Row_VT);
     // get submatrix of V_T
     float *subVT_device = nullptr;
-    size_t Row_subVT = n_components, Col_subV = Col_VT;
+    size_t Row_subVT = n_components, Col_subVT = Col_VT;
     size_t size_subVT = sizeof(float)*Row_subVT*Col_subVT;
     subVT_device = DEVICE_MALLOC(subVT_device, size_subVT);
 
@@ -229,15 +232,15 @@ KPCA::transform(Array &train, Array &test){
  * */
     //1 - gram
 
-    float *X_device = (float *)train->ptr_buf->ptr_deivce;
-    float *point_device = (float *)test->ptr_buf->ptr_device;
+    float *X_device = (float *)train.ptr_buf->ptr_device;
+    float *point_device = (float *)test.ptr_buf->ptr_device;
     // get point_T_device
 
-    size_t Row_X = train->ptr_buf->shape[0];
-    size_t Col_X = train->ptr_buf->shape[1];
+    size_t Row_X = train.ptr_buf->shape[0];
+    size_t Col_X = train.ptr_buf->shape[1];
 
-    size_t Row_point = test->ptr_buf->shape[0];
-    size_t Col_point = test->ptr_buf->shape[1];
+    size_t Row_point = test.ptr_buf->shape[0];
+    size_t Col_point = test.ptr_buf->shape[1];
 
 
     float *point_T_device = nullptr;
@@ -254,7 +257,8 @@ KPCA::transform(Array &train, Array &test){
     // get K
     gram_cpu(X_device, Row_X, Col_X,
              point_T_device, Row_point_T, Col_point_T,
-             K_device, Row_K, Col_K);
+             K_device, Row_K, Col_K,
+             this->param1);
 
     DEVICE_FREE(point_T_device); 
 
@@ -271,10 +275,13 @@ KPCA::transform(Array &train, Array &test){
     
     float *mean_rep_device = nullptr;
     size_t Row_mean_rep = Row_K, Col_mean_rep = Col_K;
-    mean_rep_device = DEVICE_MALLOC(mean_rep_device, Row_K, Col_K,
-                           mean_device, Col_mean);
+    size_t size_mean_rep = sizeof(float)*Row_mean_rep*Col_mean_rep;
+    mean_rep_device = DEVICE_MALLOC(mean_rep_device, size_mean_rep);
 
-    DEVICE_FREE(mean_deivce);
+    vector_repeat_by_rows_cpu(mean_rep_device, Row_mean_rep, Col_mean_rep,
+                              mean_device, Col_mean);
+
+    DEVICE_FREE(mean_device);
 
     matrix_mul_cpu(K_device, Row_K, Col_K,
                    mean_rep_device, Row_mean_rep, Col_mean_rep,
@@ -289,7 +296,7 @@ KPCA::transform(Array &train, Array &test){
     J_T_device = DEVICE_MALLOC(J_T_device, size_J_T);
     
     vector_repeat_by_rows_cpu(J_T_device, Row_J_T, Col_J_T,
-                         this->column_sums->ptr_device, this->column_sums->shape[1] );
+                         (float *)this->column_sums->ptr_buf->ptr_device, this->column_sums->ptr_buf->shape[1] );
     // transpose J
     float *J_device = nullptr;
     size_t Row_J = Col_J_T, Col_J = Row_J_T;
@@ -315,16 +322,16 @@ KPCA::transform(Array &train, Array &test){
     size_t size_t_point2 = sizeof(float)*Row_t_point2*Col_t_point2;
     t_point2_device = DEVICE_MALLOC(t_point2_device, size_t_point2);
 
-    matrix_dotmul_cpu(this->V_T->ptr_deivce, this->V_T->shape[0], this->V_T->shape[1],
+    matrix_dotmul_cpu((float *)this->V_T->ptr_buf->ptr_device, this->V_T->ptr_buf->shape[0], this->V_T->ptr_buf->shape[1],
                      K_device, Row_K, Col_K,
                      t_point2_device, Row_t_point2, Col_t_point2); 
 
     DEVICE_FREE(K_device);
     // copy this->L to L_device
     float *L_device = nullptr;
-    size_t Row_L = 1, Col_L = this->L->shape[1];
+    size_t Row_L = 1, Col_L = this->L->ptr_buf->shape[1];
     L_device = DEVICE_MALLOC(L_device, sizeof(float)*Row_L*Col_L);
-    matrix_subblock_cpu(this->L->ptr_device, Row_L, Col_L,
+    matrix_subblock_cpu((float *)this->L->ptr_buf->ptr_device, Row_L, Col_L,
                         L_device, Row_L, Col_L,
                         0,0,Row_L, Col_L);
     // computer invsqrt
