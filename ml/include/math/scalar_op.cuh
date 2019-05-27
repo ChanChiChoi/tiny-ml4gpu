@@ -1,9 +1,27 @@
 #pragma once
 
-#include <string.h>
+//#include <string.h>
 #include <math_functions.hpp>
 #include "common/include/type.h"
 #include "common/include/common.h"
+
+__device__ int 
+strcmp(const char *x, const char *y){
+  
+    assert(x != nullptr && y != nullptr);
+    while( *y != '\0'){
+        if (*x < *y){
+            return -1;
+        }else if (*x > *y){
+            return 1;
+        }
+        x++;
+        y++;
+    }
+    return 0;
+}
+
+
 
 /*
 template === one scalar operation
