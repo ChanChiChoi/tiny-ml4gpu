@@ -18,7 +18,7 @@ matrix_mul_cpu(float *Md, u32 Row_Md, u32 Col_Md,
                float *Pd, u32 Row_Pd, u32 Col_Pd,
                const char *op = "mul");
 void
-matrix_divide_scalar_cpu(float *mat, u32 Row, u32 Col, u32 scalar);
+matrix_divide_scalar_cpu(float *mat, u32 Row, u32 Col, float scalar);
 
 void
 matrix_transpose_cpu(float *mat_src, u32 Row_src, u32 Col_src,
@@ -35,6 +35,4 @@ matrix_add_scalar_cpu(float *mat, u32 Row, u32 Col, float scalar);
 
 void
 matrix_gaussian_scalar_cpu(float *mat, u32 Row, u32 Col, float scalar_sigma);
-
-
 
