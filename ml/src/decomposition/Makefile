@@ -26,19 +26,24 @@ LDFLAGS := $(patsubst %,-L%,${LDFLAGS_DIR})
 LDLIBS_DIR := m4g_com_cuMF m4g_ml_math m4g_ml_preprocess
 LDLIBS := $(patsubst %,-l%,${LDLIBS_DIR})
 
-obj := PCA${suf}
-
-all:  $(obj)
+pcaobj := PCA${suf}
+kpcaobj := KPCA$(suf)
+all:  $(pcaobj) $(kpcaobj)
 	
 
-${obj}: pybind11.cpp pca.o
+${pcaobj}: pybind11.cpp pca.o
 	$(CC) $^ ${libcommon}/buffer_info_ex.o ${CLDFLAG} ${INCLUDE} -o $@ ${LDFLAGS} ${LDLIBS}
 
 pca.o:  pca.cpp 
 	$(CC) $^ $(CXXFLAG) $(INCLUDE)  -o $@ 
 	 
+${kpcaobj}: pybind11_kernel_pca.cpp kernel_pca.o
+	$(CC) $^ ${libcommon}/buffer_info_ex.o ${CLDFLAG} ${INCLUDE} -o $@ ${LDFLAGS} ${LDLIBS}
 
-clean_sotmp := ${obj} 
+kernel_pca.o: kernel_pca.cpp
+	$(CC) $^ $(CXXFLAG) $(INCLUDE)  -o $@
+
+clean_sotmp := ${pcaobj} ${kpcaobj}
 clean_sotmp := $(strip $(clean_sotmp))
 comma := ,
 empty := 
