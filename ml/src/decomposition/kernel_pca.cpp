@@ -79,7 +79,7 @@ KPCA::fit(Array &matrix){
     matrix_mul_cpu(K_device, Row_gram, Col_gram,
                    J_device, Row_gram, Col_gram,
                    K_device, Row_gram, Col_gram,
-                   "divide");
+                   SCALAR_TWO_DIVIDE);
     // tranpose J_device, then K - J'
     float *J_T_device = nullptr;
     J_T_device = DEVICE_MALLOC(J_T_device, size_gram);
@@ -91,7 +91,7 @@ KPCA::fit(Array &matrix){
     matrix_mul_cpu(K_device, Row_gram, Col_gram,
                    J_T_device, Col_gram, Row_gram,
                    K_device, Row_gram, Col_gram,
-                   "divide");
+                   SCALAR_TWO_DIVIDE);
     DEVICE_FREE(J_T_device);
  
     matrix_add_scalar_cpu(K_device, Row_gram, Col_gram, this->total_sum);
@@ -286,7 +286,7 @@ KPCA::transform(Array &train, Array &test){
     matrix_mul_cpu(K_device, Row_K, Col_K,
                    mean_rep_device, Row_mean_rep, Col_mean_rep,
                    K_device, Row_K, Col_K,
-                   "divide");
+                   SCALAR_TWO_DIVIDE);
     DEVICE_FREE(mean_rep_device);
 
     // K - J begin
@@ -309,7 +309,7 @@ KPCA::transform(Array &train, Array &test){
     matrix_mul_cpu(K_device, Row_K, Col_K,
                    J_device, Row_J, Col_J,
                    K_device, Row_K, Col_K,
-                   "divide");
+                   SCALAR_TWO_DIVIDE);
 
     DEVICE_FREE(J_device);
 
