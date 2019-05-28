@@ -10,7 +10,7 @@
 void
 cov_cpu(float *mat, u32 Row_mat, u32 Col_mat,
         float *mat_cov, u32 Row_mat_cov, u32 Col_mat_cov){
-    
+
     //1 - malloc one matrix
     size_t size = sizeof(float)*Row_mat*Col_mat;
     float *mat_T_device = NULL;
@@ -24,6 +24,11 @@ cov_cpu(float *mat, u32 Row_mat, u32 Col_mat,
 
     //3 - matrix_mul
 
+//    float *mat1 = (float *)malloc(size);
+//    DEVICE_TO_HOST(mat1, mat_T_device, size);
+//    for(int i=0;i<20; i++)
+//        printf(" [%d %f] \n",i,mat1[i]);
+
     matrix_dotmul_cpu(mat_T_device,Row_mat_T, Col_mat_T,
                    mat, Row_mat, Col_mat,
                    mat_cov, Row_mat_cov, Col_mat_cov,SCALAR_TWO_MUL);
@@ -32,13 +37,10 @@ cov_cpu(float *mat, u32 Row_mat, u32 Col_mat,
 
     //4 - divide (n-1) samples;
     size_t n_1 = MAX(1,Row_mat-1);
-    matrix_divide_scalar_cpu(mat_cov, Row_mat_cov, Col_mat_cov, n_1);
+    matrix_divide_scalar_cpu(mat_cov, Row_mat_cov, Col_mat_cov, float(n_1));
 
-    float *mat1 = (float *)malloc(size);
-    DEVICE_TO_HOST(mat1, mat_cov, size);
-    for(int i=0;i<Row_mat*Col_mat; i++)
-        printf(" [%d %f] \n",i,mat1[i]);
 }
+
 
 void
 gram_cpu(float *mat, u32 Row_mat, u32 Col_mat,
