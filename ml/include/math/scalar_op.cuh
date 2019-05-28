@@ -50,7 +50,7 @@ scalar_operation1(T x, const char *op){
   T ans = T(0);
   if (strcmp1<T>(op,"sqrt") == 0){
       ans = scalar_sqrt<T>(x);
-  }else if(strcmp<T>(op, "invsqrt") == 0){
+  }else if(strcmp1<T>(op, "invsqrt") == 0){
       ans = scalar_invsqrt<T>(x);
   }
   return ans;
