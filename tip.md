@@ -3,14 +3,48 @@ nvcc operation is different with gcc/g++, so I encounter some weird problems. th
 
 
 #### 1. undefined symbol
-I have a .cu file
+if you was reported "undefined symbol", when you "nm" the .so file or .o file, that the symbol exists. what confused me is the problem do not always happen.
+
+math.h
 ```
-void text(){
-  /*some coding*/
+#pragma once
+void display();
+```
+
+math.cu
+```
+#include <stdio.h>
+#include "math.h"
+
+void
+display(int a){
+ printf("hello\n");
+}
+```
+
+```
+nvcc math.cu -c -shared -Xcompiler -fPIC
+nvcc math.o -shared -Xcompiler -fPIC -o libmath.so
+```
+test.cpp
+```
+#include<stdio.h>
+#include "math.h"
+
+int
+sofile(){
+ display();
+ return 0;
 }
 ```
 then, 
+```
+g++ test.cpp -L. -lmath -shared -fPIC -o libtest.so
+```
+if you "ldd -r libtest.so", it will report "undefined symbol: _Z7displayv   (./libtest.so)";  
+but when "nm libmath.so |grep display", it says "000000000000626c T _Z7displayi".
 
+you should .....
 
 
 
