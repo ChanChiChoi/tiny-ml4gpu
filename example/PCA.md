@@ -16,5 +16,5 @@ pca = PCA(3)
 pca.fit(data)
 res_data = pca.transform(data)
 
-npres = res.data.cpu()
+npres = res_data.cpu()
 ```
