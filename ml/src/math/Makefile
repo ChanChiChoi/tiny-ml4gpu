@@ -43,8 +43,8 @@ matrix.o: matrix.cu
 svd.o:svd.cu
 	$(NVCC) $^ -c $(NVCCFLAG) $(INCLUDE_SELF)  -o $@
 
-stats.o: stats.cpp
-	$(CC) $^ -c $(CXXFLAG) $(INCLUDE_SELF) -o $@ 
+stats.o: stats.cu
+	$(NVCC) $^ -c $(NVCCFLAG) $(INCLUDE_SELF) -o $@ 
 
 vector.o: vector.cu
 	$(NVCC) $^ -c $(NVCCFLAG) $(INCLUDE_SELF) -o $@
