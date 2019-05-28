@@ -1,3 +1,9 @@
+lib := lib
+ifneq ($(lib),$(wildcard $(lib)))
+  $(info hello world)
+  $(shell mkdir $(lib))
+endif
+
 
 all:  ml_mk
 
