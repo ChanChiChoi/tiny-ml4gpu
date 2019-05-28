@@ -31,8 +31,7 @@ kpcaobj := KPCA$(suf)
 all:  $(pcaobj) $(kpcaobj)
 	
 
-${pcaobj}: pybind11.cpp pca.o matrix.o
-	cp ${libml}/lib/matrix.o .
+${pcaobj}: pybind11.cpp pca.o
 	$(CC) $^ ${libcommon}/buffer_info_ex.o ${CLDFLAG} ${INCLUDE} -o $@ ${LDFLAGS} ${LDLIBS}
 
 pca.o:  pca.cpp 
