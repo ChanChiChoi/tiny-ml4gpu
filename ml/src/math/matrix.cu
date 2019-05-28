@@ -184,7 +184,7 @@ matrix_scalar_self_launch(T *mat, u32 Row, u32 Col,const int op){
 function: matrix_scalar
 */
 template<typename T>__global__ void
-matrix_scalar(T *mat, u32 Row, u32 Col, u32 scalar, const int op){
+matrix_scalar(T *mat, u32 Row, u32 Col, T scalar, const int op){
 
     u32 idy = blockIdx.y*blockDim.y + threadIdx.y;
     u32 idx = blockIdx.x*blockDim.x + threadIdx.x;
@@ -197,7 +197,7 @@ matrix_scalar(T *mat, u32 Row, u32 Col, u32 scalar, const int op){
 }
 
 template<typename T> void
-matrix_scalar_launch(T *mat, u32 Row, u32 Col, u32 scalar,const int op){
+matrix_scalar_launch(T *mat, u32 Row, u32 Col, T scalar,const int op){
 
     dim3 grid(MAX(1, (size_t)ceil((double)Col/TILE_HEIGHT)),
               MAX(1, (size_t)ceil((double)Row/TILE_WIDTH)) );
@@ -315,7 +315,7 @@ matrix_diag_launch(T *mat, u32 Row, u32 Col, T *vec, u32 len){
 /*
 function: matrix_dotmul_cpu
 */
-void
+extern "C" void
 matrix_dotmul_cpu(float *Md, u32 Row_Md, u32 Col_Md,
                float *Nd, u32 Row_Nd, u32 Col_Nd,
                float *Pd, u32 Row_Pd, u32 Col_Pd,

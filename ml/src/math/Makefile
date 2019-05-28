@@ -64,6 +64,7 @@ $(info ${clean_so})
 
 install:
 	cp *.so ${libml}
+	cp *.o ${libml}
 
 test: test_svd
 
