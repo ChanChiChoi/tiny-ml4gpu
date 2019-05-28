@@ -2,7 +2,7 @@
 
 //#include <string.h>
 #include <math_functions.hpp>
-#include "ml/include/scalar_op_def.h"
+#include "ml/include/math/scalar_op_def.h"
 
 # ifndef __SCALAR_OP__
 # define __SCALAR_OP__
@@ -23,7 +23,7 @@ scalar_invsqrt(T x){
 }
 
 template<typename T> __device__ T
-scalar_operation1(T x, const char *op){
+scalar_operation1(T x, const int op){
   /*
    this function used to be entrance of how to handle one scalar
    1 - sqrt(x)
@@ -75,7 +75,7 @@ scalar_gaussian(T x, T sigma){
 
 
 template<typename T> __device__ T
-scalar_operation2(T x, T y, const char *op){
+scalar_operation2(T x, T y, const int op){
   /*
    this function used to be entrance of how to handle two scalar
    1 - x * y

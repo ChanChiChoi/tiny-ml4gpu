@@ -1,6 +1,6 @@
 #pragma once
 #include "common/include/type.h"
-#include "ml/include/scalar_op_def.h"
+#include "ml/include/math/scalar_op_def.h"
 
 void
 matrix_subblock_cpu(float *big, u32 Row_big, u32 Col_big,
