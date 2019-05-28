@@ -1,5 +1,5 @@
 
-nvcc operation is different with gcc/g++, so I encounter some weird problems. that\'s frustrating.
+nvcc operation is different with gcc/g++, so I encounter some weird problems. that is frustrating.
 
 
 #### 1. undefined symbol
@@ -14,7 +14,7 @@ then,
 
 
 
-#### 2. 
+#### 2. not create .so with .cu and .cpp
 
 do not create one .so file with some .cu files and some .cpp files, which will result some problems that you can not understand, for example, 
 
@@ -40,7 +40,9 @@ pca.cpp
 cov_cpu()
 cudaMalloc(); // or cudaMemcpy or some others
 ```
-It\'ll 
+It will report cudaMalloc error(cuda IllAddress), or some others reason(helpless), the first line which below "conv_cpu" and access device memory. so we must rename stats.cpp to stats.cu, then "nvcc"(do not use gcc/g++) all the files inside this .so file.
+
+
 
 
 
