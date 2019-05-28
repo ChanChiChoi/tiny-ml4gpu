@@ -60,6 +60,6 @@ install:
 	cp *.so ${libml}
 
 clean:
-	rm -f *.o
+	rm -f *.o *.so
 	rm -f ${clean_so}
 	-rm -f ${libml}/${clean_so}
