@@ -6,7 +6,7 @@
 #include "common/include/common.h"
 //#include "common/include/malloc_free.h"
 #include "ml/include/math/matrix.h"
-#include "ml/include/math/scalar_op.cuh"
+#include "ml/include/math/scalar_op.h"
 
 # define TILE_HEIGHT 32
 # define TILE_WIDTH 32
@@ -85,8 +85,10 @@ matrix_dotmul(T * Md, u32 Row_Md, u32 Col_Md,
                ind_max_TILE = Col_Md - m*TILE_WIDTH;
            // calc the point
            for(u32 k = 0; k < ind_max_TILE; ++k){
-              //Pvalue += Mds[ty][k] * Nds[k][tx];
-              Pvalue += scalar_operation2<T>(Mds[ty][k], Nds[k][tx],op);
+              Pvalue += Mds[ty][k] * Nds[k][tx];
+              printf(" [%d %f] \n",k,Pvalue);
+              //Pvalue += scalar_operation2<T>(Mds[ty][k], Nds[k][tx],op);
+              //printf(" [%f] ",scalar_operation2<T>(Mds[ty][k], Nds[k][tx],op));
            }
        }
 

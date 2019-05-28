@@ -3,7 +3,7 @@
 #include "common/include/type.h"
 #include "common/include/common.h"
 #include "ml/include/math/vector.h"
-#include "ml/include/math/scalar_op.cuh"
+#include "ml/include/math/scalar_op.h"
 
 # define TILE_HEIGHT 32
 # define TILE_WIDTH 32
@@ -75,7 +75,7 @@ vector_op_self(T *vec, u32 len, const char *op){
         return ;
 
     T tmp = vec[idx];
-    vec[idx] = scalar_operation1(tmp, op);
+    vec[idx] = scalar_operation1<T>(tmp, op);
 } 
 
 template<typename T> void
