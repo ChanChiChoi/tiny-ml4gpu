@@ -18,7 +18,7 @@ template<typename T> __global__ void
 matrix_dotmul(T * Md, u32 Row_Md, u32 Col_Md,
            T * Nd, u32 Row_Nd, u32 Col_Nd,
            T * Pd, u32 Row_Pd, u32 Col_Pd,
-           const char *op
+           const int op
            ){
     
     /*
@@ -86,8 +86,7 @@ matrix_dotmul(T * Md, u32 Row_Md, u32 Col_Md,
            for(u32 k = 0; k < ind_max_TILE; ++k){
               //Pvalue += Mds[ty][k] * Nds[k][tx];
               //printf(" [%d %f] ",k,Pvalue);
-              Pvalue += scalar_operation2<T>(Mds[ty][k], Nds[k][tx],1);
-              printf(" [%f] ",scalar_operation2<T>(Mds[ty][k], Nds[k][tx],1));
+              Pvalue += scalar_operation2<T>(Mds[ty][k], Nds[k][tx],op);
            }
        }
 
@@ -106,7 +105,7 @@ template<typename T> void
 matrix_dotmul_launch(T * Md, u32 Row_Md, u32 Col_Md,
            T * Nd, u32 Row_Nd, u32 Col_Nd,
            T * Pd, u32 Row_Pd, u32 Col_Pd,
-           const char *op){
+           const int op){
 
     dim3 grid(MAX(1, (size_t)ceil((double)Col_Pd/TILE_HEIGHT)),
               MAX(1, (size_t)ceil((double)Row_Pd/TILE_WIDTH)) );
@@ -155,7 +154,7 @@ matrix_transpose_launch(T *mat_src, u32 Row_src, u32 Col_src,
 function: matrix_scalar_self
 */
 template<typename T> __global__ void
-matrix_scalar_self(T *mat, u32 Row, u32 Col, const char *op){
+matrix_scalar_self(T *mat, u32 Row, u32 Col, const int op){
 
     u32 idy = blockIdx.y*blockDim.y + threadIdx.y;
     u32 idx = blockIdx.x*blockDim.x + threadIdx.x;
@@ -170,7 +169,7 @@ matrix_scalar_self(T *mat, u32 Row, u32 Col, const char *op){
 
 
 template<typename T> void
-matrix_scalar_self_launch(T *mat, u32 Row, u32 Col,const char *op){
+matrix_scalar_self_launch(T *mat, u32 Row, u32 Col,const int op){
 
     dim3 grid(MAX(1, (size_t)ceil((double)Col/TILE_HEIGHT)),
               MAX(1, (size_t)ceil((double)Row/TILE_WIDTH)) );
@@ -185,7 +184,7 @@ matrix_scalar_self_launch(T *mat, u32 Row, u32 Col,const char *op){
 function: matrix_scalar
 */
 template<typename T>__global__ void
-matrix_scalar(T *mat, u32 Row, u32 Col, u32 scalar, const char *op){
+matrix_scalar(T *mat, u32 Row, u32 Col, u32 scalar, const int op){
 
     u32 idy = blockIdx.y*blockDim.y + threadIdx.y;
     u32 idx = blockIdx.x*blockDim.x + threadIdx.x;
@@ -193,12 +192,12 @@ matrix_scalar(T *mat, u32 Row, u32 Col, u32 scalar, const char *op){
     if (idy >= Row || idx >= Col)
         return ;
     T x = mat[idy*Col+idx];
-    mat[idy*Col+idx] = scalar_operation2<T>(x,T(scalar),1);
+    mat[idy*Col+idx] = scalar_operation2<T>(x,T(scalar),op);
 //    mat[idy*Col+idx] /= scalar;
 }
 
 template<typename T> void
-matrix_scalar_launch(T *mat, u32 Row, u32 Col, u32 scalar,const char *op){
+matrix_scalar_launch(T *mat, u32 Row, u32 Col, u32 scalar,const int op){
 
     dim3 grid(MAX(1, (size_t)ceil((double)Col/TILE_HEIGHT)),
               MAX(1, (size_t)ceil((double)Row/TILE_WIDTH)) );
@@ -251,7 +250,7 @@ template<typename T> __global__ void
 matrix_mul(float *Md, u32 Row_Md, u32 Col_Md,
            float *Nd, u32 Row_Nd, u32 Col_Nd,
            float *Pd, u32 Row_Pd, u32 Col_Pd,
-           const char *op){
+           const int op){
 
     assert(Row_Md == Row_Nd);
     assert(Row_Md == Row_Pd);
@@ -267,14 +266,14 @@ matrix_mul(float *Md, u32 Row_Md, u32 Col_Md,
   
     T x = Md[thread_idx];
     T y = Nd[thread_idx];
-    Pd[thread_idx] = scalar_operation2<T>(x,y,1);
+    Pd[thread_idx] = scalar_operation2<T>(x,y,op);
 }
 
 template<typename T> void
 matrix_mul_launch(float *Md, u32 Row_Md, u32 Col_Md,
            float *Nd, u32 Row_Nd, u32 Col_Nd,
            float *Pd, u32 Row_Pd, u32 Col_Pd,
-           const char *op){
+           const int op){
 
     dim3 grid(MAX(1, (size_t)ceil((double)Col_Pd/TILE_HEIGHT)),
               MAX(1, (size_t)ceil((double)Row_Pd/TILE_WIDTH)) );
@@ -320,7 +319,7 @@ void
 matrix_dotmul_cpu(float *Md, u32 Row_Md, u32 Col_Md,
                float *Nd, u32 Row_Nd, u32 Col_Nd,
                float *Pd, u32 Row_Pd, u32 Col_Pd,
-               const char *op){
+               const int op){
 
     matrix_dotmul_launch<float>(Md, Row_Md, Col_Md,
                Nd, Row_Nd, Col_Nd,
@@ -345,7 +344,7 @@ function: matrix_divide_scalar_cpu
 */
 void
 matrix_divide_scalar_cpu(float *mat, u32 Row, u32 Col, float scalar){
-    matrix_scalar_launch<float>(mat, Row, Col, scalar,"divide");
+    matrix_scalar_launch<float>(mat, Row, Col, scalar, SCALAR_TWO_DIVIDE);
 }
 
 
@@ -354,7 +353,7 @@ function: matrix_add_scalar_cpu
 */
 void
 matrix_add_scalar_cpu(float *mat, u32 Row, u32 Col, float scalar){
-    matrix_scalar_launch<float>(mat, Row, Col, scalar,"add");
+    matrix_scalar_launch<float>(mat, Row, Col, scalar,SCALAR_TWO_ADD);
 }
 
 /*
@@ -362,7 +361,7 @@ function: matrix_gaussian_scalar_cpu
 */
 void
 matrix_gaussian_scalar_cpu(float *mat, u32 Row, u32 Col, float scalar_sigma){
-    matrix_scalar_launch<float>(mat, Row, Col, scalar_sigma,"gaussian");
+    matrix_scalar_launch<float>(mat, Row, Col, scalar_sigma,SCALAR_TWO_GAUSSIAN);
 }
 
 
@@ -386,7 +385,7 @@ function: matrix_sqrt_cpu
 void
 matrix_scalar_sqrt_cpu(float *mat, u32 Row_mat, u32 Col_mat){
 
-    matrix_scalar_self_launch<float>(mat, Row_mat, Col_mat, "sqrt");
+    matrix_scalar_self_launch<float>(mat, Row_mat, Col_mat, SCALAR_ONE_SQRT);
 }
 
 /*
@@ -396,7 +395,7 @@ void
 matrix_mul_cpu(float *Md, u32 Row_Md, u32 Col_Md,
                float *Nd, u32 Row_Nd, u32 Col_Nd,
                float *Pd, u32 Row_Pd, u32 Col_Pd,
-               const char *op){
+               const int op){
 
     matrix_mul_launch<float>(Md, Row_Md, Col_Md,
                Nd, Row_Nd, Col_Nd,

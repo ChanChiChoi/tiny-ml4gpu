@@ -67,7 +67,7 @@ vector_sum_launch(T *vec, u32 len, T *res){
 template: vector_op_self
 */
 template<typename T> __global__ void
-vector_op_self(T *vec, u32 len, const char *op){
+vector_op_self(T *vec, u32 len, const int op){
 
     u32 idx = blockIdx.x*blockDim.x+threadIdx.x;
   
@@ -79,7 +79,7 @@ vector_op_self(T *vec, u32 len, const char *op){
 } 
 
 template<typename T> void
-vector_op_self_launch(T *vec, u32 len, const char *op){
+vector_op_self_launch(T *vec, u32 len, const int op){
 
     dim3 grid(MAX(1, ceil(double(len)/BLOCK_LENGTH)));
     dim3 block(BLOCK_LENGTH);
@@ -104,12 +104,12 @@ vector_sum_cpu(float *vec, u32 len, float *res){
 
 void
 vector_invsqrt_self_cpu(float *vec, u32 len){
-    vector_op_self_launch<float>(vec, len, "invsqrt");
+    vector_op_self_launch<float>(vec, len, SCALAR_ONE_INVSQRT);
 }
 
 
 void
 vector_sqrt_self_cpu(float *vec, u32 len){
-    vector_op_self_launch<float>(vec, len, "sqrt");
+    vector_op_self_launch<float>(vec, len, SCALAR_ONE_SQRT);
 }
 
