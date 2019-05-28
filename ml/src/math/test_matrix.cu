@@ -2,10 +2,13 @@
 #include <cuda_runtime.h>
 //#include <chrono>
 
-#include "matrix.cu"
+#include "ml/include/math/math.h"
 #include "common/include/helper.cuh"
 //using namespace std::chrono;
 
+/*
+nvcc test_matrix.cu -I../../../ -std=c++11 -L. -lm4g_ml_math -lm4g_com_cuMF
+*/
 int
 main(){
 
@@ -44,7 +47,7 @@ main(){
   
     matrix_dotmul_cpu(md_device, md_rows, md_cols,
                    nd_device, nd_rows, nd_cols,
-                   pd_device, pd_rows, pd_cols,2);
+                   pd_device, pd_rows, pd_cols,SCALAR_TWO_MUL);
   //  auto t0 = high_resolution_clock::now();
     //mean_by_rows_cpu(mat_device,mean_device, rows,cols);
     //cudaDeviceSynchronize();
