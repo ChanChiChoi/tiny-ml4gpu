@@ -1,3 +1,5 @@
+#pragma once
+
 # define SCALAR_TWO_MUL 1
 # define SCALAR_TWO_ADD 2
 # define SCALAR_TWO_DIVIDE 3

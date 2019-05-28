@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <iostream>
 #include <stdio.h>
 #include "common/include/type.h"
 #include "common/include/common.h"
@@ -25,7 +26,7 @@ cov_cpu(float *mat, u32 Row_mat, u32 Col_mat,
 
     matrix_dotmul_cpu(mat_T_device,Row_mat_T, Col_mat_T,
                    mat, Row_mat, Col_mat,
-                   mat_cov, Row_mat_cov, Col_mat_cov,"mul");
+                   mat_cov, Row_mat_cov, Col_mat_cov,SCALAR_TWO_MUL);
 
     DEVICE_FREE(mat_T_device);
 
@@ -33,6 +34,10 @@ cov_cpu(float *mat, u32 Row_mat, u32 Col_mat,
     size_t n_1 = MAX(1,Row_mat-1);
     matrix_divide_scalar_cpu(mat_cov, Row_mat_cov, Col_mat_cov, n_1);
 
+    float *mat1 = (float *)malloc(size);
+    DEVICE_TO_HOST(mat1, mat_cov, size);
+    for(int i=0;i<Row_mat*Col_mat; i++)
+        printf(" [%d %f] \n",i,mat1[i]);
 }
 
 void
@@ -43,7 +48,7 @@ gram_cpu(float *mat, u32 Row_mat, u32 Col_mat,
     // computer L2_distance  
     matrix_dotmul_cpu(mat,Row_mat, Col_mat,
                    mat_T_device, Row_mat_T, Col_mat_T,
-                   mat_gram, Row_gram, Col_gram,"mse");
+                   mat_gram, Row_gram, Col_gram,SCALAR_TWO_MSE);
     
     // computer sqrt of each elements
     matrix_scalar_sqrt_cpu(mat_gram, Row_gram, Col_gram);
