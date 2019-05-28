@@ -6,13 +6,12 @@
 #include "common/include/common.h"
 //#include "common/include/malloc_free.h"
 #include "ml/include/math/matrix.h"
-#include "ml/include/math/scalar_op.h"
+#include "ml/include/math/scalar_op.cuh"
 
 # define TILE_HEIGHT 32
 # define TILE_WIDTH 32
 
 # define BLOCK_LENGTH 256
-
 
 //=============
 template<typename T> __global__ void
@@ -85,10 +84,10 @@ matrix_dotmul(T * Md, u32 Row_Md, u32 Col_Md,
                ind_max_TILE = Col_Md - m*TILE_WIDTH;
            // calc the point
            for(u32 k = 0; k < ind_max_TILE; ++k){
-              Pvalue += Mds[ty][k] * Nds[k][tx];
-              printf(" [%d %f] \n",k,Pvalue);
-              //Pvalue += scalar_operation2<T>(Mds[ty][k], Nds[k][tx],op);
-              //printf(" [%f] ",scalar_operation2<T>(Mds[ty][k], Nds[k][tx],op));
+              //Pvalue += Mds[ty][k] * Nds[k][tx];
+              //printf(" [%d %f] ",k,Pvalue);
+              Pvalue += scalar_operation2<T>(Mds[ty][k], Nds[k][tx],1);
+              printf(" [%f] ",scalar_operation2<T>(Mds[ty][k], Nds[k][tx],1));
            }
        }
 
@@ -194,7 +193,7 @@ matrix_scalar(T *mat, u32 Row, u32 Col, u32 scalar, const char *op){
     if (idy >= Row || idx >= Col)
         return ;
     T x = mat[idy*Col+idx];
-    mat[idy*Col+idx] = scalar_operation2<T>(x,T(scalar),op);
+    mat[idy*Col+idx] = scalar_operation2<T>(x,T(scalar),1);
 //    mat[idy*Col+idx] /= scalar;
 }
 
@@ -268,7 +267,7 @@ matrix_mul(float *Md, u32 Row_Md, u32 Col_Md,
   
     T x = Md[thread_idx];
     T y = Nd[thread_idx];
-    Pd[thread_idx] = scalar_operation2<T>(x,y,op);
+    Pd[thread_idx] = scalar_operation2<T>(x,y,1);
 }
 
 template<typename T> void

@@ -2,31 +2,23 @@
 
 //#include <string.h>
 #include <math_functions.hpp>
-#include "common/include/type.h"
-#include "common/include/common.h"
 
 # ifndef __SCALAR_OP__
 # define __SCALAR_OP__
-//NAMESPACE_BEGIN(m4g)
-//static __device__ int 
-template<typename T> __device__ int
-strcmp1(const char *x, const char *y){
-  
-    assert(x != nullptr && y != nullptr);
-    while( *y != '\0'){
-        if (*x < *y){
-            return -1;
-        }else if (*x > *y){
-            return 1;
-        }
-        x++;
-        y++;
-    }
-    return 0;
-}
+//================DEFINE
 
-//NAMESPACE_END(m4g)
+# define SCALAR_TWO_MUL 1
+# define SCALAR_TWO_ADD 2
+# define SCALAR_TWO_DIVIDE 3
+# define SCALAR_TWO_MSE 4
+# define SCALAR_TWO_GAUSSIAN 5
 
+
+# define SCALAR_ONE_SQRT 1
+# define SCALAR_ONE_INVSQRT 2
+
+
+//=====================
 /*
 template === one scalar operation
 */
@@ -48,9 +40,9 @@ scalar_operation1(T x, const char *op){
 
   */
   T ans = T(0);
-  if (strcmp1<T>(op,"sqrt") == 0){
+  if (op == SCALAR_ONE_SQRT){
       ans = scalar_sqrt<T>(x);
-  }else if(strcmp1<T>(op, "invsqrt") == 0){
+  }else if(op == SCALAR_ONE_INVSQRT){
       ans = scalar_invsqrt<T>(x);
   }
   return ans;
@@ -101,15 +93,15 @@ scalar_operation2(T x, T y, const char *op){
 
   */
   T ans = T(0);
-  if (strcmp1<T>(op,"mul") == 0){
+  if (op == SCALAR_TWO_MUL){
       ans = scalar_multiply<T>(x,y);
-  }else if(strcmp1<T>(op, "mse") == 0){
+  }else if(op == SCALAR_TWO_MSE){
       ans = scalar_mse<T>(x,y); 
-  }else if(strcmp1<T>(op,"divide") == 0){
+  }else if(op == SCALAR_TWO_DIVIDE){
       ans = scalar_divide<T>(x,y);
-  }else if(strcmp1<T>(op, "gaussian") == 0){
+  }else if(op == SCALAR_TWO_GAUSSIAN){
       ans = scalar_gaussian<T>(x,y);
-  }else if(strcmp1<T>(op, "add") == 0){
+  }else if(op == SCALAR_TWO_ADD){
       ans = scalar_add<T>(x,y);
   }
   return ans;

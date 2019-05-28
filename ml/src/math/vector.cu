@@ -3,7 +3,7 @@
 #include "common/include/type.h"
 #include "common/include/common.h"
 #include "ml/include/math/vector.h"
-#include "ml/include/math/scalar_op.h"
+#include "ml/include/math/scalar_op.cuh"
 
 # define TILE_HEIGHT 32
 # define TILE_WIDTH 32
