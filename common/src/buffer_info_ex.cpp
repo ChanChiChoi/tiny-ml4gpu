@@ -85,7 +85,7 @@ Array::cpu(){
 }
 
 void
-Array::display(){
+Array::display_meta(){
     printf("ptr id: %ld\n",ptr_buf->ptr);
     printf("ptr_host id: %d\n",ptr_buf->ptr_host);
     printf("ptr_device id: %d\n",ptr_buf->ptr_device);
@@ -94,3 +94,29 @@ Array::display(){
     printf("itemsize: %d\n",ptr_buf->itemsize);
     printf("size: %d\n",ptr_buf->size);
 }
+
+void
+Array::display_data(){
+        
+     if(this->ptr_buf->ptr_host){
+         auto pdata = this->ptr_buf->ptr_host;
+     }else if(this->ptr_buf->ptr){
+         auto pdata = this->ptr_buf->ptr;
+     }else{
+         float *pdata = nullptr;
+         throw std::runtime_error("current has no data or data only on device, not on host!");
+     }
+
+    if (this->ptr_buf->ndim == 2){
+        for(size_t i=0; i<this->ptr_buf->shape[0]; i++){
+            printf("\n[%d] ",i);
+            for(size_t j=0; j<this->ptr_buf->shape[1]; j++){
+                printf(" %lf",(double)pdata[i*ptr_buf->shape[1]+j]);
+            }
+        }
+    }else if(this->ptr_buf->ndim == 1){
+       for(size_t i=0; i<this->ptr_buf->shape[0]; i++)
+            printf(" %lf",(double)pdata[i]);
+    }
+
+}  

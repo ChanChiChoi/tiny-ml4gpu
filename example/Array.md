@@ -8,8 +8,8 @@ data = Array(npdata)
 # transfer numpy data from host to gpu device  
 data.cuda()  
 
-# display current data info  
-data.display()  
+# display current meta info of data  
+data.display_meta()  
 
 # transfer data on gpu deivce to cpu host, the result is numpy data  
 res = data.cpu()  
