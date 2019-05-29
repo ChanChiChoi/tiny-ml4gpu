@@ -194,7 +194,7 @@ KPCA::fit(Array &matrix){
            Col_mappedX_T = Row_mappedX;
     size_t size_mappedX_T = sizeof(float)*Row_mappedX_T*Col_mappedX_T;
     float *mappedX_T = (float *)malloc(size_mappedX_T);
-    mappedX_T_device = HOST_TO_DEVICE_MALLOC(mappedX_T_device, size_mappedX_T);
+    mappedX_T_device = HOST_TO_DEVICE_MALLOC(mappedX_T, size_mappedX_T);
 
     matrix_transpose_cpu(mappedX_device, Row_mappedX, Col_mappedX,
                          mappedX_T_device, Row_mappedX_T, Col_mappedX_T);
