@@ -95,29 +95,54 @@ Array::display_meta(){
     printf("size: %d\n",ptr_buf->size);
 }
 
+template<typename T> void
+_display(T *pdata, ssize_t ndim, vector<ssize_t> shape){
+
+    if (ndim == 2){
+        auto rows = shape[0];
+        auto cols = shape[1];
+        for(size_t i=0; i<rows; i++){
+            printf("\n[%d] ",i);
+            for(size_t j=0; j<cols; j++){
+                printf(" %lf",*( pdata + i*cols + j) );
+            }
+        }
+        printf("\n");
+    }else if(ndim == 1){
+       auto rows = shape[0];
+       for(size_t i=0; i<rows; i++)
+            printf(" %lf",*( pdata + i) );
+       printf("\n");
+    }else{
+        throw std::rumtime_error("current only support ndim == 1 or 2!");
+    }
+
+
+}
+
 void
 Array::display_data(){
         
-     void *pdata = nullptr;
+     void *_pdata = nullptr;
      if(this->ptr_buf->ptr_host){
-         pdata = this->ptr_buf->ptr_host;
+         _pdata = this->ptr_buf->ptr_host;
      }else if(this->ptr_buf->ptr){
-         pdata = this->ptr_buf->ptr;
+         _pdata = this->ptr_buf->ptr;
      }else{
-         pdata = nullptr;
+         _pdata = nullptr;
          throw std::runtime_error("current has no data or data only on device, not on host!");
      }
 
-    if (this->ptr_buf->ndim == 2){
-        for(size_t i=0; i<this->ptr_buf->shape[0]; i++){
-            printf("\n[%d] ",i);
-            for(size_t j=0; j<this->ptr_buf->shape[1]; j++){
-                printf(" %lf",*( (double *)pdata + i*ptr_buf->shape[1] + j) );
-            }
-        }
-    }else if(this->ptr_buf->ndim == 1){
-       for(size_t i=0; i<this->ptr_buf->shape[0]; i++)
-            printf(" %lf",*( (double *)pdata + i) );
+     
+    switch (ptr_buf->format[0]){
+        case 'f':
+            _display((float *)_pdata, ptr_buf->ndim, ptr_buf->shape);
+            break;
+        case NULL:
+           printf("current Array obj has no data concent, cannot execute display_data()!\n");
+           break;
+        default:
+            throw std::runtime_error("current version only support float32!");
+            break;
     }
-
 }  
