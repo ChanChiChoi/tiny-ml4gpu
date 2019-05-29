@@ -160,13 +160,14 @@ Array::display_cuda(){
     }
     
     switch (ptr_buf->format[0]){
-        case 'f':
+        case 'f':{
             ssize_t itemsize = ptr_buf->itemsize;
             ssize_t size = ptr_buf->size;
             float *_pdata = (float *)malloc(itemsize*size);
-            DEVICE_TO_HOST(_pdata, _pdata_device, itemsize*size);
-            _display((_pdata, ptr_buf->ndim, ptr_buf->shape);
+            DEVICE_TO_HOST(_pdata, (float *)_pdata_device, itemsize*size);
+            _display(_pdata, ptr_buf->ndim, ptr_buf->shape);
             free(_pdata);
+            break;}
         case NULL:
            printf("current Array obj has no data concent, cannot execute display_cuda()!\n");
            break;
