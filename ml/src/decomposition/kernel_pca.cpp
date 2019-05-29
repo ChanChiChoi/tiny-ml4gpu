@@ -321,7 +321,7 @@ KPCA::transform(Array &train, Array &test){
     //3 - transform
     // computer V'*K
     float *t_point2_device = nullptr;   
-    size_t Row_t_point2 = this->n_components, Col_t_point2 = Row_K;
+    size_t Row_t_point2 = this->n_components, Col_t_point2 = Col_K;
     size_t size_t_point2 = sizeof(float)*Row_t_point2*Col_t_point2;
     t_point2_device = DEVICE_MALLOC(t_point2_device, size_t_point2);
 
@@ -332,9 +332,9 @@ KPCA::transform(Array &train, Array &test){
     DEVICE_FREE(K_device);
     // copy this->L to L_device
     float *L_device = nullptr;
-    size_t Row_L = 1, Col_L = this->L->ptr_buf->shape[1];
+    size_t Row_L = 1, Col_L = this->n_components;//this->L->ptr_buf->shape[1];
     L_device = DEVICE_MALLOC(L_device, sizeof(float)*Row_L*Col_L);
-    matrix_subblock_cpu((float *)this->L->ptr_buf->ptr_device, Row_L, Col_L,
+    matrix_subblock_cpu((float *)this->L->ptr_buf->ptr_device, 1, this->L->ptr_buf->shape[1],
                         L_device, Row_L, Col_L,
                         0,0,Row_L, Col_L);
     // computer invsqrt
@@ -350,18 +350,28 @@ KPCA::transform(Array &train, Array &test){
 
     DEVICE_FREE(L_device);
 
-    float *res_device = nullptr;
-    size_t Row_res = Row_invsqrtL, Col_res = Col_t_point2;
-    res_device = DEVICE_MALLOC(res_device, sizeof(float)*Row_res*Col_res);
+    float *res_T_device = nullptr;
+    size_t Row_res_T = Row_invsqrtL, Col_res_T = Col_t_point2;
+    size_t size_res_T = sizeof(float)*Row_res_T*Col_res_T;
+    res_T_device = DEVICE_MALLOC(res_T_device, size_res_T);
 
     matrix_dotmul_cpu(invsqrtL_device, Row_invsqrtL, Col_invsqrtL,
                       t_point2_device, Row_t_point2, Col_t_point2,
-                      res_device, Row_res, Col_res);
+                      res_T_device, Row_res_T, Col_res_T);
     DEVICE_FREE(t_point2_device);
     DEVICE_FREE(invsqrtL_device);
 
+    // computer tpoint= tpoint';
+    float *res = (float *)malloc(size_res_T);
+    float *res_device = HOST_TO_DEVICE_MALLOC(res, size_res_T);
+    size_t Row_res = Col_res_T, Col_res = Row_res_T;
+    matrix_transpose_cpu(res_T_device, Row_res_T, Col_res_T,
+                         res_device, Row_res, Col_res);
+    DEVICE_FREE(res_T_device);
+    DEVICE_TO_HOST(res, res_device, size_res_T);
+
     return new Array{
-           nullptr, nullptr, res_device,
+           nullptr, res, res_device,
            2, {ssize_t(Row_res), ssize_t(Col_res)}, std::string(1,'f'),
            ssize_t(sizeof(float)), ssize_t(Row_res*Col_res),
            {ssize_t(sizeof(float)*Row_res), ssize_t(sizeof(float))}
