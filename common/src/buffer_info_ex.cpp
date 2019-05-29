@@ -56,7 +56,7 @@ Array::_cpu(){
     
     assert(this->ptr_buf);
 
-    void * res = nullptr;
+    void *res = nullptr;
     if (ptr_buf -> ptr_host){
         res = ptr_buf->ptr_host;
     }else if(ptr_buf->ptr){
@@ -75,13 +75,18 @@ Array::_cpu(){
                 ptr_buf->strides
            );
 
+//    for(int i=0; i<20; i++)
+//        printf(" %lf ",*((float *)res+i));
+//    printf("\n");
     return py::array_t<T>{res_buf};
 
 }
 
 py::array_t<float> 
 Array::cpu(){
-
+    // the cpu() has big bug, which values in numpy is not equal with display_cpu() or display_cuda().
+    // it means i cannot get right values of display_cpu() or display_cuda() into numpy.
+    
     return this->_cpu<float>();
 }
 
@@ -124,6 +129,7 @@ _display(T *pdata, ssize_t ndim, std::vector<ssize_t> &shape){
 void
 Array::display_cpu(){
         
+     // display values on ptr_host or ptr; the result should equal dislay_cuda()
      void *_pdata = nullptr;
      if(this->ptr_buf->ptr_host){
          _pdata = this->ptr_buf->ptr_host;
@@ -151,6 +157,7 @@ Array::display_cpu(){
 void
 Array::display_cuda(){
     
+    // copy data from device side to host side, then print them on host side!,the result should equal display_cpu()
     void *_pdata_device = nullptr;
     if(this->ptr_buf->ptr_device){
         _pdata_device = this->ptr_buf->ptr_device;
