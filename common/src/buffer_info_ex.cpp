@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <vector>
 #include "common/include/buffer_info_ex.h"
 #include "common/include/malloc_free.h"
 
@@ -96,7 +97,7 @@ Array::display_meta(){
 }
 
 template<typename T> void
-_display(T *pdata, ssize_t ndim, vector<ssize_t> shape){
+_display(T *pdata, ssize_t ndim, std::vector<ssize_t> &shape){
 
     if (ndim == 2){
         auto rows = shape[0];
@@ -114,7 +115,7 @@ _display(T *pdata, ssize_t ndim, vector<ssize_t> shape){
             printf(" %lf",*( pdata + i) );
        printf("\n");
     }else{
-        throw std::rumtime_error("current only support ndim == 1 or 2!");
+        throw std::runtime_error("current only support ndim == 1 or 2!");
     }
 
 
