@@ -97,5 +97,8 @@ public:
 
     py::array_t<float>  cpu();
     void display_meta(); //  display metainfo of Array
-    void display_data(); // display data of ptr_host or ptr
+    void display_cpu(); // display data of ptr_host or ptr
+
+    void display_cuda();// display data from cuda side
+
 };

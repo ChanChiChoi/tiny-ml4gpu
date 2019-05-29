@@ -63,7 +63,7 @@ Array::_cpu(){
         res = ptr_buf->ptr;
     }else{
         res = nullptr;
-        throw std::runtime_error("current has no data");
+        throw std::runtime_error("current host side has no data");
     }
    
     py::buffer_info res_buf =  py::buffer_info(
@@ -122,7 +122,7 @@ _display(T *pdata, ssize_t ndim, std::vector<ssize_t> &shape){
 }
 
 void
-Array::display_data(){
+Array::display_cpu(){
         
      void *_pdata = nullptr;
      if(this->ptr_buf->ptr_host){
@@ -131,7 +131,7 @@ Array::display_data(){
          _pdata = this->ptr_buf->ptr;
      }else{
          _pdata = nullptr;
-         throw std::runtime_error("current has no data or data only on device, not on host!");
+         throw std::runtime_error("current has no data, or data only on device, not on host!");
      }
 
      
@@ -147,3 +147,31 @@ Array::display_data(){
             break;
     }
 }  
+
+void
+Array::display_cuda(){
+    
+    void *_pdata_device = nullptr;
+    if(this->ptr_buf->ptr_device){
+        _pdata_device = this->ptr_buf->ptr_device;
+
+    }else{
+        throw std::runtime_error("current has no data on device!");
+    }
+    
+    switch (ptr_buf->format[0]){
+        case 'f':
+            ssize_t itemsize = ptr_buf->itemsize;
+            ssize_t size = ptr_buf->size;
+            float *_pdata = (float *)malloc(itemsize*size);
+            DEVICE_TO_HOST(_pdata, _pdata_device, itemsize*size);
+            _display((_pdata, ptr_buf->ndim, ptr_buf->shape);
+            free(_pdata);
+        case NULL:
+           printf("current Array obj has no data concent, cannot execute display_cuda()!\n");
+           break;
+        default:
+            throw std::runtime_error("current version only support float32!");
+            break;
+    }
+}
