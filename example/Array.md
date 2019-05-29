@@ -11,6 +11,9 @@ data.cuda()
 # display current meta info of data  
 data.display_meta()  
 
+# display current data, current only support ndim == 1or2
+data.display_data()
+
 # transfer data on gpu deivce to cpu host, the result is numpy data  
 res = data.cpu()  
 ```
