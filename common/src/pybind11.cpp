@@ -15,7 +15,8 @@ PYBIND11_MODULE(Array, m){
         .def(py::init<py::array_t<float> &>())
         .def("cuda", &Array::cuda)
         .def("cpu", &Array::cpu)
-        .def("display", &Array::display)
+        .def("display_meta", &Array::display_meta)
+        .def("display_data", &Array::display_data)
         ;
 
 
