@@ -75,17 +75,12 @@ Array::_cpu(){
                 ptr_buf->strides
            );
 
-//    for(int i=0; i<20; i++)
-//        printf(" %lf ",*((float *)res+i));
-//    printf("\n");
     return py::array_t<T>{res_buf};
 
 }
 
 py::array_t<float> 
 Array::cpu(){
-    // the cpu() has big bug, which values in numpy is not equal with display_cpu() or display_cuda().
-    // it means i cannot get right values of display_cpu() or display_cuda() into numpy.
     
     return this->_cpu<float>();
 }
