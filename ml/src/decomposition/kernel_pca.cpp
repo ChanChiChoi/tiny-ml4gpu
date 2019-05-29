@@ -193,15 +193,17 @@ KPCA::fit(Array &matrix){
     size_t Row_mappedX_T = Col_mappedX,       
            Col_mappedX_T = Row_mappedX;
     size_t size_mappedX_T = sizeof(float)*Row_mappedX_T*Col_mappedX_T;
-    mappedX_T_device = DEVICE_MALLOC(mappedX_T_device, size_mappedX_T);
+    float *mappedX_T = (float *)malloc(size_mappedX_T);
+    mappedX_T_device = HOST_TO_DEVICE_MALLOC(mappedX_T_device, size_mappedX_T);
 
     matrix_transpose_cpu(mappedX_device, Row_mappedX, Col_mappedX,
                          mappedX_T_device, Row_mappedX_T, Col_mappedX_T);
    
     DEVICE_FREE(mappedX_device);
+    DEVICE_TO_HOST(mappedX_T, mappedX_T_device, size_mappedX_T);
     
     return new Array{
-          nullptr, nullptr, mappedX_T_device,
+          nullptr, mappedX_T, mappedX_T_device,
           2, {ssize_t(Row_mappedX_T), ssize_t(Col_mappedX_T)}, std::string(1,'f'),
           ssize_t(sizeof(float)), ssize_t(Row_mappedX_T*Col_mappedX_T),
           {ssize_t(sizeof(float)*Row_mappedX_T), ssize_t(sizeof(float))}
