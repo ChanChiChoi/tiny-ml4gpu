@@ -13,6 +13,10 @@ traindata.cuda()
 
 # init KPCA, you need send 
 kpca = KPCA(3)
+
+# there is a bug, which mappedX.cpu() is not equal to mappedX.display_cpu(), 
+# that equal to mappedX.display_cuda(), I do not know why.
+# the problem do not happen on PCA.
 mappedX = kpca.fit(traindata)
 
 nptestdata = np.random.randn(80,10).astype(np.float32)

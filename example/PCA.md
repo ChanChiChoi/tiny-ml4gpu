@@ -16,11 +16,12 @@ pca = PCA(3)
 pca.fit(data)
 res_data = pca.transform(data)
 
-# there is a bug on cpu() function, the right values can be displayed by display_cpu() or display_cuda()
+# the right values can be displayed by display_cpu() or display_cuda()
 npres = res_data.cpu()
 
-# display value on host side, the value then transfer onto numpy side, but there is a problem that after transfering,
-# the value will be changed.
+# display value on host side, the value then transfer onto numpy side,
+# the value of res_data.display_cpu() should be equal to res_data.dpsplay_cuda()
+# and res_data.cpu()
 
 res_data.display_cpu()
 ```
