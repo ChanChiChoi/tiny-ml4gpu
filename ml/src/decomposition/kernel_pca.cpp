@@ -96,6 +96,8 @@ KPCA::fit(Array &matrix){
  
     matrix_add_scalar_cpu(K_device, Row_gram, Col_gram, this->total_sum);
  
+    // TODO: K(isnan(K)) = 0;
+    //       K(isinf(K)) = 0;
     // 3 - calc eigenval eigenvector of this matrix
     ci32 Row_A = Row_gram, Col_A = Col_gram;
     ci32 lda = Row_gram;
@@ -116,8 +118,6 @@ KPCA::fit(Array &matrix){
     float *S_device = HOST_TO_DEVICE_MALLOC(S, size_S);
     float *VT_device = HOST_TO_DEVICE_MALLOC(V, size_VT);
  
-    // TODO: K(isnan(K)) = 0;
-    //       K(isinf(K)) = 0;
     svd(K_device, Row_gram, Col_gram, lda,
          U_device, Row_U, Col_U,
          S_device, Length,
@@ -173,7 +173,7 @@ KPCA::fit(Array &matrix){
           nullptr, nullptr, subVT_device,
           2, {ssize_t(Row_subVT), ssize_t(Col_subVT)}, std::string(1,'f'),
           ssize_t(sizeof(float)), ssize_t(Row_subVT*Col_subVT),
-          {ssize_t(sizeof(float)*Row_subVT), ssize_t(sizeof(float))}
+          {ssize_t(sizeof(float)*Col_subVT), ssize_t(sizeof(float))}
         };
     
     //mappedX =  sqrtL* subVT
@@ -199,6 +199,26 @@ KPCA::fit(Array &matrix){
     matrix_transpose_cpu(mappedX_device, Row_mappedX, Col_mappedX,
                          mappedX_T_device, Row_mappedX_T, Col_mappedX_T);
    
+
+    //========
+    /* I found numpy data different with below printf*/
+
+//    size_t size_tmp = sizeof(float)*Row_mappedX*Col_mappedX;
+//    float *tmp = (float *)malloc(size_tmp);
+//    DEVICE_TO_HOST(tmp, mappedX_T_device, size_tmp);
+//    printf("==========%d %d\n",Row_mappedX_T, Col_mappedX_T);
+//    for(int i=0; i<Row_mappedX_T; i++){
+//      printf("\n");
+//      for(int j=0; j<Col_mappedX_T;j++){
+//         //printf(" [%d %d %f]",i,j,tmp[i*Col_gram+j]);
+//         auto tmp1 = tmp[i*Col_mappedX_T+j];
+//         if(tmp1<-1 || 1<tmp1 )
+//             printf("==[%f]==\n",tmp1);
+//         printf(" [%f]",tmp1);
+//      }
+//    }
+//    // ==========
+
     DEVICE_FREE(mappedX_device);
     DEVICE_TO_HOST(mappedX_T, mappedX_T_device, size_mappedX_T);
     
@@ -206,16 +226,9 @@ KPCA::fit(Array &matrix){
           nullptr, mappedX_T, mappedX_T_device,
           2, {ssize_t(Row_mappedX_T), ssize_t(Col_mappedX_T)}, std::string(1,'f'),
           ssize_t(sizeof(float)), ssize_t(Row_mappedX_T*Col_mappedX_T),
-          {ssize_t(sizeof(float)*Row_mappedX_T), ssize_t(sizeof(float))}
+          {ssize_t(sizeof(float)*Col_mappedX_T), ssize_t(sizeof(float))}
         };
 
-
-//    float *V_device = nullptr;
-//    V_device = DEVICE_MALLOC(V_device, size_VT);
-//    matrix_transpose_cpu(VT_device, Row_VT, Col_VT,
-//                         V_device, Col_VT, Row_VT);
-    
- 
 }
 
 
@@ -374,7 +387,7 @@ KPCA::transform(Array &train, Array &test){
            nullptr, res, res_device,
            2, {ssize_t(Row_res), ssize_t(Col_res)}, std::string(1,'f'),
            ssize_t(sizeof(float)), ssize_t(Row_res*Col_res),
-           {ssize_t(sizeof(float)*Row_res), ssize_t(sizeof(float))}
+           {ssize_t(sizeof(float)*Col_res), ssize_t(sizeof(float))}
 
         };
 }
