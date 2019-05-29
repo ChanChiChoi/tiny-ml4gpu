@@ -273,6 +273,7 @@ KPCA::transform(Array &train, Array &test){
     mean_device = DEVICE_MALLOC(mean_device,size_mean);
 
     // compute mean by row
+    // K - repmat(sum(K, 1), [size(K, 1) 1])
     mean_by_rows_cpu(K_device, mean_device, Row_K, Col_K);
     
     float *mean_rep_device = nullptr;
@@ -293,7 +294,7 @@ KPCA::transform(Array &train, Array &test){
 
     // K - J begin
     float *J_T_device = nullptr;
-    size_t Row_J_T = Row_K, Col_J_T = Col_K;
+    size_t Row_J_T = Col_K, Col_J_T = Row_K;
     size_t size_J_T = sizeof(float)*Row_J_T*Col_J_T;    
     J_T_device = DEVICE_MALLOC(J_T_device, size_J_T);
     
