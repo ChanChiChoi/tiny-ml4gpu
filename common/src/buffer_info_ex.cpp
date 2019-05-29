@@ -98,12 +98,13 @@ Array::display_meta(){
 void
 Array::display_data(){
         
+     void *pdata = nullptr;
      if(this->ptr_buf->ptr_host){
-         auto pdata = this->ptr_buf->ptr_host;
+         pdata = this->ptr_buf->ptr_host;
      }else if(this->ptr_buf->ptr){
-         auto pdata = this->ptr_buf->ptr;
+         pdata = this->ptr_buf->ptr;
      }else{
-         float *pdata = nullptr;
+         pdata = nullptr;
          throw std::runtime_error("current has no data or data only on device, not on host!");
      }
 
