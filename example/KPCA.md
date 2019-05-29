@@ -13,7 +13,7 @@ traindata.cuda()
 
 # init KPCA, you need send 
 kpca = KPCA(3)
-kpca.fit(traindata)
+mappedX = kpca.fit(traindata)
 
 nptestdata = np.random.randn(80,10).astype(np.float32)
 testdata = Array(nptestdata)
