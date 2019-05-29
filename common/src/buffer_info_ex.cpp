@@ -112,12 +112,12 @@ Array::display_data(){
         for(size_t i=0; i<this->ptr_buf->shape[0]; i++){
             printf("\n[%d] ",i);
             for(size_t j=0; j<this->ptr_buf->shape[1]; j++){
-                printf(" %lf",(double)pdata[i*ptr_buf->shape[1]+j]);
+                printf(" %lf",*( (double *)pdata + i*ptr_buf->shape[1] + j) );
             }
         }
     }else if(this->ptr_buf->ndim == 1){
        for(size_t i=0; i<this->ptr_buf->shape[0]; i++)
-            printf(" %lf",(double)pdata[i]);
+            printf(" %lf",*( (double *)pdata + i) );
     }
 
 }  
