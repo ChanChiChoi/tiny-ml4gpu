@@ -208,27 +208,27 @@ device_to_device(double *dst_device, double *src_device, size_t size, const char
 
 //===============memset template
 template<typename T> void
-_device_memset(T *devPtr, int value, size_t count){
-    CHECK_CALL(cudaMemset(devPtr, value, count));
+_device_memset(T *devPtr, int value, size_t count, const char *file, const int line){
+    CHECK_CALL(cudaMemset(devPtr, value, count), file, line);
 }
 //=============== memset template Instantiation
 void
-device_memset(float *ptr_dev, int value, size_t count){
-    _device_memset<float>(ptr_dev, value, count);
+device_memset(float *ptr_dev, int value, size_t count, const char *file, const int line){
+    _device_memset<float>(ptr_dev, value, count, file, line);
 }
 
 void
-device_memset(unsigned int *ptr_dev, int value, size_t count){
-    _device_memset<unsigned int>(ptr_dev, value, count);
+device_memset(unsigned int *ptr_dev, int value, size_t count, const char *file, const int line){
+    _device_memset<unsigned int>(ptr_dev, value, count, file, line);
 }
 
 void
-device_memset(double *ptr_dev, int value, size_t count){
-    _device_memset<double>(ptr_dev, value, count);
+device_memset(double *ptr_dev, int value, size_t count, const char *file, const int line){
+    _device_memset<double>(ptr_dev, value, count, file, line);
 }
 
 void
-device_memset(int *ptr_dev, int value, size_t count){
-    _device_memset<int>(ptr_dev, value, count);
+device_memset(int *ptr_dev, int value, size_t count, const char *file, const int line){
+    _device_memset<int>(ptr_dev, value, count, file, line);
 }
 
