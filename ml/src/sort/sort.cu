@@ -2,8 +2,8 @@
 #include <assert.h>
 #include <limits>
 #include <cuda_runtime.h>
-#include "common/malloc_free.h"
-#include "ML/knn/sort.h"
+#include "common/include/malloc_free.h"
+#include "ml/include/sort/sort.h"
 
 typedef unsigned int u32;
 #define MAX_NUM_LISTS 128
@@ -190,7 +190,8 @@ sort_by_rows(T  *mat, u32  *ind_mat, size_t rows, size_t cols,
               num_lists,cols,tx,
               tmp_1+bx*cols, 
               ind_1+bx*cols ,
-              precision);
+              precision,
+              sizeof(T));
         
     __syncthreads();
 

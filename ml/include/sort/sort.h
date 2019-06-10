@@ -1,4 +1,4 @@
-typedef unsigned int u32;
+#include "common/include/type.h"
 
 void
 sort_by_rows(float *mat, u32 *ind_mat, size_t rows, size_t cols, u32 precision);
