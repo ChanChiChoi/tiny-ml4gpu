@@ -12,11 +12,14 @@ namespace py = pybind11;
 PYBIND11_MODULE(Array, m){
 
     py::class_<Array>(m,"Array")
+        .def(py::init<py::array_t<int> &>())
         .def(py::init<py::array_t<float> &>())
+        .def(py::init<py::array_t<double> &>())
         .def("cuda", &Array::cuda)
         .def("cpu", &Array::cpu)
         .def("display_meta", &Array::display_meta)
-        .def("display_data", &Array::display_data)
+        .def("display_cpu", &Array::display_cpu)
+        .def("display_cuda", &Array::display_cuda)
         ;
 
 
