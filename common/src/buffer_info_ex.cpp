@@ -7,14 +7,20 @@ Buf& buffer_info_ex::cuda(){
 
     size_t bytes_size = itemsize * size;
     switch (format[0]){
+        case 'i':
+            ptr_device = (void *)HOST_TO_DEVICE_MALLOC((int *)ptr, bytes_size);
+            break;
         case 'f':
             ptr_device = (void *)HOST_TO_DEVICE_MALLOC((float *)ptr, bytes_size);
+            break;
+        case 'd':
+            ptr_device = (void *)HOST_TO_DEVICE_MALLOC((double *)ptr, bytes_size);
             break;
         case NULL:
            printf("current Array obj has no data concent, cannot execute cuda()!\n");
            break;
         default:
-            throw std::runtime_error("current version only support float32!");
+            throw std::runtime_error("current version only support int32;float32;float64!");
             break;
     }
 
@@ -24,6 +30,16 @@ Buf& buffer_info_ex::cuda(){
 buffer_info_ex::~buffer_info_ex(){
 
     switch (format[0]){
+        case 'i':
+            if(ptr_device){
+                DEVICE_FREE((int *)ptr_device);
+                ptr_device = NULL;
+            }
+            if(ptr_host){
+                free((int *)ptr_host);
+                ptr_host = NULL;
+            }
+            break;
         case 'f':
             if(ptr_device){
                 DEVICE_FREE((float *)ptr_device);
@@ -34,11 +50,21 @@ buffer_info_ex::~buffer_info_ex(){
                 ptr_host = NULL;
             }
             break;
+        case 'd':
+            if(ptr_device){
+                DEVICE_FREE((double *)ptr_device);
+                ptr_device = NULL;
+            }
+            if(ptr_host){
+                free((double *)ptr_host);
+                ptr_host = NULL;
+            }
+            break;
         case NULL:
            printf("current Array obj has no data concent, cannot deconstructor!\n");
            break;
         default:
-            throw std::runtime_error("current version only support float32!");
+            throw std::runtime_error("current version only support int32;float32;float64!");
             break;
     }
 
@@ -79,11 +105,24 @@ Array::_cpu(){
 
 }
 
+py::array_t<int> 
+Array::cpu(){
+    
+    return this->_cpu<int>();
+}
+
 py::array_t<float> 
 Array::cpu(){
     
     return this->_cpu<float>();
 }
+
+py::array_t<double> 
+Array::cpu(){
+    
+    return this->_cpu<double>();
+}
+
 
 void
 Array::display_meta(){
@@ -137,14 +176,20 @@ Array::display_cpu(){
 
      
     switch (ptr_buf->format[0]){
+        case 'i':
+            _display((int *)_pdata, ptr_buf->ndim, ptr_buf->shape);
+            break;
         case 'f':
             _display((float *)_pdata, ptr_buf->ndim, ptr_buf->shape);
+            break;
+        case 'd':
+            _display((double *)_pdata, ptr_buf->ndim, ptr_buf->shape);
             break;
         case NULL:
            printf("current Array obj has no data concent, cannot execute display_data()!\n");
            break;
         default:
-            throw std::runtime_error("current version only support float32!");
+            throw std::runtime_error("current version only support int32;float32;float64!");
             break;
     }
 }  
@@ -162,6 +207,15 @@ Array::display_cuda(){
     }
     
     switch (ptr_buf->format[0]){
+        case 'i':{
+            ssize_t itemsize = ptr_buf->itemsize;
+            ssize_t size = ptr_buf->size;
+            int *_pdata = (int *)malloc(itemsize*size);
+            DEVICE_TO_HOST(_pdata, (int *)_pdata_device, itemsize*size);
+            _display(_pdata, ptr_buf->ndim, ptr_buf->shape);
+            free(_pdata);
+            break;
+            }
         case 'f':{
             ssize_t itemsize = ptr_buf->itemsize;
             ssize_t size = ptr_buf->size;
@@ -169,12 +223,22 @@ Array::display_cuda(){
             DEVICE_TO_HOST(_pdata, (float *)_pdata_device, itemsize*size);
             _display(_pdata, ptr_buf->ndim, ptr_buf->shape);
             free(_pdata);
-            break;}
+            break;
+            }
+        case 'f':{
+            ssize_t itemsize = ptr_buf->itemsize;
+            ssize_t size = ptr_buf->size;
+            double *_pdata = (double *)malloc(itemsize*size);
+            DEVICE_TO_HOST(_pdata, (double *)_pdata_device, itemsize*size);
+            _display(_pdata, ptr_buf->ndim, ptr_buf->shape);
+            free(_pdata);
+            break;
+            }
         case NULL:
            printf("current Array obj has no data concent, cannot execute display_cuda()!\n");
            break;
         default:
-            throw std::runtime_error("current version only support float32!");
+            throw std::runtime_error("current version only support int32;float32;float64!");
             break;
     }
 }

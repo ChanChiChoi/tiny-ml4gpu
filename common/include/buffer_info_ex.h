@@ -118,7 +118,10 @@ public:
     Array & cuda(); // transfer ptr->data into GPU
     template<typename T> py::array_t<T>  _cpu(); // transfer ptr->data from GPU into python numpy
 
+    py::array_t<int>  cpu();
     py::array_t<float>  cpu();
+    py::array_t<double>  cpu();
+
     void display_meta(); //  display metainfo of Array
     void display_cpu(); // display data of ptr_host or ptr
 
