@@ -3,6 +3,7 @@
  * https://www.cnblogs.com/shouhuxianjian/p/9773200.html
  * */
 #include <string>
+#include <vector>
 #include "ml/include/decomposition/lda.h"
 #include "ml/include/math/math.h"
 #include "ml/include/preprocessing/preprocess.h"
@@ -10,14 +11,14 @@
 #include "common/include/buffer_info_ex.h"
 #include "common/include/malloc_free.h"
 
-vector<vector<int>>
-sort_ind(int *vec, size_t num, size_t n_classes){
+using std::vector;
 
-    vector<vector<int>> ind(n_classes, vector<int>());
+void
+sort_ind(vector<vector<int>> &ans, int *vec, size_t num){
+
     for(int i=0; i<num; i++){
-        ind[vec[i]-1].push_back(i);
+        ans[vec[i]-1].push_back(i);
     }
-    return ind;
 }
 
 Array * 
@@ -60,7 +61,9 @@ LDA::fit(Array &matrix, Array &labels, size_t n_classes){
     // Sw += p*C;
     int *labels_host = (int *)labels.ptr_buf->ptr;
     size_t num = labels.ptr_buf->size;
-    auto ind_vec = sort_ind(labels_host, num, n_classes);
+    vector<vector<int>> ind_vec(n_classes, vector<int>());
+
+    sort_ind(ind_vec, labels_host, num);
 
     // compute between class scatter
     // Sb = St - Sw;
