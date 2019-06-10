@@ -14,16 +14,19 @@
 using std::vector;
 
 void
-sort_ind(vector<vector<int>> &ans, int *vec, size_t num){
+stat_ind(vector<vector<int>> &ans, int *vec, size_t num){
 
     for(int i=0; i<num; i++){
-        ans[vec[i]-1].push_back(i);
+        ans[vec[i]].push_back(i);
     }
 }
 
 Array * 
 LDA::fit(Array &matrix, Array &labels, size_t n_classes){
 
+    /*
+ *  labels should start with 1, not 0;
+ *  */
     float *train_device = (float *)matrix.ptr_buf->ptr_device;
     assert(matrix.ptr_buf->ndim == 2);
     size_t rows = matrix.ptr_buf->shape[0];
@@ -61,9 +64,11 @@ LDA::fit(Array &matrix, Array &labels, size_t n_classes){
     // Sw += p*C;
     int *labels_host = (int *)labels.ptr_buf->ptr;
     size_t num = labels.ptr_buf->size;
-    vector<vector<int>> ind_vec(n_classes, vector<int>());
+    vector<vector<int>> ind_vec(n_classes+1, vector<int>());
 
-    sort_ind(ind_vec, labels_host, num);
+    // if labels start with 0, then [n_classes+1] vector has 0 size;
+    // else start with 1, then [0] vector has 0 size;
+    stat_ind(ind_vec, labels_host, num);
 
     // compute between class scatter
     // Sb = St - Sw;
