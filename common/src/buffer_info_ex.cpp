@@ -106,19 +106,19 @@ Array::_cpu(){
 }
 
 py::array_t<int> 
-Array::cpu(){
+Array::cpu(int _i){
     
     return this->_cpu<int>();
 }
 
 py::array_t<float> 
-Array::cpu(){
+Array::cpu(float _f){
     
     return this->_cpu<float>();
 }
 
 py::array_t<double> 
-Array::cpu(){
+Array::cpu(double _d){
     
     return this->_cpu<double>();
 }
@@ -225,7 +225,7 @@ Array::display_cuda(){
             free(_pdata);
             break;
             }
-        case 'f':{
+        case 'd':{
             ssize_t itemsize = ptr_buf->itemsize;
             ssize_t size = ptr_buf->size;
             double *_pdata = (double *)malloc(itemsize*size);
