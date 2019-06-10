@@ -27,7 +27,7 @@ typedef struct buffer_info_ex: public py::buffer_info{
         ptr_host = nullptr;
         itemsize = rhs.itemsize;
         size = rhs.size;
-        format = std::move(rhs.format);
+        format = std::move(rhs.format); // const char c = "?bBhHiIqQfdg"[detail::is_fmt_numeric<T>::index]
         ndim = rhs.ndim;
         shape = std::move(rhs.shape);
         strides = std::move(rhs.strides);
