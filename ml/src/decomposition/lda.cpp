@@ -10,11 +10,19 @@
 #include "common/include/buffer_info_ex.h"
 #include "common/include/malloc_free.h"
 
+vector<vector<int>>
+sort_ind(int *vec, size_t num, size_t n_classes){
+
+    vector<vector<int>> ind(n_classes, vector<int>());
+    for(int i=0; i<num; i++){
+        ind[vec[i]-1].push_back(i);
+    }
+    return ind;
+}
 
 Array * 
-LDA::fit(Array &matrix, Array &labels, size_t n_class,){
+LDA::fit(Array &matrix, Array &labels, size_t n_classes){
 
-    // 对比n_components 与类别个数，
     float *train_device = (float *)matrix.ptr_buf->ptr_device;
     assert(matrix.ptr_buf->ndim == 2);
     size_t rows = matrix.ptr_buf->shape[0];
@@ -23,9 +31,10 @@ LDA::fit(Array &matrix, Array &labels, size_t n_class,){
     // computer the mean by rows
     size_t size_mean = sizeof(float)*cols;
     float *mean = (float *)malloc(size_mean);
-    float *mean_device = HOST_TO_DEVICE_MALLOC(mean_device,size_mean);
+    float *mean_device = HOST_TO_DEVICE_MALLOC(mean_device, size_mean);
 
-    mean_by_rows_cpu(train_device, mean_device, rows, cols);
+    // substract mean from matrix
+    subtract_mean_by_rows_cpu(train_device, mean_device, rows, cols);
     DEVICE_TO_HOST(mean, mean_device, size_mean);
     
     delete this->mean_vec;
@@ -36,17 +45,22 @@ LDA::fit(Array &matrix, Array &labels, size_t n_class,){
           {ssize_t(sizeof(float)*cols), ssize_t(sizeof(float))}
         };
 
-    // substract mean from matrix
-    subtract_mean_by_rows_cpu(train_device, mean_device, rows, cols);
-    
     // intialize Sw
     // Sw = zeros(size(X, 2), size(X, 2));
-
+    float *Sw = nullptr;
+    size_t size_sw = sizeof(float)*cols*cols;
+    Sw = DEVICE_MALLOC(Sw,size_sw);
+    DEVICE_MEMSET(Sw, 0, size_sw);
+ 
     // compute total convariance matrix
     // St = cov(X);
 
-    // sum over classes
-    // Sw += p*c;
+    // sum over classes, 
+    // get all instances with ith class
+    // Sw += p*C;
+    int *labels_host = (int *)labels.ptr_buf->ptr;
+    size_t num = labels.ptr_buf->size;
+    auto ind_vec = sort_ind(labels_host, num, n_classes);
 
     // compute between class scatter
     // Sb = St - Sw;
