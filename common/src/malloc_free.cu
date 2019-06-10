@@ -206,5 +206,29 @@ device_to_device(double *dst_device, double *src_device, size_t size, const char
      _device_to_device<double>(dst_device, src_device, size, file, line);
 }
 
-//===============cusolver
+//===============memset template
+template<typename T> void
+_device_memset(T *devPtr, int value, size_t count){
+    CHECK_CALL(cudaMemset(devPtr, value, count));
+}
+//=============== memset template Instantiation
+void
+device_memset(float *ptr_dev, int value, size_t count){
+    _device_memset<float>(ptr_dev, value, count);
+}
+
+void
+device_memset(unsigned int *ptr_dev, int value, size_t count){
+    _device_memset<unsigned int>(ptr_dev, value, count);
+}
+
+void
+device_memset(double *ptr_dev, int value, size_t count){
+    _device_memset<double>(ptr_dev, value, count);
+}
+
+void
+device_memset(int *ptr_dev, int value, size_t count){
+    _device_memset<int>(ptr_dev, value, count);
+}
 

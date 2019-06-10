@@ -100,3 +100,19 @@ device_to_device(double *dst_device, double *src_device, size_t size, const char
 
 //============macro define
 #define DEVICE_TO_DEVICE(dst_device, src_device) device_to_device(dst_device, src_device, __FILE__, __LINE__)
+
+//=============memset
+void
+device_memset(float *ptr_dev, int value, size_t count);
+
+void
+device_memset(unsigned int *ptr_dev, int value, size_t count);
+
+void
+device_memset(int *ptr_dev, int value, size_t count);
+
+void
+device_memset(double *ptr_dev, int value, size_t count);
+
+//==========macro define
+#define DEVICE_MEMSET(ptr_device, value, count) device_memset(ptr_device, value, count, __FILE__, __LINE__)
