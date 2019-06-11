@@ -58,6 +58,11 @@ LDA::fit(Array &matrix, Array &labels, size_t n_classes){
  
     // compute total convariance matrix
     // St = cov(X);
+    float *St = nullptr;
+    size_t size_st = sizeof(float)*cols*cols;
+    St = DEVICE_MALLOC(St, size_st);
+    cov_cpu(train_device, rows, cols,
+            St, cols, cols);
 
     // sum over classes, 
     // get all instances with ith class
@@ -66,12 +71,13 @@ LDA::fit(Array &matrix, Array &labels, size_t n_classes){
     size_t num = labels.ptr_buf->size;
     vector<vector<int>> ind_vec(n_classes+1, vector<int>());
 
-    // if labels start with 0, then [n_classes+1] vector has 0 size;
-    // else start with 1, then [0] vector has 0 size;
+    /* if labels start with 0, then [n_classes+1] vector has 0 size; */
+    /* else start with 1, then [0] vector has 0 size; */
     stat_ind(ind_vec, labels_host, num);
 
     // compute between class scatter
     // Sb = St - Sw;
+    
 
     /* Sb(isnan(Sb)) = 0; Sw(isnan(Sw)) = 0; */
     /* Sb(isinf(Sb)) = 0; Sw(isinf(Sw)) = 0; */
