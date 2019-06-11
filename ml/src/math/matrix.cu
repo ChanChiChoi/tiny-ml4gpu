@@ -248,9 +248,13 @@ function: matrix_sub_by_rows
 */
 template<typename T> __global__ void
 matrix_sub_by_rows(T *mat, u32 Row_mat, u32 Col_mat,
-                   int *vec){
+                   T *mat_ans, u32 Row_mat_ans, u32 Col_mat_ans,
+                   int *vec, u32 Length){
 
+    assert(Row_mat_ans == Length);
+    assert(Col_mat == Col_mat_ans);
    // TODO: 
+    
 
 }
 
