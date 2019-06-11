@@ -244,6 +244,17 @@ matrix_subblock_launch(T *big, u32 Row_big, u32 Col_big,
 }
 
 /*
+function: matrix_sub_by_rows
+*/
+template<typename T> __global__ void
+matrix_sub_by_rows(T *mat, u32 Row_mat, u32 Col_mat,
+                   int *vec){
+
+   // TODO: 
+
+}
+
+/*
 function: matrix_mul
 */
 template<typename T> __global__ void
