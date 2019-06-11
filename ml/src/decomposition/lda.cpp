@@ -77,7 +77,18 @@ LDA::fit(Array &matrix, Array &labels, size_t n_classes){
 
     // compute between class scatter
     // Sb = St - Sw;
-    
+    for (int i=0; i<n_classes+1; i++){
+       if (ind_vec[i].size() == 0){
+           continue;
+       }
+       int *ind_device = nullptr;
+       ind_device = DEVICE_MALLOC(ind_device, sizeof(int)*ind_vec[i].size() );
+       HOST_TO_DEVICE(ind_device, &ind_vec[i][0], sizeof(int)*ind_vec[i].size());
+       // call matrix_sub_by_row
+
+
+       DEVICE_FREE(ind_device);
+    }   
 
     /* Sb(isnan(Sb)) = 0; Sw(isnan(Sw)) = 0; */
     /* Sb(isinf(Sb)) = 0; Sw(isinf(Sw)) = 0; */
