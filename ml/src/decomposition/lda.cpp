@@ -77,17 +77,43 @@ LDA::fit(Array &matrix, Array &labels, size_t n_classes){
 
     // compute between class scatter
     // Sb = St - Sw;
+    int *ind_device = nullptr;
+    int length = 0;
+    float *matrix_sub = nullptr;
+    float *mat_C = nullptr;
+    float p = 0.0;
     for (int i=0; i<n_classes+1; i++){
-       if (ind_vec[i].size() == 0){
+       length = ind_vec[i].size();
+       if (length == 0){
            continue;
        }
-       int *ind_device = nullptr;
-       ind_device = DEVICE_MALLOC(ind_device, sizeof(int)*ind_vec[i].size() );
-       HOST_TO_DEVICE(ind_device, &ind_vec[i][0], sizeof(int)*ind_vec[i].size());
+       
+       ind_device = DEVICE_MALLOC(ind_device, sizeof(int)*length);
+       HOST_TO_DEVICE(ind_device, &ind_vec[i][0], sizeof(int)*length);
        // call matrix_sub_by_row
+       // cur_X = X(labels == i,:);
+       matrix_sub = DEVICE_MALLOC(matrix_sub, sizeof(float)*cols*length);
+       matrix_sub_by_rows_cpu(train_device, rows, cols,
+                              matrix_sub, length, cols,
+                              ind_device, length);
 
+       // C = cov(cur_X);
+       mat_C = DEVICE_MALLOC(mat_C, sizeof(float)*cols*cols);
+       cov_cpu(matrix_sub, length, cols,
+               mat_C, cols, cols );
 
+       // p = size(cur_X, 1) / (length(labels) - 1);
+       p = length / (n_classes-1); 
+       // Sw = Sw + (p * C);
+       matrix_mul_scalar_cpu(mat_C, rows, cols, p);
+       matrix_mul_cpu(Sw, cols, cols,
+               mat_C, cols, cols,
+               Sw, cols, cols,
+               SCALAR_TWO_ADD);
+    
        DEVICE_FREE(ind_device);
+       DEVICE_FREE(matrix_sub);
+       DEVICE_FREE(mat_C);
     }   
 
     /* Sb(isnan(Sb)) = 0; Sw(isnan(Sw)) = 0; */
