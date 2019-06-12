@@ -8,7 +8,7 @@
 
 #include "common/include/malloc_free.h"
 #include "common/include/helper.cuh"
-#include "ml/include/math/svd.h"
+#include "ml/include/math/matrix_solver.h"
 
 
 void
