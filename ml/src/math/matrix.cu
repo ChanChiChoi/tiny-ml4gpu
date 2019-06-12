@@ -253,7 +253,31 @@ matrix_sub_by_rows(T *mat, u32 Row_mat, u32 Col_mat,
 
     assert(Row_mat_ans == Length);
     assert(Col_mat == Col_mat_ans);
-   // TODO: 
+    // TODO: 
+    
+    u32 idy = blockIdx.y*blockDim.y + threadIdx.y;
+    u32 idx = blockIdx.x*blockDim.x + threadIdx.x;
+//    u32 thread_idx = idy*Col_Md + idx;
+    
+    if(idx >= Col_mat_ans || idy >= Row_mat_ans)
+        return ;
+
+    mat_ans[ idy*Col_mat_ans + idx ] = mat[vec[idy]*Col_mat + idx];
+}
+
+template<typename T> void
+matrix_sub_by_rows_launch(T *mat, u32 Row_mat, u32 Col_mat,
+                   T *mat_ans, u32 Row_mat_ans, u32 Col_mat_ans,
+                   int *vec, u32 Length){
+
+    dim3 grid(MAX(1, (size_t)ceil((double)Col_mat_ans/TILE_HEIGHT)),
+              MAX(1, (size_t)ceil((double)Row_mat_ans/TILE_WIDTH)));
+    dim3 block(TILE_WIDTH, TILE_HEIGHT);
+
+    matrix_sub_by_rows<T><<<grid, block>>>(mat, Row_mat, Col_mat,
+                               mat_ans, Row_mat_ans, Col_mat_ans,
+                               vec, Length);
+
     
 
 }
@@ -423,4 +447,16 @@ function: matrix_diag_cpu
 void
 matrix_diag_cpu(float *mat, u32 Row, u32 Col, float *vec, u32 len){
     matrix_diag_launch<float>(mat, Row, Col, vec, len);
+}
+
+/*
+function: matrix_sub_by_rows_cpu
+*/
+void
+matrix_sub_by_rows_cpu(float *mat, u32 Row_mat, u32 Col_mat,
+                   float *mat_ans, u32 Row_mat_ans, u32 Col_mat_ans,
+                   int *vec, u32 Length){
+    matrix_sub_by_rows_launch<float>(mat, Row_mat, Col_mat,
+                             mat_ans, Row_mat_ans, Col_mat_ans,
+                             vec, Length);
 }
