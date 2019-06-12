@@ -35,6 +35,9 @@ void
 matrix_add_scalar_cpu(float *mat, u32 Row, u32 Col, float scalar);
 
 void
+matrix_mul_scalar_cpu(float *mat, u32 Row, u32 Col, float scalar);
+
+void
 matrix_gaussian_scalar_cpu(float *mat, u32 Row, u32 Col, float scalar_sigma);
 
 void
