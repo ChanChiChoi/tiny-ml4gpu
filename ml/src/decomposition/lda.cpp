@@ -116,12 +116,22 @@ LDA::fit(Array &matrix, Array &labels, size_t n_classes){
        DEVICE_FREE(mat_C);
     }   
 
+    //  Sb       = St - Sw;
+    size_t size_sb = sizeof(float)*cols*cols;
+    float *Sb = nullptr;
+    Sb = DEVICE_MALLOC(Sb, size_sb);
+    matrix_mul_cpu(St, cols, cols,
+                   Sw, cols, cols,
+                   Sb, cols, cols,
+                   SCALAR_TWO_DIVIDE);
     /* Sb(isnan(Sb)) = 0; Sw(isnan(Sw)) = 0; */
     /* Sb(isinf(Sb)) = 0; Sw(isinf(Sw)) = 0; */
 
     // make sure not to embed in too high dimension
     // no_dims = nc - 1;
-
+    if (n_classes <= this->n_components){
+        this->n_components = n_classes - 1;
+    }
     // perform engendecomposition of inv(Sw)*Sb;
     // eig(Sb, Sw);
 
