@@ -395,6 +395,15 @@ matrix_add_scalar_cpu(float *mat, u32 Row, u32 Col, float scalar){
     matrix_scalar_launch<float>(mat, Row, Col, scalar,SCALAR_TWO_ADD);
 }
 
+
+/*
+function: matrix_mul_scalar_cpu
+*/
+void
+matrix_mul_scalar_cpu(float *mat, u32 Row, u32 Col, float scalar){
+    matrix_scalar_launch<float>(mat, Row, Col, scalar,SCALAR_TWO_MUL);
+}
+
 /*
 function: matrix_gaussian_scalar_cpu
 */
