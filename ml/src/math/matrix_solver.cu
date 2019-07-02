@@ -108,3 +108,15 @@ svd(double *A_device, const int Row_A, const int Col_A, const int lda,
     
   return ;
 }
+
+//======================================inversion of matrices
+void triBatch(float *src_device, size_t Row_src, size_t Col_src,
+              float *dst_device, size_t Row_dst, size_t Col_dst,
+              ){
+  
+  cublasHandle_t handle = nullptr; 
+  
+
+
+  return ;
+}
